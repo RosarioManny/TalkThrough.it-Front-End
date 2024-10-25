@@ -4,7 +4,6 @@ import { useState } from 'react'
 const NavBar = () => {
     const user = false
 
-
     return (
         <>
         <Link to="/">TalkThroughIt</Link>
