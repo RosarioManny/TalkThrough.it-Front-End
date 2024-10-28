@@ -1,4 +1,5 @@
 // TODO: figure out connection string to server here. right now localhost3000:/TalkThroughIt
+// TODO: I installed axios, lets figure out how to use it! --Gabe
 
 const BASE_URL = `${import.meta.env.VITE_EXPRESS_BACKEND_URL}/TalkThroughIt`
 
