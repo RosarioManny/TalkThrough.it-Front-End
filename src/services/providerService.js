@@ -2,7 +2,7 @@
 // TODO: I installed axios, lets figure out how to use it! --Gabe
 import axios from 'axios'
 
-const BACKEND_URL = `http://localhost:5000`
+const BACKEND_URL = `http://localhost:3000`
 
 const fetchProviders = async () => {
     try {
@@ -14,4 +14,4 @@ const fetchProviders = async () => {
     }
 }
 
-export {fetchProviders}
+export {fetchProviders} 

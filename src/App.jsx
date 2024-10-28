@@ -56,10 +56,9 @@ function App() {
             // Unprotected routes (Client not signed up) here
             <>
             <Route path="/" element={<Landing/>} />
-            <Route path="/ProviderList" element={<ProviderList providers={providers}/>} />
+            <Route path="/providerlist" element={<ProviderList providers={providers}/>} />
             </>
-      
-           )} 
+          )} 
            
           <Route path="/signup" element={<SignupForm setClient={setClient}/>} />
           <Route path="/signin" element={<SigninForm setClient={setClient}/>} />
