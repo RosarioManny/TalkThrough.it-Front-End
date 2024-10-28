@@ -32,7 +32,7 @@ export const signupProvider = async (formData) => {
 // Function for signing in an existing user
 export const signin = async (clientData) => {
   try {
-    const res = await axios.post(`${BACKEND_URL}/clients/signin`, clientData);
+    const res = await axios.post(`${BACKEND_URL}/auth/clients/signin`, clientData);
     console.log(res.data);
 
     if (res.data.error) {
