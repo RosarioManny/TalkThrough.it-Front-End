@@ -10,16 +10,16 @@ const NavBar = () => {
         <Link to="/">TalkThroughIt</Link>
         {user ? (
         <nav>
-            <Link to="provider">Find Provider</Link>
-            <Link to="message">Message</Link>
-            <Link to="signout">Sign-Out</Link>
+            <Link to="providerlist">Find Provider </Link>
+            <Link to="message">Message </Link>
+            <Link to="signout">Sign-Out </Link>
         </nav>
         ) : (
         <nav>
-            <Link to="provider">Find Provider</Link>
-            <Link to="message">Message</Link>
-            <Link to="signup">Sign-Up</Link>
-            <Link to="signiin">Sign-In</Link>
+            <Link to="providerlist">Find Provider </Link>
+            <Link to="message">Message </Link>
+            <Link to="signup">Sign-Up </Link>
+            <Link to="signiin">Sign-In </Link>
         </nav>
         )}
         </>
