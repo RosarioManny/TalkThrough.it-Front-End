@@ -19,7 +19,7 @@ const NavBar = () => {
             <Link to="providerlist">Find Provider </Link>
             <Link to="message">Message </Link>
             <Link to="signup">Sign-Up </Link>
-            <Link to="signiin">Sign-In </Link>
+            <Link to="signin">Sign-In </Link>
         </nav>
         )}
         </>

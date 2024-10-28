@@ -17,9 +17,9 @@ const signup = async (formData) => {
   }
 };
 
-const signin = async (userData) => {
+const signin = async (clientData) => {
   try {
-    const res = await axios.post(`${BACKEND_URL}/users/signin`,userData)
+    const res = await axios.post(`${BACKEND_URL}/clients/signin`,clientData)
     console.log(res.data)
 
     if (res.data.error){
@@ -29,8 +29,8 @@ const signin = async (userData) => {
     if(res.data.token){
       localStorage.setItem('token',res.data.token)
 
-      const user = JSON.parse(atob(res.data.token.split('.')[1])) //atob is decryption native to js. res.data.token instead of json.token
-      return user
+      const client = JSON.parse(atob(res.data.token.split('.')[1])) //atob is decryption native to js. res.data.token instead of json.token
+      return client
     }
 
   } catch (error) {
@@ -39,11 +39,11 @@ const signin = async (userData) => {
   }
 }
 
-const getUser = () => {
+const getClient = () => {
   const token = localStorage.getItem('token')
   if (!token) return null
-  const user = JSON.parse(atob(token.split('.')[1]))
-  return user
+  const client = JSON.parse(atob(token.split('.')[1]))
+  return client
 }
 
 const signOut = () => {
@@ -52,5 +52,5 @@ const signOut = () => {
 
 
 export { // or put export next to each variable
-  signup, signin, getUser,signOut
+  signup, signin, getClient, signOut
 };

@@ -1,5 +1,3 @@
-//taken from hoot front end - Gabe
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import * as authService from '../../services/authService';
@@ -11,6 +9,9 @@ const SignupForm = (props) => {
     username: '',
     password: '',
     passwordConf: '',
+    location: '',
+    insuranceProvider: '',
+    therapyGoals: '',
   });
 
   const updateMessage = (msg) => {
@@ -19,6 +20,7 @@ const SignupForm = (props) => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    console.log(formData);
   };
 
   const handleSubmit = async (e) => {
@@ -32,7 +34,7 @@ const SignupForm = (props) => {
     }
   };
 
-  const { username, password, passwordConf } = formData;
+  const { username, password, passwordConf, location, insuranceProvider, therapyGoals} = formData;
 
   const isFormInvalid = () => {
     return !(username && password && password === passwordConf);
@@ -51,6 +53,7 @@ const SignupForm = (props) => {
             value={username}
             name="username"
             onChange={handleChange}
+            required
           />
         </div>
         <div>
@@ -61,6 +64,7 @@ const SignupForm = (props) => {
             value={password}
             name="password"
             onChange={handleChange}
+            required
           />
         </div>
         <div>
@@ -71,7 +75,58 @@ const SignupForm = (props) => {
             value={passwordConf}
             name="passwordConf"
             onChange={handleChange}
+            required
           />
+        </div>
+        <div>
+          <label htmlFor="location">Location:</label>
+          <input
+            type="text"
+            id="location"
+            value={location}
+            name="location"
+            onChange={handleChange}
+            required
+          />
+        </div>
+        <div>
+          <label htmlFor="insuranceProvider">Insurance Provider:</label>
+          <select 
+            onChange={handleChange} 
+            name="insuranceProvider"  
+            id="insuranceProvider"
+            value={insuranceProvider}
+            required
+          >
+            <option value="Aetna">
+            Aetna
+            </option>
+            <option value="United Health Care">
+            United Health Care
+            </option>
+            <option value="Blue Cross / Blue Shield">
+            Blue Cross / Blue Shield
+            </option>
+            <option value="Humana">
+            Humana
+            </option>
+            <option value="Fidelis Care">
+            Fidelis Care
+            </option>
+            <option value="Health Plus One">
+            Health Plus One
+            </option>
+          </select>
+        </div>
+        <div>
+          <label htmlFor="therapyGoals">Therapy Goals: </label>
+          <textarea 
+          name="therapyGoals" 
+          id="therapyGoals" 
+          onChange={handleChange} 
+          value={therapyGoals}
+          >
+          </textarea>
         </div>
         <div>
           <button disabled={isFormInvalid()}>Sign Up</button>
