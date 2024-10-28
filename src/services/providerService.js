@@ -6,7 +6,7 @@ const BACKEND_URL = `http://localhost:5000`
 
 const fetchProviders = async () => {
     try {
-        const res = await axios.get(`${BACKEND_URL}/TalkThroughIt/providers`, {headers: {Authorization:`Bearer ${localStorage.getItem('token')}`}} )
+        const res = await axios.get(`${BACKEND_URL}/search/providers`, {headers: {Authorization:`Bearer ${localStorage.getItem('token')}`}} )
         return res.data
     } catch (error) {
         console.log(error)

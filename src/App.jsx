@@ -27,7 +27,7 @@ function App() {
   // Picks up all providers in launch (should we move this down?)
   useEffect(()=>{
     const fetchAllProviders = async () =>{
-      const providerData = await providerService.index()
+      const providerData = await providerService.fetchProviders()
       // console.log('Providers:', providerData) 
       setProviders(providerData)
     }
