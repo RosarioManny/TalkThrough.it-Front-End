@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
   return (
     <>
         <div>ProviderList</div>
-        {/* TODO: This is a stub using our current provider model, will not run until we connect our models*/}
+        {/* TODO: This is a stub using our current provider model, will not run until we connect our models */}
         {/* commented out until it works */}
         {props.providers.map((prov)=>(
             <Link key={prov._id} to={`/providerlist/${prov._id}`}>

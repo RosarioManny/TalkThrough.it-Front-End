@@ -1,18 +1,17 @@
-// TODO: figure out connection string to server here. right now localhost3000:/TalkThroughIt
-// TODO: I installed axios, lets figure out how to use it! --Gabe
+import axios from 'axios';
 
-const BASE_URL = `${import.meta.env.VITE_EXPRESS_BACKEND_URL}/TalkThroughIt`
+// Use environment variables for flexibility in different environments
+const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
 
-const index =  async () => {
-    try {
-        const res = await fetch(BASE_URL,{
-            // Only if we need people to sign in to view therapists TODO: Ask team what they prefer 
-            headers: {Authorization: `Bearer ${localStorage.getItem(`token`)}`}  
-        })
-        return res.json()
-    } catch (error){
-        console.log(error)
-    }
-}
-
-export {index}
+// Function to fetch providers
+export const fetchProviders = async () => {
+  try {
+    const res = await axios.get(`${BACKEND_URL}/search/providers`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+    });
+    return res.data;
+  } catch (error) {
+    console.error('Fetch providers error:', error);
+    throw error;
+  }
+};
