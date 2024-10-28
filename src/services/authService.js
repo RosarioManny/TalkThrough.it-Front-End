@@ -1,20 +1,30 @@
 import axios from "axios";
 
-// Use environment variables for flexibility in different environments
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+// Use Vite's environment variable
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
-// Function for signing up a new user
-export const signup = async (formData) => {
+// Function for signing up a new client
+export const signupClient = async (formData) => {
   try {
-    const res = await axios.post(`${BACKEND_URL}/users/signup`, formData);
+    const res = await axios.post(`${BACKEND_URL}/register/client`, formData);
     console.log(res.data);
-
-    // Store the token in local storage for authentication
     localStorage.setItem('token', res.data.token);
-
     return res.data;
   } catch (error) {
-    console.error('Signup error:', error);
+    console.error('Client Signup error:', error);
+    throw error;
+  }
+};
+
+// Function for signing up a new provider
+export const signupProvider = async (formData) => {
+  try {
+    const res = await axios.post(`${BACKEND_URL}/register/provider`, formData);
+    console.log(res.data);
+    localStorage.setItem('token', res.data.token);
+    return res.data;
+  } catch (error) {
+    console.error('Provider Signup error:', error);
     throw error;
   }
 };
@@ -31,7 +41,6 @@ export const signin = async (clientData) => {
 
     if (res.data.token) {
       localStorage.setItem('token', res.data.token);
-
       const client = JSON.parse(atob(res.data.token.split('.')[1])); // Decode the JWT payload
       return client;
     }
