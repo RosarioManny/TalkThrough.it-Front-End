@@ -6,27 +6,28 @@ import Footer from './components/Partials/Footer/Footer'
 import ProviderList from './components/ProviderList/ProviderList'
 import * as providerService from './services/providerService.js'
 import * as authService from './services/authService.js'
+import Landing from './components/Landing/Landing.jsx'
+import SignupForm from './components/SignupForm/SignupForm.jsx'
+import SigninForm from './components/SigninForm/SigninForm.jsx'
 
-export const AuthedUserContext = createContext(null)
+export const AuthedClientContext = createContext(null)
 
 
 function App() {
 
-  const [user,setUser] = useState(null)
+  const [client,setClient] = useState(null)
   // Currently storing array of providers in this state
   const[providers, setProviders] = useState([])
 
-
-  //is this necessary? Taken from hoot front end --gabe
   useEffect (()=>{
-    const userData = getUser()
-    setUser(userData)
+    const clientData = authService.getClient()
+    setClient(clientData)
   },[])
 
   // Picks up all providers in launch (should we move this down?)
   useEffect(()=>{
     const fetchAllProviders = async () =>{
-      const providerData = await providerService.index()
+      const providerData = await providerService.fetchProviders()
       // console.log('Providers:', providerData) 
       setProviders(providerData)
     }
@@ -35,24 +36,24 @@ function App() {
 
   const handleSignout = () =>{
     authService.signout();
-    setUser(null)
+    setClient(null)
   }
 
 
 
   return (
     <>
-      <AuthedUserContext.Provider value={user}>
+      <AuthedClientContext.Provider value={client}>
 
       <NavBar />
         <Routes>
-          {/*TODO: create user sign in to make protected/unprotected routes.. also, should user be client at this point? We have both users and clients right now. */}
-          {user ? (
+          {/*TODO: create Client sign in to make protected/unprotected routes.. also, should Client be client at this point? We have both Clients and clients right now. */}
+          {client ? (
             // Protected routes here
             <Route/>
 
            ) : ( 
-            // Unprotected routes (user not signed up) here
+            // Unprotected routes (Client not signed up) here
             <>
             <Route path="/" element={<Landing/>} />
             <Route path="/ProviderList" element={<ProviderList providers={providers}/>} />
@@ -60,11 +61,11 @@ function App() {
       
            )} 
            
-          <Route path="/signup" element={<SignupForm setUser={setUser}/>} />
-          <Route path="/signup" element={<SigninForm setUser={setUser}/>} />
+          <Route path="/signup" element={<SignupForm setClient={setClient}/>} />
+          <Route path="/signin" element={<SigninForm setClient={setClient}/>} />
         </Routes>
       <Footer />
-      </AuthedUserContext.Provider>
+      </AuthedClientContext.Provider>
     </>
   )
 }
