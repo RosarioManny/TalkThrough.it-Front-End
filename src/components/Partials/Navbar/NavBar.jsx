@@ -18,8 +18,9 @@ const NavBar = () => {
         <nav>
             <Link to="providerlist">Find Provider </Link>
             <Link to="message">Message </Link>
-            <Link to="signup">Sign-Up </Link>
             <Link to="signin">Sign-In </Link>
+            <Link to="signup/client">Sign-In Client </Link>
+            <Link to="signup/provider">Sign-In Provider </Link>
         </nav>
         )}
         </>

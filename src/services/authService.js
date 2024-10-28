@@ -6,7 +6,7 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 // Function for signing up a new client
 export const signupClient = async (formData) => {
   try {
-    const res = await axios.post(`${BACKEND_URL}/register/client`, formData);
+    const res = await axios.post(`${BACKEND_URL}/auth/register/client`, formData);
     console.log(res.data);
     localStorage.setItem('token', res.data.token);
     return res.data;
@@ -19,7 +19,7 @@ export const signupClient = async (formData) => {
 // Function for signing up a new provider
 export const signupProvider = async (formData) => {
   try {
-    const res = await axios.post(`${BACKEND_URL}/register/provider`, formData);
+    const res = await axios.post(`${BACKEND_URL}/auth/register/provider`, formData);
     console.log(res.data);
     localStorage.setItem('token', res.data.token);
     return res.data;
