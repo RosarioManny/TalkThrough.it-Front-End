@@ -1,33 +1,71 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { useState, createContext, useEffect } from 'react'
+import { Link, Route, Routes } from 'react-router-dom'
 import './App.css'
+import NavBar from './components/Partials/Navbar/NavBar'
+import Footer from './components/Partials/Footer/Footer'
+import ProviderList from './components/ProviderList/ProviderList'
+import * as providerService from './services/providerService.js'
+import * as authService from './services/authService.js'
+import Landing from './components/Landing/Landing.jsx'
+import SignupForm from './components/SignupForm/SignupForm.jsx'
+import SigninForm from './components/SigninForm/SigninForm.jsx'
+
+export const AuthedClientContext = createContext(null)
+
 
 function App() {
-  const [count, setCount] = useState(0)
+
+  const [client,setClient] = useState(null)
+  // Currently storing array of providers in this state
+  const[providers, setProviders] = useState([])
+
+  useEffect (()=>{
+    const clientData = authService.getClient()
+    setClient(clientData)
+  },[])
+
+  // Picks up all providers in launch (should we move this down?)
+  useEffect(()=>{
+    const fetchAllProviders = async () =>{
+      const providerData = await providerService.fetchProviders()
+      // console.log('Providers:', providerData) 
+      setProviders(providerData)
+    }
+    fetchAllProviders()
+  },[])
+
+  const handleSignout = () =>{
+    authService.signout();
+    setClient(null)
+  }
+
+
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
+      <AuthedClientContext.Provider value={client}>
+
+      <NavBar />
+        <Routes>
+          {/*TODO: create Client sign in to make protected/unprotected routes.. also, should Client be client at this point? We have both Clients and clients right now. */}
+          {client ? (
+            // Protected routes here
+            <Route/>
+
+           ) : ( 
+            // Unprotected routes (Client not signed up) here
+            <>
+            <Route path="/" element={<Landing/>} />
+            <Route path="/ProviderList" element={<ProviderList providers={providers}/>} />
+            </>
+      
+           )} 
+           
+          <Route path="/signup" element={<SignupForm setClient={setClient}/>} />
+          <Route path="/signin" element={<SigninForm setClient={setClient}/>} />
+        </Routes>
+      <Footer />
+      </AuthedClientContext.Provider>
     </>
   )
 }
