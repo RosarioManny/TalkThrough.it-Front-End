@@ -15,6 +15,7 @@ import ProviderAppointments from './components/Appointments/ProviderAppointments
 import ProviderAvailability from './components/Availability/ProviderAvailability';
 import Footer from './components/Partials/Footer/Footer';
 
+
 const App = () => {
     const { user, handleSignOut } = useAuth();
 
