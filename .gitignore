@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# added by gabe
+node_modules
+package-lock.json
+.env
+TalkThroughIt-Backend/

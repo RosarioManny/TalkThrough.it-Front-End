@@ -1,25 +1,25 @@
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useContext} from 'react'
+import { AuthedUserContext } from '../../../App';
 
-const NavBar = () => {
-    const user = false
-
-
+const NavBar = (props) => {
+    const user = useContext(AuthedUserContext)
+    
     return (
         <>
         <Link to="/">TalkThroughIt</Link>
         {user ? (
         <nav>
-            <Link to="provider">Find Provider</Link>
-            <Link to="message">Message</Link>
-            <Link to="signout">Sign-Out</Link>
+            <Link to="/providerlist">Find Provider </Link>
+            <Link to="/message">Message </Link>
+            <Link to="/" onClick={props.handleSignOut}>Sign Out </Link>
         </nav>
         ) : (
         <nav>
-            <Link to="provider">Find Provider</Link>
-            <Link to="message">Message</Link>
-            <Link to="signup">Sign-Up</Link>
-            <Link to="signiin">Sign-In</Link>
+            <Link to="/providerlist">Find Provider </Link>
+            <Link to="/register/client">Client Sign Up </Link>
+            <Link to="/register/provider">Provider Sign Up </Link>
+            <Link to="/login">Sign In </Link>
         </nav>
         )}
         </>
