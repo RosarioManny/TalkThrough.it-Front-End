@@ -54,7 +54,6 @@ const App = () => {
           <Route path="/register/client" element={<ClientSignupForm />} />
           <Route path="/register/provider" element={<ProviderSignupForm />} />
           <Route path="/login" element={<SigninForm setUser={setUser} />} />
-          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/login" element={<SigninForm />} />
           <Route path="/client/dashboard" element={<ClientDashboard />} />
           <Route path="/provider/dashboard" element={<ProviderDashboard />} />
