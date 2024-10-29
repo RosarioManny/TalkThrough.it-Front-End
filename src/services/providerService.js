@@ -14,3 +14,14 @@ export const fetchProviders = async () => {
       throw error;
     }
   };
+
+export const showProviders = async (providersId) => {
+  try {
+    const res = await fetch(`${BACKEND_URL}/providers/${providersId}`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      })
+    return res.json();
+  } catch (error) {
+    console.log(error);
+  }
+};
