@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { fetchSavedProviders, fetchClientAppointments } from '../../services/dashboardService';
+import { getAuthHeaders } from '../../services/dashboardService'
+import axios from 'axios';
 
 const ClientDashboard = () => {
   const navigate = useNavigate();
@@ -15,8 +17,9 @@ const ClientDashboard = () => {
   useEffect(() => {
     if (!user) {
       navigate('/login');
-      return;
+      return; 
     }
+
 
     const fetchDashboardData = async () => {
       try {
@@ -50,6 +53,36 @@ const ClientDashboard = () => {
 
     fetchDashboardData();
   }, [user, navigate]);
+
+
+   // gabe start 
+   console.log("shiiiiiiiiit")
+  
+   const [conversations, setConversations] = useState({})
+ 
+   const getConversations = async() => {
+     try{
+         const response = await axios.get(`localhost:3000/messages/conversations`,getAuthHeaders())
+         setConversations(response.data)
+     }catch(error){
+         if (error.response?.status === 401) {
+             console.error('Authentication token missing or invalid');
+         }
+         console.error('Error saving provider:', error);
+         throw error;
+     }
+ }
+ 
+   useEffect(()=>{
+     const fetchConvos = async () => {
+       const convoData = await getConversations()
+       setConversations(convoData.conversations)
+     }
+     fetchConvos()
+   },[])  
+
+  //gabe end here  
+  console.log("conversations:" + conversations)
 
   // Helper function to format provider name
   const formatProviderName = (provider) => {
