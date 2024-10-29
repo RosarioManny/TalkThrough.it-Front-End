@@ -24,6 +24,7 @@ const App = () => {
 
   return (
     <>
+    <AuthedUserContext.Provider value={user}>
       <NavBar user={user} handleSignOut={handleSignOut}/>
       <Routes>
         <Route path="/" element={<Landing />} />
@@ -35,6 +36,7 @@ const App = () => {
         <Route path="/providerlist/:providerId" element={<ProviderDetails />} />
       </Routes>
       <Footer />
+    </AuthedUserContext.Provider>
     </>
   );
 };
