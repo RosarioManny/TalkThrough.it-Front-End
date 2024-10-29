@@ -40,7 +40,7 @@ const ClientSignupForm = () => {
       <p>{message}</p>
       <form onSubmit={handleSubmit}>
       <div>
-          <label htmlFor="email">email:</label>
+          <label htmlFor="email">Email:</label>
           <input
             type="email"
             id="email"
@@ -51,7 +51,7 @@ const ClientSignupForm = () => {
           />
         </div>
         <div>
-          <label htmlFor="firstName">firstName:</label>
+          <label htmlFor="firstName">First Name:</label>
           <input
             type="text"
             id="firstName"
@@ -62,7 +62,7 @@ const ClientSignupForm = () => {
           />
         </div>
         <div>
-          <label htmlFor="lastName">lastName:</label>
+          <label htmlFor="lastName">Last Name:</label>
           <input
             type="text"
             id="lastName"
@@ -106,6 +106,7 @@ const ClientSignupForm = () => {
           />
         </div>
         <div>
+          {/* TODO: add the rest of the provider array from Provider Signup form (we have 5 options here, and 19 in the provider signup*/}
           <label htmlFor="insuranceProvider">Insurance Provider:</label>
           <select 
             onChange={handleChange} 

@@ -7,6 +7,7 @@ import Dashboard from './components/Dashboard/Dashboard';
 import Landing from './components/Landing/Landing';
 import NavBar from './components/Partials/Navbar/NavBar';
 import ProviderList from './components/ProviderList/ProviderList'; // Import the ProviderList component
+import ProviderDetails from './components/ProviderDetails/ProviderDetails'
 import Footer from './components/Partials/Footer/Footer';
 
 export const AuthedUserContext = createContext(null)
@@ -30,17 +31,8 @@ const App = () => {
         <Route path="/register/provider" element={<ProviderSignupForm />} /> {/* Changed from /signup/provider */}
         <Route path="/login" element={<SigninForm />} /> {/* Changed from /signin */}
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/providerlist" element={<ProviderList />} /> 
-        <Route path="/login"/>
-        <Route path="/provider/:providerId"/>
-        <Route path="/conversations"/>
-        <Route path="/conversation/:otherUserId"/>
-        <Route path="/savedTherapist"/>
-        <Route path=""/>
-        <Route path=""/>
-        <Route path=""/>
-        <Route path=""/>
-        <Route path=""/>
+        <Route path="/providerlist" element={<ProviderList />} />
+        <Route path="/providerlist/:providerId" element={<ProviderDetails />} />
       </Routes>
       <Footer />
     </>
