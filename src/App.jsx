@@ -10,6 +10,7 @@ import ProviderList from './components/ProviderList/ProviderList'; // Import the
 import ProviderDetails from './components/ProviderDetails/ProviderDetails'
 import Footer from './components/Partials/Footer/Footer';
 import { getUser, signOut } from './services/authService';
+import Messages from "./components/Messages"
 
 
 export const AuthedUserContext = createContext(null)
@@ -39,6 +40,8 @@ const App = () => {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/providerlist" element={<ProviderList />} />
           <Route path="/providerlist/:providerId" element={<ProviderDetails />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/messages/:messageId" element={<Messages />} />
         </Routes>
       <Footer />
     </AuthedUserContext.Provider>
