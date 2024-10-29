@@ -207,17 +207,6 @@ const ClientDashboard = () => {
         </div>
 
         {/* Recent Messages Section */}
-<<<<<<< HEAD
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-2xl font-semibold mb-4 text-gray-800">Recent Messages</h2>
-          <div className="text-gray-500 flex flex-col items-center justify-center h-40">
-            <svg className="w-12 h-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-            </svg>
-            <p>Messaging feature coming soon!</p>
-          </div>
-        </div>
-=======
         <Link to='/messages/:messageId'>
           <div className='bg-white p-6 rounded-lg shadow-md'>
             <h2 className='text-2xl font-semibold mb-4 text-gray-800'>
@@ -240,7 +229,6 @@ const ClientDashboard = () => {
           </div>
           <button>Reply</button>
         </Link>
->>>>>>> 60bafe85290cad253e8ff7a3f9189c2ba31eab85
       </div>
     </div>
   );
