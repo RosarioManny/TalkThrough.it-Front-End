@@ -9,16 +9,21 @@ import NavBar from './components/Partials/Navbar/NavBar';
 import ProviderList from './components/ProviderList/ProviderList'; // Import the ProviderList component
 import ProviderDetails from './components/ProviderDetails/ProviderDetails'
 import Footer from './components/Partials/Footer/Footer';
+import { getUser, signOut } from './services/authService';
+
 
 export const AuthedUserContext = createContext(null)
 
 const App = () => {
   const [user, setUser] = useState()
 
-  useEffect(() => {})
+  useEffect(() => {
+    const userData = getUser()
+    setUser(userData)
+  }, [])
 
   const handleSignOut = () => {
-    authedService.signout();
+    signOut();
     setUser(null)
   }
 
@@ -26,15 +31,15 @@ const App = () => {
     <>
     <AuthedUserContext.Provider value={user}>
       <NavBar user={user} handleSignOut={handleSignOut}/>
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/register/client" element={<ClientSignupForm />} /> 
-        <Route path="/register/provider" element={<ProviderSignupForm />} /> 
-        <Route path="/login" element={<SigninForm />} /> 
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/providerlist" element={<ProviderList />} />
-        <Route path="/providerlist/:providerId" element={<ProviderDetails />} />
-      </Routes>
+        <Routes>
+          <Route path="/" element={<Landing />} />
+          <Route path="/register/client" element={<ClientSignupForm />} /> 
+          <Route path="/register/provider" element={<ProviderSignupForm />} /> 
+          <Route path="/login" element={<SigninForm setUser={setUser}/>} /> 
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/providerlist" element={<ProviderList />} />
+          <Route path="/providerlist/:providerId" element={<ProviderDetails />} />
+        </Routes>
       <Footer />
     </AuthedUserContext.Provider>
     </>

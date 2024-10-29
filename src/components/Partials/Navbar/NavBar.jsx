@@ -1,12 +1,10 @@
 import { Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useContext} from 'react'
+import { AuthedUserContext } from '../../../App';
 
-const NavBar = () => {
-
-    //TODO: allow user to be signed in after creating a client provider. Right now it's hardcoded to false.
-    const user = false
-
-
+const NavBar = (props) => {
+    const user = useContext(AuthedUserContext)
+    
     return (
         <>
         <Link to="/">TalkThroughIt</Link>
@@ -14,7 +12,7 @@ const NavBar = () => {
         <nav>
             <Link to="/providerlist">Find Provider </Link>
             <Link to="/message">Message </Link>
-            <Link to="/" onClick={() => signOut()}>Sign Out </Link>
+            <Link to="/" onClick={props.handleSignOut}>Sign Out </Link>
         </nav>
         ) : (
         <nav>
