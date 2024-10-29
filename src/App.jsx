@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import ClientSignupForm from './components/ClientSignupForm/ClientSignupForm';
 import ProviderSignupForm from './components/ProviderSignupForm/ProviderSignupForm';
-import SigninForm from './components/SigninForm/SigninForm';
+import { SigninForm } from './components/SigninForm/SigninForm';
 import ClientDashboard from './components/Dashboard/ClientDashboard';
 import ProviderDashboard from './components/Dashboard/ProviderDashboard';
 import Landing from './components/Landing/Landing';
