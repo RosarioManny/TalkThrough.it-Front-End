@@ -235,7 +235,6 @@ const ClientDashboard = () => {
               </svg>
             </div>
           </div>
-          <button>Reply</button>
         </Link>
       </div>
     </div>

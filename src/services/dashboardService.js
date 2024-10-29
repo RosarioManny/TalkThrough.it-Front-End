@@ -141,3 +141,20 @@ export const saveProvider = async (providerId) => {
         throw error;
     }
 };
+
+// Sending Message
+export const sendMessage = async () => {
+    try {
+        const response = await axios.post(
+            `${BACKEND_URL}/messages/`,
+            getAuthHeaders()
+        )
+        return response.data
+    } catch (error) {
+        if (error.response?.status === 401) {
+            console.error('Authentication token missing or invalid');
+        }
+        console.error('Error saving provider:', error);
+        throw error; 
+    }
+}

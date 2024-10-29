@@ -14,6 +14,7 @@ import ProviderDetails from './components/ProviderDetails/ProviderDetails';
 import ProviderAppointments from './components/Appointments/ProviderAppointments';
 import ProviderAvailability from './components/Availability/ProviderAvailability';
 import Footer from './components/Partials/Footer/Footer';
+import Messages from './components/Messages/Messages';
 
 
 const App = () => {
@@ -39,6 +40,7 @@ const App = () => {
                 <Route path="/provider/availability" element={<ProviderAvailability />} />
                 <Route path="/providerlist" element={<ProviderList />} />
                 <Route path="/providerlist/:providerId" element={<ProviderDetails />} />
+                <Route path="/messages/:messageId" element={<Messages />} />
             </Routes>
             <Footer />
         </>

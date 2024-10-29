@@ -60,7 +60,6 @@ export const signin = async (userData) => {
 
     if (res.data.token) {
       localStorage.setItem('token', res.data.token);
-      // Add this debug log
       console.log('Token stored:', res.data.token);
       return res.data;
     }
@@ -69,7 +68,6 @@ export const signin = async (userData) => {
     throw error;
   }
 };
-
 
 
 export const getUser = () => {
