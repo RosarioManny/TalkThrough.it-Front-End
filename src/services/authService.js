@@ -60,14 +60,17 @@ export const signin = async (userData) => {
 
     if (res.data.token) {
       localStorage.setItem('token', res.data.token);
-      const user = JSON.parse(atob(res.data.token.split('.')[1]));
-      return user;
+      // Add this debug log
+      console.log('Token stored:', res.data.token);
+      return res.data;
     }
   } catch (error) {
     console.error('Signin error:', error);
     throw error;
   }
 };
+
+
 
 export const getUser = () => {
   const token = localStorage.getItem('token');

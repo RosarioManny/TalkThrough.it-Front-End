@@ -1,14 +1,14 @@
 import React from 'react';
+import { useAuth } from '../../context/AuthContext'; // Import useAuth hook
 import ClientDashboard from './ClientDashboard';
 import ProviderDashboard from './ProviderDashboard';
 
-const Dashboard = ({ userType }) => {
-  // This will eventually come from authentication context
-  // const userType = useAuth().user?.type;
+const Dashboard = () => {
+  const { user } = useAuth(); // Get user from context
 
   return (
     <div>
-      {userType === 'provider' ? (
+      {user?.type === 'provider' ? (
         <ProviderDashboard />
       ) : (
         <ClientDashboard />
