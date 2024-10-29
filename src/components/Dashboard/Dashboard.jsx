@@ -1,17 +1,20 @@
-// src/components/Dashboard.jsx
-// taken from jwt react tutorial, can replace later -- gabe
+import React from 'react';
+import ClientDashboard from './ClientDashboard';
+import ProviderDashboard from './ProviderDashboard';
 
-const Dashboard = ({ user }) => {
-    return (
-      <main>
-        <h1>Welcome, {user.username}</h1>
-        <p>
-          This is the dashboard page where you, and only you, can see a dashboard
-          of all of your things.
-        </p>
-      </main>
-    );
-  };
-  
-  export default Dashboard;
-  
+const Dashboard = ({ userType }) => {
+  // This will eventually come from authentication context
+  // const userType = useAuth().user?.type;
+
+  return (
+    <div>
+      {userType === 'provider' ? (
+        <ProviderDashboard />
+      ) : (
+        <ClientDashboard />
+      )}
+    </div>
+  );
+};
+
+export default Dashboard;
