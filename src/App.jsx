@@ -28,9 +28,9 @@ const App = () => {
       <NavBar user={user} handleSignOut={handleSignOut}/>
       <Routes>
         <Route path="/" element={<Landing />} />
-        <Route path="/register/client" element={<ClientSignupForm />} /> {/* Changed from /signup/client */}
-        <Route path="/register/provider" element={<ProviderSignupForm />} /> {/* Changed from /signup/provider */}
-        <Route path="/login" element={<SigninForm />} /> {/* Changed from /signin */}
+        <Route path="/register/client" element={<ClientSignupForm />} /> 
+        <Route path="/register/provider" element={<ProviderSignupForm />} /> 
+        <Route path="/login" element={<SigninForm />} /> 
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/providerlist" element={<ProviderList />} />
         <Route path="/providerlist/:providerId" element={<ProviderDetails />} />
