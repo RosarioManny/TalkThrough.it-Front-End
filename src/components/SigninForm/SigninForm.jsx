@@ -8,7 +8,7 @@ const SigninForm = (props) => {
   const navigate = useNavigate();
   const [message, setMessage] = useState(['']);
   const [formData, setFormData] = useState({
-    username: '',
+    email: '',
     password: '',
   });
 
@@ -23,6 +23,7 @@ const SigninForm = (props) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log(formData)
     try {
       const user = await authService.signin(formData);
       console.log(user);
@@ -36,16 +37,26 @@ const SigninForm = (props) => {
   return (
     <main>
       <h1>Log In</h1>
+      {/* TODO: I believe the first field is e-mail, but afterwards it's password then client type in the backend, should create a radial button or something to let the user pick either one, and also how to check this on the backend? -gabe 
+      
+      example working on postman:
+      {
+        "email": "thisisatest@test.test", 
+        "password": "therock",
+        "userType": "client"
+      }
+      
+      */}
       <p>{message}</p>
       <form autoComplete="off" onSubmit={handleSubmit}>
         <div>
-          <label htmlFor="email">Username:</label>
+          <label htmlFor="email">E-mail:</label>
           <input
             type="text"
             autoComplete="off"
-            id="username"
+            id="email"
             value={formData.username}
-            name="username"
+            name="email"
             onChange={handleChange}
           />
         </div>
@@ -60,6 +71,7 @@ const SigninForm = (props) => {
             onChange={handleChange}
           />
         </div>
+        {/* TODO: put client or provider selection here --backend: auth.js line 128-- Gabe */}
         <div>
           <button>Log In</button>
           <Link to="/">

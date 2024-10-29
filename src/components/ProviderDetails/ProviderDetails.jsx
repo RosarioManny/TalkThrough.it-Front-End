@@ -4,7 +4,10 @@ import React from 'react'
 
 function ProviderDetails() {
   return (
+    <>
+    <h1>TODO: display full provider details here. - Gabe</h1>
     <div>ProviderDetails</div>
+    </>
   )
 }
 
