@@ -14,7 +14,7 @@ import ProviderList from './components/ProviderList/ProviderList';
 import ProviderDetails from './components/ProviderDetails/ProviderDetails';
 import Footer from './components/Partials/Footer/Footer';
 import { getUser, signOut } from './services/authService';
-import Messages from "./components/Messages"
+import Messages from "./components/Messages/Messages"
 
 export const AuthedUserContext = createContext(null);
 
