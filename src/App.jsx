@@ -19,6 +19,7 @@ import Messages from "./components/Messages/Messages"
 export const AuthedUserContext = createContext(null);
 
 const App = () => {
+  // const [user, setUser] = useState(); (might have to return to this, because use auth is no longer a state)
   const { user, setUser } = useAuth();
   const [message, setMessage] = useState([]);
 
@@ -36,6 +37,7 @@ const App = () => {
     setUser(null);
   };
 
+
   // Function to determine which navbar to show
   const renderNavBar = () => {
     if (!user) return <NavBar user={user} handleSignOut={handleSignOut} />;
@@ -51,6 +53,8 @@ const App = () => {
           <Route path="/" element={<Landing />} />
           <Route path="/register/client" element={<ClientSignupForm />} />
           <Route path="/register/provider" element={<ProviderSignupForm />} />
+          <Route path="/login" element={<SigninForm setUser={setUser} />} />
+          <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/login" element={<SigninForm />} />
           <Route path="/client/dashboard" element={<ClientDashboard />} />
           <Route path="/provider/dashboard" element={<ProviderDashboard />} />
