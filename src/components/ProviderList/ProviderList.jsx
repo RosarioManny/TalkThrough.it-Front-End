@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { fetchProviders } from "../../services/providerService";
 
 const ProviderList = () => {
@@ -26,7 +27,8 @@ const ProviderList = () => {
       {error && <p>{error}</p>}
       <ul>
         {providers.map((provider) => (
-          <li key={provider._id}>
+          <Link key={provider._id} to={`/providerlist/${provider._id}`}>
+          <li>
             <h2>{`${provider.firstName} ${provider.lastName}`}</h2>
             <p>
               <strong>Credentials:</strong> {provider.credentials}
@@ -67,6 +69,7 @@ const ProviderList = () => {
                 : "Not specified"}
             </p>
           </li>
+          </Link>
         ))}
       </ul>
     </div>

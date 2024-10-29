@@ -7,6 +7,7 @@ import Dashboard from './components/Dashboard/Dashboard';
 import Landing from './components/Landing/Landing';
 import NavBar from './components/Partials/Navbar/NavBar';
 import ProviderList from './components/ProviderList/ProviderList'; // Import the ProviderList component
+import ProviderDetails from './components/ProviderDetails/ProviderDetails'
 import Footer from './components/Partials/Footer/Footer';
 
 const App = () => {
@@ -20,6 +21,7 @@ const App = () => {
         <Route path="/login" element={<SigninForm />} /> {/* Changed from /signin */}
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/providerlist" element={<ProviderList />} />
+        <Route path="/providerlist/:providerId" element={<ProviderDetails />} />
         {/* Add more routes as needed */}
       </Routes>
       <Footer />
