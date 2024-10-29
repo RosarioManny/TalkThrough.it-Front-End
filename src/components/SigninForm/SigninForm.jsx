@@ -10,6 +10,7 @@ const SigninForm = (props) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
+    userType: 'Client',
   });
 
   const updateMessage = (msg) => {
@@ -19,6 +20,7 @@ const SigninForm = (props) => {
   const handleChange = (e) => {
     updateMessage('');
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    console.log(formData)
   };
 
   const handleSubmit = async (e) => {
@@ -72,6 +74,22 @@ const SigninForm = (props) => {
           />
         </div>
         {/* TODO: put client or provider selection here --backend: auth.js line 128-- Gabe */}
+        <label htmlFor="userType">Please select if you are a client or a provider:</label>
+        <select 
+          onChange={handleChange} 
+          name="userType"  
+          id="userType"
+          value={formData.userType}
+          required
+        >
+            <option value="client">
+              Client
+            </option>
+            <option value="Provider">
+              Provider
+            </option>
+        </select>
+              
         <div>
           <button>Log In</button>
           <Link to="/">
