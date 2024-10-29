@@ -20,11 +20,16 @@ export const AuthedUserContext = createContext(null);
 
 const App = () => {
   const { user, setUser } = useAuth();
+  const [message, setMessage] = useState([]);
 
   useEffect(() => {
     const userData = getUser();
     setUser(userData);
   }, [setUser]);
+
+  useEffect(() => {
+
+  })
 
   const handleSignOut = () => {
     signOut();
@@ -51,7 +56,6 @@ const App = () => {
           <Route path="/provider/dashboard" element={<ProviderDashboard />} />
           <Route path="/providerlist" element={<ProviderList />} />
           <Route path="/providerlist/:providerId" element={<ProviderDetails />} />
-          <Route path="/messages" element={<Messages />} />
           <Route path="/messages/:messageId" element={<Messages />} />
         </Routes>
         <Footer />

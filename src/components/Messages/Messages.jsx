@@ -9,6 +9,8 @@ const Messages = (props) => {
     // get recieversId and Contents of the msg
     // display if read 
 
+    const messageRead = true
+
     return (
         <>
         <h1>RecieverId</h1>
