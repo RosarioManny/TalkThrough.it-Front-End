@@ -6,7 +6,8 @@ import { showProviders } from '../../services/providerService';
 
 const ProviderDetails = (props) => {
      const {providerId} = useParams();
-     const [provider, setProvider] = useState(null);
+     const [provider, setProvider] = useState({});
+    //  console.log(providerId)
      
      useEffect (() => {
       const fetchProviders =async ()=>{
@@ -16,11 +17,12 @@ const ProviderDetails = (props) => {
       fetchProviders()
     },[])
 
-    console.log(`${provider}`)
+    console.log(provider.provider)
   return (
     <>
     <h1>TODO: display full provider details here. - Gabe</h1>
     <div>ProviderDetails</div>
+    <p>{provider.provider.firstName}</p>
     </>
   )
 }

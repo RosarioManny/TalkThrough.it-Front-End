@@ -10,7 +10,7 @@ const SigninForm = (props) => {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
-    userType: 'Client',
+    userType: 'client',
   });
 
   const updateMessage = (msg) => {
@@ -28,7 +28,7 @@ const SigninForm = (props) => {
     console.log(formData)
     try {
       const user = await authService.signin(formData);
-      console.log(user);
+      // console.log(user);
       props.setUser(user);
       navigate('/');
     } catch (err) {
@@ -85,7 +85,7 @@ const SigninForm = (props) => {
             <option value="client">
               Client
             </option>
-            <option value="Provider">
+            <option value="provider">
               Provider
             </option>
         </select>
