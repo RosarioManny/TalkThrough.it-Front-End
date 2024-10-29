@@ -2,7 +2,6 @@ import axios from 'axios';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
-// Function to fetch providers
 export const fetchProviders = async () => {
     try {
       const res = await axios.get(`${BACKEND_URL}/providers`, {
@@ -13,4 +12,4 @@ export const fetchProviders = async () => {
       console.error('Fetch providers error:', error);
       throw error;
     }
-  };
+};
