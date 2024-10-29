@@ -11,6 +11,7 @@ const SigninForm = () => {
     email: '',
     password: '',
     userType: 'client'
+
   });
 
   const updateMessage = (msg) => {
@@ -74,7 +75,6 @@ const SigninForm = () => {
             className="w-full p-2 border rounded"
           />
         </div>
-        
         <div>
           <label htmlFor="userType" className="block mb-2">
             Please select if you are a client or a provider:
