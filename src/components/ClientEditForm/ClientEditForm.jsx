@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-// import { signupClient } from '../../services/authService';
+import { useNavigate } from 'react-router-dom';
+import { updateClient, fetchClientProfile } from '../../services/dashboardService';
+import { toast } from 'react-toastify';
 import Multiselect from 'multiselect-react-dropdown';
-import { editClient } from '../../services/dashboardService';
-import { getClient } from '../../services/dashboardService';
-
 
 const insuranceOptions = [
     { name: "Aetna" }, 
@@ -31,21 +29,43 @@ const insuranceOptions = [
 ];
 
 const ClientEditForm = () => {
+
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
-        email: '',
         firstName: '',
         lastName: '',
-        password: '',
-        passwordConf: '',
         location: '',
         insuranceProvider: [],
         therapyGoals: '',
     });
 
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const loadClientProfile = async () => {
+            try {
+                const profile = await fetchClientProfile();
+                // Convert insurance string back to array of objects for Multiselect
+                const insuranceProviders = profile.insuranceProvider.split(', ')
+                    .map(name => ({ name }));
+                
+                setFormData({
+                    firstName: profile.firstName,
+                    lastName: profile.lastName,
+                    location: profile.location,
+                    insuranceProvider: insuranceProviders,
+                    therapyGoals: profile.therapyGoals,
+                });
+            } catch (err) {
+                toast.error('Failed to load profile');
+                // navigate('/client/dashboard');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadClientProfile();
+    }, [navigate]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -55,72 +75,9 @@ const ClientEditForm = () => {
         }));
     };
 
-    const [profile, setProfile] =  useState([
-        // "_id": "67223965c41239738121d4b5",
-        // "email": "gabedotgutierrez@gmail.com",
-        // "firstName": "Gabriel",
-        // "lastName": "Gutierrez",
-        // "location": "The net",
-        // "insuranceProvider": "Out of pocket",
-        // "therapyGoals": "get a job",
-        // "savedProviders": [],
-        // "createdAt": "2024-10-30T13:49:25.992Z",
-        // "updatedAt": "2024-10-30T13:49:25.992Z"
-        ])
-
-        useEffect(() => {
-            const loadClientProfile = async () => {
-                try {
-                    const data = await getClient();
-                    setFormData(data.profile)
-                    console.log(profile.profile)
-                } catch (err) {
-                    console.error("Error fetching providers:", err);
-                    setError("Failed to load providers");
-                } 
-            };
-            loadClientProfile();
-        }, []);
-
-    const validateForm = () => {
-        const errors = {};
-
-        if (formData.password !== formData.passwordConf) {
-            errors.password = "Passwords do not match";
-        }
-
-        if (formData.insuranceProvider.length === 0) {
-            errors.insurance = "Please select at least one insurance provider";
-        }
-
-        const requiredFields = [
-            'email',
-            'firstName',
-            'lastName',
-            'location',
-            'therapyGoals'
-        ];
-
-        requiredFields.forEach(field => {
-            if (!formData[field]?.trim()) {
-                errors[field] = `${field.charAt(0).toUpperCase() + field.slice(1)} is required`;
-            }
-        });
-
-        return Object.keys(errors).length === 0 ? null : errors;
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
-        
-        const validationErrors = validateForm();
-        if (validationErrors) {
-            setError(Object.values(validationErrors).join(", "));
-            return;
-        }
-
         setIsLoading(true);
-        setError('');
 
         try {
             const submissionData = {
@@ -128,44 +85,29 @@ const ClientEditForm = () => {
                 insuranceProvider: formData.insuranceProvider.map(item => item.name).join(', ')
             };
 
-            await editClient(submissionData);
-            setSuccess(true);
-            
-            setTimeout(() => {
-                navigate('/login');
-            }, 2000);
-            
+            await updateClient(submissionData);
+            toast.success('Profile updated successfully');
+            navigate('/client/dashboard');
         } catch (err) {
-            setError(err.response?.data?.message || 'Signup failed. Please try again.');
+            toast.error(err.response?.data?.message || 'Update failed. Please try again.');
         } finally {
             setIsLoading(false);
         }
     };
 
+    if (isLoading) {
+        return (
+            <div className="flex justify-center items-center min-h-screen">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-celestial_blue-500"></div>
+            </div>
+        );
+    }
+
     return (
         <div className="max-w-2xl mx-auto p-8 bg-white rounded-xl shadow-lg mt-8">
-            {success && (
-                <div className="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg flex items-center">
-                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/>
-                    </svg>
-                    Registration successful! Redirecting to login page...
-                </div>
-            )}
-
-            {error && (
-                <div className="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center">
-                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd"/>
-                    </svg>
-                    {error}
-                </div>
-            )}
-
             <form onSubmit={handleSubmit} className="space-y-6">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Client Registration</h2>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Edit Profile</h2>
 
-                {/* Basic Information */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
@@ -185,44 +127,6 @@ const ClientEditForm = () => {
                             type="text"
                             name="lastName"
                             value={formData.lastName}
-                            onChange={handleChange}
-                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                            required
-                        />
-                    </div>
-                </div>
-
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                        required
-                    />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                        <input
-                            type="password"
-                            name="password"
-                            value={formData.password}
-                            onChange={handleChange}
-                            className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                            required
-                        />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
-                        <input
-                            type="password"
-                            name="passwordConf"
-                            value={formData.passwordConf}
                             onChange={handleChange}
                             className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                             required
@@ -278,34 +182,26 @@ const ClientEditForm = () => {
                 <div className="flex gap-4">
                     <button
                         type="submit"
-                        disabled={isLoading || success}
+                        disabled={isLoading}
                         className={`flex-1 py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white 
-                            ${isLoading || success 
+                            ${isLoading 
                                 ? 'bg-gray-400 cursor-not-allowed' 
                                 : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
                             }`}
                     >
-                        {isLoading ? (
-                            <div className="flex items-center justify-center">
-                                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                Submitting...
-                            </div>
-                        ) : success ? 'Registration Complete!' : 'Sign Up'}
+                        {isLoading ? 'Updating...' : 'Save Changes'}
                     </button>
                     
-                    <Link 
-                        to="/"
-                        className="flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 text-center"
+                    <button 
+                        type="button"
+                        onClick={() => navigate('/client/dashboard')}
+                        className="flex-1 py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                     >
                         Cancel
-                    </Link>
+                    </button>
                 </div>
             </form>
         </div>
     );
 };
-
-export default ClientEditForm;
+export default ClientEditForm

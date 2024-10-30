@@ -15,7 +15,7 @@ import ProviderAppointments from './components/Appointments/ProviderAppointments
 import ProviderAvailability from './components/Availability/ProviderAvailability';
 import Footer from './components/Partials/Footer/Footer';
 import ClientEditForm from './components/ClientEditForm/ClientEditForm';
-import ClientProfilePage from './components/ClientProfilePage/ClientProfilePage';
+// import ClientProfilePage from './components/ClientProfilePage/ClientProfilePage';
 
 
 const App = () => {
