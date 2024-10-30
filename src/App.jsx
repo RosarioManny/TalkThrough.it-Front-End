@@ -15,8 +15,7 @@ import ProviderAppointments from './components/Appointments/ProviderAppointments
 import ProviderAvailability from './components/Availability/ProviderAvailability';
 import Footer from './components/Partials/Footer/Footer';
 import ClientEditForm from './components/ClientEditForm/ClientEditForm';
-import ProviderEditForm from './components/ProviderEditForm/ProviderEditForm';
-
+// import ClientProfilePage from './components/ClientProfilePage/ClientProfilePage';
 
 
 const App = () => {
@@ -37,11 +36,11 @@ const App = () => {
                 <Route path="/register/provider" element={<ProviderSignupForm />} />
                 <Route path="/login" element={<SigninForm />} />
                 <Route path="/client/dashboard" element={<ClientDashboard />} />
+                {/* <Route path="/client/profile" element={<ClientProfilePage />} /> */}
                 <Route path="/client/profile/" element={<ClientEditForm />} />
                 <Route path="/provider/dashboard" element={<ProviderDashboard />} />
                 <Route path="/provider/appointments" element={<ProviderAppointments />} />
                 <Route path="/provider/availability" element={<ProviderAvailability />} />
-                <Route path="/provider/profile" element={<ProviderEditForm />} />
                 <Route path="/providerlist" element={<ProviderList />} />
                 <Route path="/providerlist/:providerId" element={<ProviderDetails />} />
             </Routes>
