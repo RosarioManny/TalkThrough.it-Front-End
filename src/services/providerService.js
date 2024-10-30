@@ -109,3 +109,15 @@ export const getProviderReviews = async (providerId) => {
         throw error;
     }
 };
+
+//update provider profile
+export const updateProvider = async(formData,userid) => {
+    try {
+      const res = await axios.put(`${BACKEND_URL}/providers/${userid}`, formData, getAuthHeaders())
+      console.log('Provider registration response:', res.data);
+      return res.data
+    } catch (error) {
+      console.error('Provider Signup error:', error);
+      throw error;
+    }
+  }

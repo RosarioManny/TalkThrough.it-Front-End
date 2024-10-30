@@ -142,6 +142,7 @@ export const saveProvider = async (providerId) => {
     }
 };
 
+//get my client
 export const fetchClientProfile = async() => {
     try {
         const response = await axios.get(
@@ -154,7 +155,7 @@ export const fetchClientProfile = async() => {
     }
 }
 
-//edit client (unfinished) - Gabe
+// edit client - Gabe
 export const updateClient = async(formData) => {
     try {
       const res = await axios.put(`${BACKEND_URL}/clients/profile/`, formData, getAuthHeaders())

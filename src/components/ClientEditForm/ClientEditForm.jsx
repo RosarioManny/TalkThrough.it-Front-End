@@ -58,7 +58,7 @@ const ClientEditForm = () => {
                 });
             } catch (err) {
                 toast.error('Failed to load profile');
-                // navigate('/client/dashboard');
+                navigate('/client/dashboard');
             } finally {
                 setIsLoading(false);
             }
