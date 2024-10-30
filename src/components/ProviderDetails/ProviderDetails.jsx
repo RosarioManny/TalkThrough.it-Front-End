@@ -202,7 +202,7 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
       <div className={`${isModal ? 'py-6' : `${theme.card.default} p-6`}`}>
         <h3 className={`${theme.text.heading} text-xl mb-4`}>Session Types</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          {provider?.sessionTypes.map((type) => (
+          {provider?.sessionTypes?.map((type) => (
             <div 
               key={type}
               className="flex items-center gap-3 bg-alice_blue-50 p-3 rounded-lg"

@@ -141,3 +141,27 @@ export const saveProvider = async (providerId) => {
         throw error;
     }
 };
+
+export const getClient = async() => {
+    try {
+        const response = await axios.get(
+            `${BACKEND_URL}/clients/profile`,getAuthHeaders()
+        )
+        console.log("profile data" + response.data)
+        return response.data
+    } catch (error) {
+     console.log(error)   
+    }
+}
+
+//edit client (unfinished) - Gabe
+export const editClient = async(formData) => {
+    try {
+      const res = await axios.put(`${BACKEND_URL}/profile/`, formData)
+      console.log('Client registration response:', res.data);
+      return res.data
+    } catch (error) {
+      console.error('Client Signup error:', error);
+      throw error;
+    }
+  }
