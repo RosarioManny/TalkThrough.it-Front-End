@@ -70,14 +70,13 @@ export const signin = async (userData) => {
   }
 };
 
-
-
 export const getUser = () => {
   const token = localStorage.getItem('token');
   if (!token) return null;
   const user = JSON.parse(atob(token.split('.')[1]));
   return user;
 };
+
 
 export const signOut = () => {
   localStorage.removeItem('token');
