@@ -33,14 +33,16 @@ const Dashboard = () => {
   },[])
 
   return (
-    <div>
-      {user?.type === 'provider' ? (
-        <ProviderDashboard />
-      ) : (
-        <ClientDashboard />
-      )}
+    <div className="bg-alice_blue-500 min-h-screen">
+        <div className="container mx-auto px-4 py-8">
+            {user?.type === 'provider' ? (
+                <ProviderDashboard />
+            ) : (
+                <ClientDashboard />
+            )}
+        </div>
     </div>
-  );
+);
 };
 
 export default Dashboard;

@@ -1,62 +1,67 @@
-import { Link } from 'react-router-dom';
-import { useAuth } from '../../../context/AuthContext';
+import { Link } from "react-router-dom";
+import { useAuth } from "../../../context/AuthContext";
+import { theme } from "../../../styles/theme";
 
-const NavBar = () => {
-    const { user, handleSignOut } = useAuth();
+export const NavBar = () => {
+  const { user, handleSignOut } = useAuth();
 
-    return (
-        <nav className="bg-blue-600 p-4 shadow-md">
-            <div className="container mx-auto flex justify-between items-center">
-                <Link to="/" className="text-white text-xl font-bold">
-                    TalkThrough.it
-                </Link>
-                <div className="flex items-center space-x-6">
-                    <Link 
-                        to="/providerlist" 
-                        className="text-white hover:text-blue-200 transition-colors"
+  return (
+    <nav className={theme.nav.wrapper}>
+      <div className={`${theme.layout.container} flex justify-between items-center`}>
+        <Link
+          to="/"
+          className={`${theme.text.nav} text-xl font-bold`}
+        >
+          TalkThrough.it
+        </Link>
+        <div className="flex items-center space-x-6">
+          <Link
+            to="/providerlist"
+            className={theme.text.nav}
+          >
+            Find Providers
+          </Link>
+          {!user ? (
+            <>
+              <Link
+                to="/login"
+                className={theme.text.nav}
+              >
+                Login
+              </Link>
+              <div className="relative group">
+                <button className={`${theme.text.nav} pb-2`}>
+                  Sign Up
+                </button>
+                <div className={theme.nav.dropdown}>
+                  <div className="absolute h-2 -top-2 left-0 right-0"></div>
+                  <div className={theme.card.default}>
+                    <Link
+                      to="/register/client"
+                      className={theme.nav.dropdownItem}
                     >
-                        Find Providers
+                      Sign Up as Client
                     </Link>
-                    {!user ? (
-                        <>
-                            <Link 
-                                to="/login" 
-                                className="text-white hover:text-blue-200 transition-colors"
-                            >
-                                Login
-                            </Link>
-                            <div className="relative group">
-                                <button className="text-white hover:text-blue-200 transition-colors">
-                                    Sign Up
-                                </button>
-                                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden group-hover:block">
-                                    <Link 
-                                        to="/register/client" 
-                                        className="block px-4 py-2 text-gray-800 hover:bg-blue-50"
-                                    >
-                                        Sign Up as Client
-                                    </Link>
-                                    <Link 
-                                        to="/register/provider" 
-                                        className="block px-4 py-2 text-gray-800 hover:bg-blue-50"
-                                    >
-                                        Sign Up as Provider
-                                    </Link>
-                                </div>
-                            </div>
-                        </>
-                    ) : (
-                        <button 
-                            onClick={handleSignOut}
-                            className="text-white hover:text-blue-200 transition-colors"
-                        >
-                            Logout
-                        </button>
-                    )}
+                    <Link
+                      to="/register/provider"
+                      className={theme.nav.dropdownItem}
+                    >
+                      Sign Up as Provider
+                    </Link>
+                  </div>
                 </div>
-            </div>
-        </nav>
-    );
+              </div>
+            </>
+          ) : (
+            <button
+              onClick={handleSignOut}
+              className={theme.text.nav}
+            >
+              Logout
+            </button>
+          )}
+        </div>
+      </div>
+    </nav>
+  );
 };
-
-export default NavBar;
