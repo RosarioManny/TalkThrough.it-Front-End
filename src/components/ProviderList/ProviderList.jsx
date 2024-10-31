@@ -269,7 +269,7 @@ const ProviderCard = React.memo(({ provider, onClick }) => {
                 .map((insurance, index) => (
                   <span
                     key={`${insurance}-${index}`}
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-celadon-50 text-celadon-600"
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-celadon-50 text-celadon-100"
                   >
                     {insurance}
                   </span>

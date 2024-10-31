@@ -207,7 +207,7 @@ useEffect(() => {
               <div className="flex flex-wrap gap-4">
                 <button
                   onClick={handleBookAppointment}
-                  className={`${theme.button.primary} px-6 py-2 rounded-lg`}
+                  className={`${theme.button.primary} px-6 py-2 rounded-lg hover:-translate-y-0.5 hover:shadow-md `}
                 >
                   Book Appointment
                 </button>
@@ -217,7 +217,7 @@ useEffect(() => {
                 {savedProviders.some(p=> p._id == provider._id) ? (
                   <button
                   onClick={handleRemoveSavedProvider}
-                  className={`${theme.button} bg-amber-600 hover:bg-amber-400`}
+                  className={`${theme.button} text-white bg-amber-500 hover:bg-amber-400 hover:-translate-y-0.5 hover:shadow-md rounded-lg p-2 tranisition-all duration-200 `}
                   > 
                     Favorited ☆
                   </button>
@@ -225,7 +225,7 @@ useEffect(() => {
                      
                   <button
                     onClick={handleSaveProvider}
-                    className={`${theme.button.outline} text-white px-6 py-2 rounded-lg`}
+                    className={`${theme.button.outline} hover:-translate-y-0.5 hover:shadow-md text-white px-6 py-2 rounded-lg`}
                   >
                     Save Provider
                   </button>
