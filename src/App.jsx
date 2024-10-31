@@ -10,7 +10,7 @@ import { NavBar } from './components/Partials/Navbar/NavBar';
 import { ClientNavBar } from './components/Partials/Navbar/ClientNavBar';
 import { ProviderNavBar } from './components/Partials/Navbar/ProviderNavBar';
 import ProviderList from './components/ProviderList/ProviderList';
-import ProviderDetails from './components/ProviderDetails/ProviderDetails';
+import ProviderDetails from './components/ProviderDetails/ProviderDetails.jsx';
 import ProviderAppointments from './components/Appointments/ProviderAppointments';
 import ProviderAvailability from './components/Availability/ProviderAvailability';
 import Footer from './components/Partials/Footer/Footer';

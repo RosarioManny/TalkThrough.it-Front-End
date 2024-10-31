@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, redirect } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { theme } from "../../styles/theme";
 import {
@@ -56,20 +56,17 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
   }, [providerId, selectedDate, modalProvider]);
 
   useEffect(() => {
-   const saved = fetchSavedProviders();
-   console.log(saved)
-   setSavedProviders([...savedProviders, saved ])
-   console.log(savedProviders)
-  }, [])
+
+   fetchSavedProviders().then(res => {
+    setSavedProviders(res)
+   })
+}, [])
 
   const handleSaveProvider = async () => {
-    console.log(fetchSavedProviders())
     try {
       await saveProvider(providerId || provider?._id);
-
       console.log( user)
-      // Show success message
-      
+      navigate("/client/dashboard")
     } catch (err) {
       // Show error message
     }
@@ -96,7 +93,7 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
   if (error) {
     return (
       <div className={`${theme.status.error} p-4 ${isModal ? 'mx-4' : 'max-w-2xl mx-auto'} mt-8 rounded-lg`}>
-        {error}
+        {error + "Banana"}
       </div>
     );
   }
@@ -122,7 +119,6 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
               </div>
             )}
           </div>
-          
           <div className="flex-grow space-y-4">
             <div>
               <h1 className={`${theme.text.heading} text-2xl mb-2`}>
@@ -146,13 +142,20 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
                 >
                   Book Appointment
                 </button>
+                {savedProviders.some(p=> p._id == provider._id) ? (
+                  <button
+                  className={`${theme.button} bg-amber-600 hover:bg-amber-400`}
+                  > 
+                    Favorited ☆
+                  </button>
+                     )  : (
                   <button
                     onClick={handleSaveProvider}
-                    className={`${theme.button.outline} px-6 py-2 rounded-lg`}
+                    className={`${theme.button.outline} text-white px-6 py-2 rounded-lg`}
                   >
                     Save Provider
                   </button>
-                
+                )} 
               </div>
             )}
           </div>
