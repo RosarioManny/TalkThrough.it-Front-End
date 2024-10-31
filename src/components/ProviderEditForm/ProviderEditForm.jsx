@@ -1,7 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { signupProvider } from "../../services/authService";
 import Multiselect from 'multiselect-react-dropdown';
+import { useAuth } from "../../context/AuthContext";
+import { fetchProviderDetails } from "../../services/providerService";
+import { updateProvider } from "../../services/providerService";
 
 const providerFilters = {
     languages: [
@@ -33,8 +36,11 @@ const providerFilters = {
     ]
 };
 
-const ProviderSignupForm = () => {
+const ProviderEditForm = () => {
+    const { user } = useAuth();
+
     const navigate = useNavigate();
+
     const [formData, setFormData] = useState({
         email: "",
         password: "",
@@ -54,12 +60,62 @@ const ProviderSignupForm = () => {
         acceptingClients: true
     });
 
+    //attempting to load provider here
+    useEffect(() => {
+        const loadProviderProfile = async () => {
+            try {
+                // console.log(user._id)
+                const profile = await fetchProviderDetails(user._id);
+                console.log(profile.provider)
+                // Convert insurance string back to array of objects for Multiselect
+
+                //TODO: insurance accepted, languages, specialties, and seession types are all arrays and need to be converted to work in our form autopopulate (example code below, not working)
+                const insuranceAccepted = profile.provider.insuranceAccepted.map(name => ({ name }));
+
+                const specialties = profile.provider.specialties.map(name => ({ name }));
+
+                const languages = profile.provider.languages.map(name => ({ name }));
+
+                const sessionTypes = profile.provider.sessionTypes.map(name => ({ name }));
+
+                
+                setFormData({
+                    firstName: profile.provider.firstName,
+                    lastName: profile.provider.lastName,
+                    credentials: profile.provider.credentials,
+                    bio: profile.provider.bio,
+                    email: profile.provider.email,
+                    password: "",
+                    location: profile.provider.location,
+                    insuranceAccepted: insuranceAccepted, 
+                    specialties: specialties,
+                    yearsOfExperience: profile.provider.yearsOfExperience,
+                    languages: languages,
+                    licensureState: profile.provider.licensureState,
+                    licenseNumber: profile.provider.licenseNumber,
+                    sessionTypes: sessionTypes,
+                    acceptingClients: profile.provider.acceptingClients
+                });
+                // setFormData(profile.provider)
+            } catch (err) {
+                console.error('Failed to load profile');
+                // navigate('/client/dashboard');
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        loadProviderProfile();
+    }, [navigate]);
+
+
     const [error, setError] = useState("");
     const [success, setSuccess] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
+        // console.log(formData)
         if (type === "checkbox") {
             setFormData({ ...formData, [name]: checked });
         } else {
@@ -148,7 +204,7 @@ const ProviderSignupForm = () => {
                 acceptingClients: formData.acceptingClients
             };
 
-            const response = await signupProvider(submissionData);
+            const response = await updateProvider(submissionData, user._id);
             setSuccess(true);
             
             setTimeout(() => {
@@ -455,12 +511,12 @@ const ProviderSignupForm = () => {
                             </svg>
                             Submitting...
                         </div>
-                    ) : success ? 'Registration Complete!' : 'Sign Up as Provider'}
+                    ) : success ? 'Registration Complete!' : 'Edit Provider Details'}
                 </button>
             </form>
         </div>
     );
 };
 
-export default ProviderSignupForm;
+export default ProviderEditForm;
 
