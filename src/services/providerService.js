@@ -43,7 +43,7 @@ export const fetchProviderDetails = async (providerId) => {
     try {
         const response = await axios.get(
             `${BACKEND_URL}/providers/${providerId}`,
-            getAuthHeaders()
+            getAuthHeaders() 
         );
         return response.data;
     } catch (error) {
@@ -63,6 +63,21 @@ export const saveProvider = async (providerId) => {
         return response.data;
     } catch (error) {
         console.error("Error saving provider:", error);
+        throw error;
+    }
+};
+
+//remove provider from favorites for clients
+export const removeSavedProvider = async (providerId) => {
+    try {
+        const response = await axios.put(
+            `${BACKEND_URL}/clients/save-provider`,
+            { providerId },
+            getAuthHeaders()
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error saving provider:', error);
         throw error;
     }
 };
@@ -111,3 +126,15 @@ export const fetchProviderPublicDetails = async (providerId) => {
         throw error;
     }
 };
+
+//update provider profile
+export const updateProvider = async(formData,userid) => {
+    try {
+      const res = await axios.put(`${BACKEND_URL}/providers/${userid}`, formData, getAuthHeaders())
+      console.log('Provider registration response:', res.data);
+      return res.data
+    } catch (error) {
+      console.error('Provider Signup error:', error);
+      throw error;
+    }
+  }

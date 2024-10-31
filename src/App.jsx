@@ -19,6 +19,10 @@ import { AppointmentBookingPage } from "./components/Appointments/AppointmentBoo
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ClientEditForm from './components/ClientEditForm/ClientEditForm';
+import ProviderEditForm from './components/ProviderEditForm/ProviderEditForm';
+
+
 
 const App = () => {
   const { user, handleSignOut } = useAuth();
@@ -64,8 +68,10 @@ const App = () => {
     </ProtectedRoute>
   }
 />
+        <Route path="/client/profile/" element={<ClientEditForm />} />
+        <Route path="/provider/profile" element={<ProviderEditForm />} />
         <Route path="/providerlist" element={<ProviderList />} />
-        <Route path="/providerlist/:providerId" element={<ProviderDetails />} />
+        <Route path="/providerlist/:providerId" element={<ProviderDetails isModal={false}/>} />
         <Route
           path="/book-appointment/:providerId"
           element={
@@ -78,6 +84,7 @@ const App = () => {
       <Footer />
     </>
   );
+
 };
 
 export default App;

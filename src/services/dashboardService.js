@@ -3,6 +3,18 @@ import { getAuthHeaders } from '../utils/auth';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
+// Helper function to get headers
+export const getAuthHeaders = () => {
+  const token = localStorage.getItem('token');
+//   console.log('Using token:', token); // Debug log
+  return {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  };
+};
+
 // Client Dashboard services
 export const fetchSavedProviders = async () => {
     try { 
@@ -13,9 +25,9 @@ export const fetchSavedProviders = async () => {
         return response.data.savedProviders;
     } catch (error) {
         if (error.response?.status === 401) {
-            console.error('Authentication token missing or invalid');
+            // console.error('Authentication token missing or invalid');
         }
-        console.error('Error fetching saved providers:', error);
+        // console.error('Error fetching saved providers:', error);
         throw error;
     }
 };
@@ -29,11 +41,11 @@ export const fetchClientAppointments = async () => {
         return response.data.appointments || [];
     } catch (error) {
         if (error.response?.status === 401) {
-            console.error('Authentication token missing or invalid');
+            // console.error('Authentication token missing or invalid');
         } else if (error.response?.status === 500) {
-            console.error('Server error:', error.response.data);
+            // console.error('Server error:', error.response.data);
         }
-        console.error('Error fetching appointments:', error);
+        // console.error('Error fetching appointments:', error);
         // Return empty array instead of throwing
         return [];
     }
@@ -42,16 +54,16 @@ export const fetchClientAppointments = async () => {
 // Provider Dashboard services
 export const fetchProviderClients = async () => {
     try {
-        console.log('Fetching provider clients...'); // Debug log
+        // console.log('Fetching provider clients...'); // Debug log
         const response = await axios.get(
             `${BACKEND_URL}/providers/dashboard/clients`,
             getAuthHeaders()
         );
-        console.log('Clients response:', response.data); // Debug log
+        // console.log('Clients response:', response.data); // Debug log
         return response.data.clients || [];
     } catch (error) {
         if (error.response?.status === 401) {
-            console.error('Authentication token missing or invalid');
+            // console.error('Authentication token missing or invalid');
         }
         console.error('Error fetching provider clients:', error);
         throw error;
@@ -129,3 +141,45 @@ export const saveProvider = async (providerId) => {
         throw error;
     }
 };
+
+// Sending Message
+export const sendMessage = async () => {
+    try {
+        const response = await axios.post(
+            `${BACKEND_URL}/messages/`,
+            getAuthHeaders()
+        )
+        return response.data
+    } catch (error) {
+        if (error.response?.status === 401) {
+            console.error('Authentication token missing or invalid');
+        }
+        console.error('Error saving provider:', error);
+        throw error; 
+    }
+}
+
+//get my client
+export const fetchClientProfile = async() => {
+    try {
+        const response = await axios.get(
+            `${BACKEND_URL}/clients/profile`,getAuthHeaders()
+        )
+        console.log(response)
+        return response.data.profile
+    } catch (error) {
+     console.log(error)   
+    }
+}
+
+// edit client - Gabe
+export const updateClient = async(formData) => {
+    try {
+      const res = await axios.put(`${BACKEND_URL}/clients/profile/`, formData, getAuthHeaders())
+      console.log('Client registration response:', res.data);
+      return res.data
+    } catch (error) {
+      console.error('Client Signup error:', error);
+      throw error;
+    }
+}

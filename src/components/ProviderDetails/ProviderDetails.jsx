@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, redirect } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { theme } from "../../styles/theme";
 import {
@@ -8,7 +8,9 @@ import {
   getProviderAvailability,
   getProviderReviews,
   saveProvider,
+  removeSavedProvider
 } from "../../services/providerService";
+import { fetchSavedProviders } from "../../services/dashboardService";
 
 export const ProviderDetails = ({
   isModal = false,
@@ -26,16 +28,20 @@ export const ProviderDetails = ({
   const [error, setError] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [successMessage, setSuccessMessage] = useState("");
+  const [savedProviders, setSavedProviders] = useState([]);
+
 
   useEffect(() => {
     if (modalProvider) {
       setProvider(modalProvider);
       return;
     }
-
+    
+  //I commented out reviews and availability methods at this time -Gabe
     const loadProviderData = async () => {
       try {
         setLoading(true);
+
         const [providerData, availabilityData, reviewsData] = await Promise.all(
           [
             // Use public endpoint when in modal or not logged in
@@ -72,14 +78,26 @@ export const ProviderDetails = ({
     }
   }, [successMessage]);
 
+useEffect(() => {
+    fetchSavedProviders().then(res => {
+    setSavedProviders(res)
+   })
+}, [])
+
+
   const handleSaveProvider = async () => {
     try {
       await saveProvider(providerId || provider?._id);
+
       setSuccessMessage("Provider saved successfully");
+
+      navigate("/client/dashboard")
+
     } catch (err) {
       setError("Failed to save provider");
     }
   };
+
 
   const handleBookAppointment = () => {
     if (!user) {
@@ -89,17 +107,26 @@ export const ProviderDetails = ({
       return;
     }
     if (user.type === "provider") {
-      return; // providers can't book appointments
+      return;
+       }
+  };
+    // providers can't book appointments
+  const handleRemoveSavedProvider = async () => {
+    try {
+      await removeSavedProvider(providerId || provider?._id);
+      console.log( user)
+      navigate("/client/dashboard")
+    } catch (err) {
+      // Show error message
     }
-    navigate(`/book-appointment/${providerId || provider?._id}`);
   };
 
-  const handleViewFullProfile = () => {
+  const handleBookAppointment = () => {
     if (isModal) {
       onClose();
     }
-    navigate(`/providerlist/${providerId || provider?._id}`);
-  };
+    navigate(`/book-appointment/${providerId || provider?._id}`);
+  };  
 
   if (loading) {
     return (
@@ -129,6 +156,7 @@ export const ProviderDetails = ({
       </div>
     );
   }
+
 
   const content = (
     <div
@@ -161,7 +189,6 @@ export const ProviderDetails = ({
               </div>
             )}
           </div>
-
           <div className="flex-grow space-y-4">
             <div>
               <h1 className={`${theme.text.heading} text-2xl mb-2`}>
@@ -185,14 +212,25 @@ export const ProviderDetails = ({
                 >
                   Book Appointment
                 </button>
+
                 {!isModal && (
+
+                {savedProviders.some(p=> p._id == provider._id) ? (
+                  <button
+                  onClick={handleRemoveSavedProvider}
+                  className={`${theme.button} bg-amber-600 hover:bg-amber-400`}
+                  > 
+                    Favorited ☆
+                  </button>
+                     )  : (
+                     
                   <button
                     onClick={handleSaveProvider}
-                    className={`${theme.button.outline} px-6 py-2 rounded-lg`}
+                    className={`${theme.button.outline} text-white px-6 py-2 rounded-lg`}
                   >
                     Save Provider
                   </button>
-                )}
+                )} 
               </div>
             )}
           </div>
@@ -211,7 +249,7 @@ export const ProviderDetails = ({
       <div className={`${isModal ? "py-6" : `${theme.card.default} p-6`}`}>
         <h3 className={`${theme.text.heading} text-xl mb-4`}>Specialties</h3>
         <div className="flex flex-wrap gap-2">
-          {provider?.specialties.map((specialty) => (
+          {provider?.specialties?.map((specialty) => (
             <span
               key={specialty}
               className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
@@ -241,6 +279,7 @@ export const ProviderDetails = ({
       <div className={`${isModal ? "py-6" : `${theme.card.default} p-6`}`}>
         <h3 className={`${theme.text.heading} text-xl mb-4`}>Session Types</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+
           {provider?.sessionTypes.map((type) => (
             <div
               key={type}
@@ -394,4 +433,5 @@ export const ProviderDetails = ({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">{content}</div>
   );
+
 };
