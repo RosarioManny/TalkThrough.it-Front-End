@@ -55,7 +55,7 @@ export const fetchProviderDetails = async (providerId) => {
     try {
         const response = await axios.get(
             `${BACKEND_URL}/providers/${providerId}`,
-            // getAuthHeaders()
+            getAuthHeaders() 
         );
         return response.data;
     } catch (error) {

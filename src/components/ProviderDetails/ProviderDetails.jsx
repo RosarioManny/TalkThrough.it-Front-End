@@ -29,19 +29,19 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
       return;
     }
     
-
+  //I commented out reviews and availability methods at this time -Gabe
     const loadProviderData = async () => {
       try {
         setLoading(true);
-        const [providerData, availabilityData, reviewsData] = await Promise.all([
+        const [providerData, availabilityData] = await Promise.all([
           fetchProviderDetails(providerId),
-          getProviderAvailability(providerId, selectedDate),
-          getProviderReviews(providerId),
+          // getProviderAvailability(providerId, selectedDate),
+          // getProviderReviews(providerId),
         ]);
-
-        setProvider(providerData);
-        setAvailability(availabilityData);
-        setReviews(reviewsData);
+        console.log(providerData)
+        setProvider(providerData.provider);
+        // setAvailability(availabilityData);
+        // setReviews(reviewsData);
       } catch (err) {
         console.error("Error loading provider data:", err);
         setError("Failed to load provider information");
@@ -56,7 +56,7 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
   }, [providerId, selectedDate, modalProvider]);
 
   useEffect(() => {
-
+    
    fetchSavedProviders().then(res => {
     setSavedProviders(res)
    })
@@ -66,7 +66,7 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
     try {
       await saveProvider(providerId || provider?._id);
       console.log( user)
-      navigate("/client/dashboard")
+      redirect("/client/dashboard")
     } catch (err) {
       // Show error message
     }
@@ -90,13 +90,13 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
     );
   }
 
-  if (error) {
-    return (
-      <div className={`${theme.status.error} p-4 ${isModal ? 'mx-4' : 'max-w-2xl mx-auto'} mt-8 rounded-lg`}>
-        {error + "Banana"}
-      </div>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <div className={`${theme.status.error} p-4 ${isModal ? 'mx-4' : 'max-w-2xl mx-auto'} mt-8 rounded-lg`}>
+  //       {error + "Banana"}
+  //     </div>
+  //   );
+  // }
 
   const content = (
     <div className={`${isModal ? 'divide-y divide-alice_blue-200' : 'space-y-6'}`}>
@@ -174,7 +174,7 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
       <div className={`${isModal ? 'py-6' : `${theme.card.default} p-6`}`}>
         <h3 className={`${theme.text.heading} text-xl mb-4`}>Specialties</h3>
         <div className="flex flex-wrap gap-2">
-          {provider?.specialties.map((specialty) => (
+          {provider?.specialties?.map((specialty) => (
             <span
               key={specialty}
               className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
@@ -304,7 +304,7 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
     );
   }
 
-  return <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">{content}</div>;
+  return <div className="max-w-7xl my-20 px-4 sm:px-6 lg:px-8">{content}</div>;
 };
 
 export default ProviderDetails;
