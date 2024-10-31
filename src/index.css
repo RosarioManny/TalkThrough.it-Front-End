@@ -19,7 +19,7 @@
     @apply font-medium text-blue-600 no-underline hover:text-blue-800;
   }
 
-  button {
+  .button-primary {
     @apply rounded-lg border border-transparent px-4 py-2 text-base font-medium 
            bg-blue-600 text-white cursor-pointer transition-colors duration-200
            hover:bg-blue-700 hover:border-blue-300
@@ -28,7 +28,7 @@
 }
 
 main {
-  @apply pt-16; 
+  @apply pt-16;
 }
 @layer components {
   .card {
@@ -37,5 +37,49 @@ main {
 
   .read-the-docs {
     @apply text-gray-500;
+  }
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@layer utilities {
+  .animate-fadeIn {
+    animation: fadeIn 1s ease-out;
+  }
+
+  .animate-slideDown {
+    animation: slideDown 1s ease-out;
+  }
+
+  .animate-slideUp {
+    animation: slideUp 1s ease-out;
   }
 }
