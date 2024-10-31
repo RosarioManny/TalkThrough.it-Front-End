@@ -10,7 +10,7 @@ import { NavBar } from './components/Partials/Navbar/NavBar';
 import { ClientNavBar } from './components/Partials/Navbar/ClientNavBar';
 import { ProviderNavBar } from './components/Partials/Navbar/ProviderNavBar';
 import ProviderList from './components/ProviderList/ProviderList';
-import ProviderDetails from './components/ProviderDetails/ProviderDetails.jsx';
+import ProviderDetails from './components/ProviderDetails/ProviderDetails';
 import ProviderAppointments from './components/Appointments/ProviderAppointments';
 import ProviderAvailability from './components/Availability/ProviderAvailability';
 import Footer from './components/Partials/Footer/Footer';
@@ -43,7 +43,7 @@ const App = () => {
                 <Route path="/provider/availability" element={<ProviderAvailability />} />
                 <Route path="/provider/profile" element={<ProviderEditForm />} />
                 <Route path="/providerlist" element={<ProviderList />} />
-                <Route path="/providerlist/:providerId" element={<ProviderDetails />} />
+                <Route path="/providerlist/:providerId" element={<ProviderDetails isModal={false}/>} />
             </Routes>
             <Footer />
         </>
