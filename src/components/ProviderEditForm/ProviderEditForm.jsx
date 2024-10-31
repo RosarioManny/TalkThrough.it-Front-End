@@ -70,9 +70,14 @@ const ProviderEditForm = () => {
                 // Convert insurance string back to array of objects for Multiselect
 
                 //TODO: insurance accepted, languages, specialties, and seession types are all arrays and need to be converted to work in our form autopopulate (example code below, not working)
+                const insuranceAccepted = profile.provider.insuranceAccepted.map(name => ({ name }));
 
-                // const insuranceAccepted = profile.provider.insuranceAccepted.split(', ')
-                //     .map(name => ({ name }));
+                const specialties = profile.provider.specialties.map(name => ({ name }));
+
+                const languages = profile.provider.languages.map(name => ({ name }));
+
+                const sessionTypes = profile.provider.sessionTypes.map(name => ({ name }));
+
                 
                 setFormData({
                     firstName: profile.provider.firstName,
@@ -82,19 +87,19 @@ const ProviderEditForm = () => {
                     email: profile.provider.email,
                     password: "",
                     location: profile.provider.location,
-                    insuranceAccepted: [], //TODO:This is an array that needs to be pulled most likely with something in commented lines above
-                    specialties: profile.provider.specialties,
+                    insuranceAccepted: insuranceAccepted, 
+                    specialties: specialties,
                     yearsOfExperience: profile.provider.yearsOfExperience,
-                    languages: profile.provider.languages,
+                    languages: languages,
                     licensureState: profile.provider.licensureState,
                     licenseNumber: profile.provider.licenseNumber,
-                    sessionTypes: profile.provider.sessionTypes,
+                    sessionTypes: sessionTypes,
                     acceptingClients: profile.provider.acceptingClients
                 });
                 // setFormData(profile.provider)
             } catch (err) {
                 console.error('Failed to load profile');
-                navigate('/client/dashboard');
+                // navigate('/client/dashboard');
             } finally {
                 setIsLoading(false);
             }
@@ -110,6 +115,7 @@ const ProviderEditForm = () => {
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
+        // console.log(formData)
         if (type === "checkbox") {
             setFormData({ ...formData, [name]: checked });
         } else {
@@ -505,7 +511,7 @@ const ProviderEditForm = () => {
                             </svg>
                             Submitting...
                         </div>
-                    ) : success ? 'Registration Complete!' : 'Sign Up as Provider'}
+                    ) : success ? 'Registration Complete!' : 'Edit Provider Details'}
                 </button>
             </form>
         </div>
