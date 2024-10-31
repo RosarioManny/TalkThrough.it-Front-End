@@ -8,6 +8,7 @@ import {
   getProviderReviews,
   saveProvider,
 } from "../../services/providerService";
+import { fetchSavedProviders } from "../../services/dashboardService";
 
 const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null }) => {
   const { providerId } = useParams();
@@ -20,12 +21,14 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
   const [loading, setLoading] = useState(!modalProvider);
   const [error, setError] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [savedProviders, setSavedProviders] = useState([]);
 
   useEffect(() => {
     if (modalProvider) {
       setProvider(modalProvider);
       return;
     }
+    
 
     const loadProviderData = async () => {
       try {
@@ -52,10 +55,21 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
     }
   }, [providerId, selectedDate, modalProvider]);
 
+  useEffect(() => {
+   const saved = fetchSavedProviders();
+   console.log(saved)
+   setSavedProviders([...savedProviders, saved ])
+   console.log(savedProviders)
+  }, [])
+
   const handleSaveProvider = async () => {
+    console.log(fetchSavedProviders())
     try {
       await saveProvider(providerId || provider?._id);
+
+      console.log( user)
       // Show success message
+      
     } catch (err) {
       // Show error message
     }
@@ -66,14 +80,7 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
       onClose();
     }
     navigate(`/book-appointment/${providerId || provider?._id}`);
-  };
-
-  const handleViewFullProfile = () => {
-    if (isModal) {
-      onClose();
-    }
-    navigate(`/providerlist/${providerId || provider?._id}`);
-  };
+  };  
 
   if (loading) {
     return (
@@ -139,21 +146,13 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
                 >
                   Book Appointment
                 </button>
-                {isModal ? (
-                  <button
-                    onClick={handleViewFullProfile}
-                    className={`${theme.button.outline} px-6 py-2 rounded-lg`}
-                  >
-                    View Full Profile
-                  </button>
-                ) : (
                   <button
                     onClick={handleSaveProvider}
                     className={`${theme.button.outline} px-6 py-2 rounded-lg`}
                   >
                     Save Provider
                   </button>
-                )}
+                
               </div>
             )}
           </div>
