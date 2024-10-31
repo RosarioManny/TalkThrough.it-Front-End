@@ -79,6 +79,21 @@ export const saveProvider = async (providerId) => {
     }
 };
 
+//remove provider from favorites for clients
+export const removeSavedProvider = async (providerId) => {
+    try {
+        const response = await axios.put(
+            `${BACKEND_URL}/clients/save-provider`,
+            { providerId },
+            getAuthHeaders()
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error saving provider:', error);
+        throw error;
+    }
+};
+
 // Get provider availability
 export const getProviderAvailability = async (providerId, date) => {
     try {

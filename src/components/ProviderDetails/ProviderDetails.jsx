@@ -7,6 +7,7 @@ import {
   getProviderAvailability,
   getProviderReviews,
   saveProvider,
+  removeSavedProvider
 } from "../../services/providerService";
 import { fetchSavedProviders } from "../../services/dashboardService";
 
@@ -66,7 +67,17 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
     try {
       await saveProvider(providerId || provider?._id);
       console.log( user)
-      redirect("/client/dashboard")
+      navigate("/client/dashboard")
+    } catch (err) {
+      // Show error message
+    }
+  };
+
+  const handleRemoveSavedProvider = async () => {
+    try {
+      await removeSavedProvider(providerId || provider?._id);
+      console.log( user)
+      navigate("/client/dashboard")
     } catch (err) {
       // Show error message
     }
@@ -144,6 +155,7 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
                 </button>
                 {savedProviders.some(p=> p._id == provider._id) ? (
                   <button
+                  onClick={handleRemoveSavedProvider}
                   className={`${theme.button} bg-amber-600 hover:bg-amber-400`}
                   > 
                     Favorited ☆
