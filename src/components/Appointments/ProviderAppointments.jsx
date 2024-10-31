@@ -1,68 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { fetchProviderAppointments } from '../../services/dashboardService';
+import React, { useState, useEffect } from "react";
+import { useAuth } from "../../context/AuthContext";
+import { theme } from "../../styles/theme";
+import { toast } from "react-toastify";
+import { AppointmentList } from "./AppointmentList";
 
-const ProviderAppointments = () => {
-    const [appointments, setAppointments] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+export const ProviderAppointments = () => {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
 
-    useEffect(() => {
-        const loadAppointments = async () => {
-            try {
-                setLoading(true);
-                const data = await fetchProviderAppointments();
-                setAppointments(data || []);
-            } catch (err) {
-                console.error('Error loading appointments:', err);
-                setError('Failed to load appointments');
-            } finally {
-                setLoading(false);
-            }
-        };
+  useEffect(() => {
+    if (user) {
+      setLoading(false);
+    }
+  }, [user]);
 
-        loadAppointments();
-    }, []);
-
-    if (loading) return <div className="flex justify-center items-center h-screen">Loading...</div>;
-    if (error) return <div className="text-red-500 text-center p-4">{error}</div>;
-
+  if (loading) {
     return (
-        <div className="p-6">
-            <h1 className="text-2xl font-bold mb-6">My Appointments</h1>
-            <div className="space-y-4">
-                {appointments.length > 0 ? (
-                    appointments.map(appointment => (
-                        <div 
-                            key={appointment._id} 
-                            className="bg-white p-4 rounded-lg shadow"
-                        >
-                            <div className="font-medium">
-                                Client: {appointment.client?.firstName} {appointment.client?.lastName}
-                            </div>
-                            <div className="text-gray-600">
-                                Date: {new Date(appointment.datetime).toLocaleString()}
-                            </div>
-                            <div className="text-sm text-gray-500">
-                                Duration: {appointment.duration} minutes
-                            </div>
-                            <div className="mt-2">
-                                <span className={`px-2 py-1 rounded text-sm ${
-                                    appointment.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                                    appointment.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                    'bg-red-100 text-red-800'
-                                }`}>
-                                    {appointment.status}
-                                </span>
-                            </div>
-                        </div>
-                    ))
-                ) : (
-                    <p className="text-gray-500 text-center">No appointments found</p>
-                )}
-            </div>
-        </div>
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-celestial_blue-500" />
+      </div>
     );
-};
+  }
 
-export default ProviderAppointments;
+  return (
+    <div className={`${theme.layout.container} p-6`}>
+      <h1 className={`${theme.text.heading} text-2xl mb-6`}>My Appointments</h1>
+      <AppointmentList userType="provider" />
+    </div>
+  );
+};

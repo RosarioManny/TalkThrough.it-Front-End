@@ -105,7 +105,6 @@ export const fetchProviderAvailability = async () => {
     }
 };
 
-
 // Update availability
 export const updateProviderAvailability = async (availabilityData) => {
     try {
