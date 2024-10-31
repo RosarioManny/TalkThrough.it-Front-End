@@ -158,3 +158,28 @@ export const sendMessage = async () => {
         throw error; 
     }
 }
+
+//get my client
+export const fetchClientProfile = async() => {
+    try {
+        const response = await axios.get(
+            `${BACKEND_URL}/clients/profile`,getAuthHeaders()
+        )
+        console.log(response)
+        return response.data.profile
+    } catch (error) {
+     console.log(error)   
+    }
+}
+
+// edit client - Gabe
+export const updateClient = async(formData) => {
+    try {
+      const res = await axios.put(`${BACKEND_URL}/clients/profile/`, formData, getAuthHeaders())
+      console.log('Client registration response:', res.data);
+      return res.data
+    } catch (error) {
+      console.error('Client Signup error:', error);
+      throw error;
+    }
+}
