@@ -1,32 +1,43 @@
 import axios from "axios";
+import { getAuthHeaders } from '../utils/auth';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
-
-const getAuthHeader = () => ({
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
-  },
-});
 
 // Appointment Management
 export const createAppointment = async (appointmentData) => {
   try {
+    console.log("Creating appointment with data:", appointmentData); // Debug log
+
     const response = await axios.post(
       `${BACKEND_URL}/appointments`,
-      {
-        provider: appointmentData.providerId,
-        datetime: appointmentData.datetime,
-        duration: appointmentData.duration || 60,
-        meetingType: appointmentData.meetingType,
-        location: appointmentData.location,
-        notes: appointmentData.notes,
-      },
-      getAuthHeader()
+      appointmentData,
+      getAuthHeaders()
     );
+
+    console.log("Appointment creation response:", response.data); // Debug log
     return response.data;
   } catch (error) {
     console.error("Error creating appointment:", error);
+    console.error("Error response:", error.response?.data); // Add this to see server error
     throw error;
+  }
+};
+
+export const getProviderAppointments = async (timeframe = 'upcoming') => {
+  try {
+      const response = await axios.get(
+          `${BACKEND_URL}/appointments/provider`, {
+              params: {
+                  timeframe,
+                  status: timeframe === 'upcoming' ? 'active' : 'all'
+              },
+              ...getAuthHeaders()
+          }
+      );
+      return response.data.appointments;
+  } catch (error) {
+      console.error('Error fetching provider appointments:', error);
+      throw error;
   }
 };
 
@@ -48,7 +59,7 @@ export const getAppointments = async (userId, userType, filters = {}) => {
 
     const response = await axios.get(
       `${BACKEND_URL}/appointments/provider?${params}`,
-      getAuthHeader()
+      getAuthHeaders()
     );
 
     return {
@@ -63,15 +74,17 @@ export const getAppointments = async (userId, userType, filters = {}) => {
 
 export const updateAppointment = async (appointmentId, status) => {
   try {
-    const response = await axios.put(
-      `${BACKEND_URL}/appointments/${appointmentId}`,
-      { status },
-      getAuthHeader()
-    );
-    return response.data;
+      console.log('Updating appointment:', { appointmentId, status }); // Debug log
+      const response = await axios.put(
+          `${BACKEND_URL}/appointments/${appointmentId}`,
+          { status },
+          getAuthHeaders()
+      );
+      console.log('Update response:', response.data); // Debug log
+      return response.data;
   } catch (error) {
-    console.error("Update appointment error:", error);
-    throw error;
+      console.error('Update appointment error:', error.response?.data || error); // Enhanced error logging
+      throw error;
   }
 };
 
@@ -81,7 +94,7 @@ export const cancelAppointment = async (appointmentId, reason, userType) => {
     const response = await axios.post(
       `${BACKEND_URL}/appointments/${appointmentId}/cancel`,
       { reason },
-      getAuthHeader()
+      getAuthHeaders()
     );
     console.log("Cancel response:", response.data);
     return response.data;

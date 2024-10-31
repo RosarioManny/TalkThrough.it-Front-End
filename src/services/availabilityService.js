@@ -1,14 +1,7 @@
 import axios from "axios";
+import { getAuthHeaders } from '../utils/auth';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
-
-const getAuthHeaders = () => ({
-  headers: {
-    Authorization: `Bearer ${localStorage.getItem("token")}`,
-    'Content-Type': 'application/json'
-  },
-});
-
 
 export const getProviderAvailability = async (providerId) => {
   try {
@@ -53,24 +46,23 @@ export const getDayAvailability = async (providerId, dayOfWeek) => {
     throw error;
   }
 };
-
 export const getProviderPublicAvailability = async (providerId) => {
   try {
-      console.log("Requesting availability for provider:", providerId);
-      
-      const response = await axios.get(
-          `${BACKEND_URL}/availability/provider/${providerId}/public`
-      );
-      
-      console.log("Received availability data:", {
-          provider: `${response.data.provider.firstName} ${response.data.provider.lastName}`,
-          availabilityCount: response.data.availability.length,
-          availability: response.data.availability
-      });
+    console.log("Requesting availability for provider:", providerId);
+    
+    const response = await axios.get(
+      `${BACKEND_URL}/availability/provider/${providerId}/public`
+    );
+    
+    console.log("Received availability data:", {
+      provider: `${response.data.provider.firstName} ${response.data.provider.lastName}`,
+      availabilityCount: response.data.availability.length,
+      availability: response.data.availability
+    });
 
-      return response.data;
+    return response.data;
   } catch (error) {
-      console.error("Error in getProviderPublicAvailability:", error);
-      throw error;
+    console.error("Error in getProviderPublicAvailability:", error);
+    throw error;
   }
 };

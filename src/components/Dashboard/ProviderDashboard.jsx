@@ -25,16 +25,23 @@ export const ProviderDashboard = () => {
     useState(false);
 
   const getConversations = async () => {
-    try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_BACKEND_URL}/messages/conversations`,
-        { headers: { Authorization: `Bearer ${user.token}` } }
-      );
-      return response.data;
-    } catch (error) {
-      console.error("Error fetching conversations:", error);
-      throw error;
-    }
+    return[];
+    // try {
+    //   const getAuthHeaders = () => ({
+    //     headers: {
+    //       Authorization: `Bearer ${localStorage.getItem("token")}`,
+    //       "Content-Type": "application/json",
+    //     },
+    //   });
+    //   const response = await axios.get(
+    //     `${BACKEND_URL}/messages/conversations`,
+    //     getAuthHeaders() // Add auth headers
+    //   );
+    //   return response.data;
+    // } catch (error) {
+    //   console.error("Error fetching conversations:", error);
+    //   throw error;
+    // }
   };
 
   useEffect(() => {
@@ -108,28 +115,36 @@ export const ProviderDashboard = () => {
 
   const handleAvailabilityUpdate = async () => {
     try {
-      await fetchDashboardData(); 
+      await fetchDashboardData();
       setSuccessMessage("Availability updated successfully");
     } catch (err) {
       setError((prev) => ({
         ...prev,
-        availability: "Failed to update availability"
+        availability: "Failed to update availability",
       }));
     }
   };
   const handleAppointmentUpdate = async () => {
     try {
-      const data = await fetchProviderAppointments();
-      setAppointments(data);
-      setSuccessMessage("Appointments updated successfully");
-      setTimeout(() => setSuccessMessage(""), 3000);
+        setLoading(true);
+        const data = await fetchProviderAppointments();
+        // Filter out rejected and cancelled appointments for upcoming view
+        const filteredAppointments = data.filter(apt => 
+            !['rejected', 'cancelled'].includes(apt.status)
+        );
+        setAppointments(filteredAppointments);
+        setSuccessMessage("Appointments updated successfully");
+        setTimeout(() => setSuccessMessage(""), 3000);
     } catch (err) {
-      setError((prev) => ({
-        ...prev,
-        appointments: "Failed to update appointments",
-      }));
+        setError(prev => ({
+            ...prev,
+            appointments: "Failed to update appointments"
+        }));
+    } finally {
+        setLoading(false);
     }
-  };
+};
+
 
   const formatDate = (dateString) => {
     try {
@@ -819,7 +834,7 @@ export const ProviderDashboard = () => {
 
       case "availability":
         return <ProviderAvailability onUpdate={handleAvailabilityUpdate} />;
-        default:
+      default:
         return null;
     }
   };

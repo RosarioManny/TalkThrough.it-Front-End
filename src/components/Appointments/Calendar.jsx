@@ -1,13 +1,23 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { theme } from "../../styles/theme";
 const Calendar = ({ selectedDate, onDateSelect, availableDates = [] }) => {
-    console.log("Calendar received props:", {
-      selectedDate,
-      availableDatesCount: availableDates.length,
-      availableDates: availableDates.map((d) => d.toISOString()),
-    });
+  const [currentMonth, setCurrentMonth] = React.useState(new Date());
 
-    const [currentMonth, setCurrentMonth] = React.useState(new Date());
+  useEffect(() => {
+    console.log("Calendar component received props:", {
+      selectedDate,
+      availableDates: availableDates?.map((d) => d.toISOString()),
+      availableDatesCount: availableDates?.length,
+    });
+  }, [selectedDate, availableDates]);
+
+  // Debug logs
+  console.log("Calendar Props:", {
+    selectedDate: selectedDate?.toISOString(),
+    availableDates: availableDates.map((d) => d.toISOString()),
+    currentMonth: currentMonth.toISOString(),
+  });
+
   const formatDateForComparison = (date) => {
     return date.toISOString().split("T")[0];
   };
@@ -41,15 +51,38 @@ const Calendar = ({ selectedDate, onDateSelect, availableDates = [] }) => {
     // First check if it's not a past date
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    if (date < today) return false;
 
-    // Check if the date exists in availableDates
-    return availableDates.some(availableDate => {
-        return date.getFullYear() === availableDate.getFullYear() &&
-               date.getMonth() === availableDate.getMonth() &&
-               date.getDate() === availableDate.getDate();
-    });
-};
+    if (date < today) {
+      console.log("Date is in past:", date.toISOString());
+      return false;
+    }
+
+    // Check if it's a Monday
+    if (date.getDay() !== 1) {
+      // 1 represents Monday
+      console.log("Not a Monday:", date.toISOString());
+      return false;
+    }
+
+    // Check if it's in the next 4 weeks
+    const fourWeeksFromNow = new Date(today);
+    fourWeeksFromNow.setDate(today.getDate() + 28);
+
+    if (date > fourWeeksFromNow) {
+      console.log("Date too far in future:", date.toISOString());
+      return false;
+    }
+
+    console.log("Date is available:", date.toISOString());
+    return true;
+  };
+
+  // In the render section of Calendar component:
+  console.log("Calendar render state:", {
+    selectedDate,
+    availableDates,
+    currentMonth,
+  });
 
   const isSelected = (date) => {
     return date?.toDateString() === selectedDate?.toDateString();
@@ -72,14 +105,22 @@ const Calendar = ({ selectedDate, onDateSelect, availableDates = [] }) => {
       return newDate;
     });
   };
-  console.log('Calendar render state:', {
+  console.log("Calendar render state:", {
     currentMonth: currentMonth.toISOString(),
-    availableDates: availableDates.map(d => ({
-        date: d.toISOString(),
-        day: d.getDay(),
-        dayName: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d.getDay()]
-    }))
-});
+    availableDates: availableDates.map((d) => ({
+      date: d.toISOString(),
+      day: d.getDay(),
+      dayName: [
+        "Sunday",
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+      ][d.getDay()],
+    })),
+  });
   return (
     <div className={`${theme.card.default} p-4`}>
       <div className="flex justify-between items-center mb-4">
@@ -112,33 +153,32 @@ const Calendar = ({ selectedDate, onDateSelect, availableDates = [] }) => {
             {date && (
               <button
                 onClick={() => {
-                  if (!isPastDate(date) && isDateAvailable(date)) {
+                  console.log("Clicked date:", date.toISOString());
+                  console.log("Is available:", isDateAvailable(date));
+                  if (isDateAvailable(date)) {
                     onDateSelect(date);
                   }
                 }}
-                disabled={isPastDate(date) || !isDateAvailable(date)}
+                disabled={!isDateAvailable(date)}
                 className={`
-                    w-full h-full flex items-center justify-center rounded-lg text-sm
-                    transition-colors
-                    ${
-                      isSelected(date) ? "bg-celestial_blue-500 text-white" : ""
-                    }
-                    ${isToday(date) ? "ring-2 ring-celestial_blue-500" : ""}
-                    ${
-                      isPastDate(date)
-                        ? "text-prussian_blue-300 cursor-not-allowed"
-                        : isDateAvailable(date)
-                        ? "hover:bg-celestial_blue-50 text-prussian_blue-500 cursor-pointer"
-                        : "text-prussian_blue-300 cursor-not-allowed"
-                    }
-                `}
-                title={
-                  isPastDate(date)
-                    ? "Past date"
-                    : !isDateAvailable(date)
-                    ? "No availability"
-                    : "Available"
-                }
+                                    w-full h-full flex items-center justify-center rounded-lg text-sm
+                                    transition-colors
+                                    ${
+                                      isSelected(date)
+                                        ? "bg-celestial_blue-500 text-white"
+                                        : ""
+                                    }
+                                    ${
+                                      isToday(date)
+                                        ? "ring-2 ring-celestial_blue-500"
+                                        : ""
+                                    }
+                                    ${
+                                      !isDateAvailable(date)
+                                        ? "text-prussian_blue-300 cursor-not-allowed"
+                                        : "hover:bg-celestial_blue-50 text-prussian_blue-500 cursor-pointer"
+                                    }
+                                `}
               >
                 {date.getDate()}
               </button>

@@ -5,7 +5,7 @@ import {
   fetchSavedProviders,
   fetchClientAppointments,
 } from "../../services/dashboardService";
-import { getAuthHeaders } from "../../services/dashboardService";
+import { getAuthHeaders } from "../../utils/auth";
 import { theme } from "../../styles/theme";
 import axios from "axios";
 

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { theme } from "../../styles/theme";
 import { fetchProviders } from "../../services/providerService";
 import { ProviderDetails } from "../ProviderDetails/ProviderDetails";
+import { debounce } from "lodash";
 
 // Filter Configuration Constants
 const providerSearchFilters = {
@@ -158,141 +159,71 @@ const providerSearchFilters = {
 };
 
 // Provider Card Component
-const ProviderCard = React.memo(({ provider, onClick }) => (
-  <div
-    onClick={() => onClick(provider)}
-    className="bg-white rounded-xl border border-alice_blue-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl cursor-pointer group"
-  >
-    <div className="p-6">
-      {/* Provider Header */}
-      <div className="flex items-start gap-4 mb-4">
-        {provider.profileImage ? (
-          <img
-            src={provider.profileImage}
-            alt={`${provider.firstName} ${provider.lastName}`}
-            className="w-16 h-16 rounded-xl object-cover"
-          />
-        ) : (
-          <div className="w-16 h-16 rounded-xl bg-celestial_blue-100 flex items-center justify-center group-hover:bg-celestial_blue-50 transition-colors duration-300">
-            <span className="text-2xl font-medium text-celestial_blue-500">
-              {provider.firstName[0]}
-              {provider.lastName[0]}
-            </span>
-          </div>
-        )}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-prussian_blue-500 group-hover:text-celestial_blue-500 transition-colors duration-300">
-                Dr. {provider.firstName} {provider.lastName}
-              </h2>
-              <p className="text-sm text-prussian_blue-400">{provider.title}</p>
-            </div>
-            {provider.acceptingClients && (
-              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-celadon-100 text-celadon-800">
-                <svg
-                  className="w-3 h-3 mr-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-                Accepting Clients
+const ProviderCard = React.memo(({ provider, onClick }) => {
+  if (!provider) {
+    return null;
+  }
+  const initials =
+    provider.firstName && provider.lastName
+      ? `${provider.firstName[0]}${provider.lastName[0]}`
+      : "";
+
+  return (
+    <div
+      onClick={() => onClick(provider)}
+      className="bg-white rounded-xl border border-alice_blue-200 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg cursor-pointer"
+    >
+      <div className="p-6">
+        {/* Provider Header */}
+        <div className="flex items-start gap-4 mb-4">
+          {provider.profileImage ? (
+            <img
+              src={provider.profileImage}
+              alt={`${provider.firstName || ""} ${provider.lastName || ""}`}
+              className="w-16 h-16 rounded-xl object-cover"
+            />
+          ) : (
+            <div className="w-16 h-16 rounded-xl bg-celestial_blue-100 flex items-center justify-center">
+              <span className="text-2xl font-medium text-celestial_blue-500">
+                {initials}
               </span>
-            )}
-          </div>
-          <div className="flex items-center gap-1 mt-1 text-sm text-prussian_blue-400">
-            <svg
-              className="w-4 h-4"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-            <span>{provider.location}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Provider Details */}
-      <div className="space-y-4">
-        {/* Specialties */}
-        <div className="flex flex-wrap gap-1.5">
-          {provider.specialties?.slice(0, 3).map((specialty, index) => (
-            <span
-              key={index}
-              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-celestial_blue-50 text-celestial_blue-400"
-            >
-              {specialty}
-            </span>
-          ))}
-          {provider.specialties?.length > 3 && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-alice_blue-100 text-alice_blue-200">
-              +{provider.specialties.length - 3} more
-            </span>
+            </div>
           )}
-        </div>
-
-        {/* Insurance */}
-        <div className="flex flex-wrap gap-1.5">
-          {provider.insuranceAccepted?.slice(0, 2).map((insurance, index) => (
-            <span
-              key={index}
-              className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-celadon-50 text-celadon-400"
-            >
-              {insurance}
-            </span>
-          ))}
-          {provider.insuranceAccepted?.length > 2 && (
-            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-alice_blue-100 text-alice_blue-400">
-              +{provider.insuranceAccepted.length - 2} more
-            </span>
-          )}
-        </div>
-
-        {/* Session Types */}
-        <div className="flex gap-3 pt-2">
-          {provider.sessionTypes?.map((type, index) => (
-            <div
-              key={index}
-              className="flex items-center text-sm text-prussian_blue-400"
-            >
-              {type === "Video" && (
-                <svg
-                  className="w-4 h-4 mr-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
-                  />
-                </svg>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between">
+              <div>
+                <h2 className="text-lg font-semibold text-prussian_blue-500 group-hover:text-celestial_blue-500 transition-colors duration-300">
+                  {provider.firstName &&
+                    provider.lastName &&
+                    `Dr. ${provider.firstName} ${provider.lastName}`}
+                </h2>
+                <p className="text-sm text-prussian_blue-400">
+                  {provider.title}
+                </p>
+              </div>
+              {provider.acceptingClients && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-celadon-100 text-celadon-800">
+                  <svg
+                    className="w-3 h-3 mr-1"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  Accepting Clients
+                </span>
               )}
-              {type === "In-Person" && (
+            </div>
+            {provider.location && (
+              <div className="flex items-center gap-1 mt-1 text-sm text-prussian_blue-400">
                 <svg
-                  className="w-4 h-4 mr-1"
+                  className="w-4 h-4"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -303,62 +234,98 @@ const ProviderCard = React.memo(({ provider, onClick }) => (
                     strokeWidth={2}
                     d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
                   />
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                  />
                 </svg>
-              )}
-              {type === "Phone" && (
-                <svg
-                  className="w-4 h-4 mr-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"
-                  />
-                </svg>
-              )}
-              {type}
-            </div>
-          ))}
+                <span>{provider.location}</span>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Bio */}
-        <p className="text-sm text-prussian_blue-400 line-clamp-2 group-hover:text-prussian_blue-500 transition-colors duration-300">
-          {provider.bio}
-        </p>
-      </div>
+        {/* Specialties Tags */}
+        {provider.specialties && provider.specialties.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 mb-3">
+            {provider.specialties.slice(0, 3).map((specialty, index) => (
+              <span
+                key={`${specialty}-${index}`}
+                className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-celestial_blue-50 text-celestial_blue-500"
+              >
+                {specialty}
+              </span>
+            ))}
+            {provider.specialties.length > 3 && (
+              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-alice_blue-100 text-alice_blue-500">
+                +{provider.specialties.length - 3} more
+              </span>
+            )}
+          </div>
+        )}
 
-      {/* View Profile Button */}
-      <div className="mt-4 pt-4 border-t border-alice_blue-200">
-        <button className="w-full flex items-center justify-center gap-2 text-sm font-medium text-celestial_blue-500 hover:text-celestial_blue-600 transition-colors duration-300">
-          View Full Profile
-          <svg
-            className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5l7 7-7 7"
-            />
-          </svg>
-        </button>
+        {/* Insurance Tags */}
+        {provider.insuranceAccepted &&
+          provider.insuranceAccepted.length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-3">
+              {provider.insuranceAccepted
+                .slice(0, 2)
+                .map((insurance, index) => (
+                  <span
+                    key={`${insurance}-${index}`}
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-celadon-50 text-celadon-600"
+                  >
+                    {insurance}
+                  </span>
+                ))}
+              {provider.insuranceAccepted.length > 2 && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-alice_blue-100 text-alice_blue-500">
+                  +{provider.insuranceAccepted.length - 2} more
+                </span>
+              )}
+            </div>
+          )}
+
+        {/* Session Types */}
+        {provider.sessionTypes && provider.sessionTypes.length > 0 && (
+          <div className="flex gap-4 mb-4">
+            {provider.sessionTypes.map((type, index) => (
+              <div
+                key={`${type}-${index}`}
+                className="flex items-center text-sm text-prussian_blue-400"
+              >
+                {/* ... rest of the session type code ... */}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Bio */}
+        {provider.bio && (
+          <p className="text-sm text-prussian_blue-400 line-clamp-2">
+            {provider.bio}
+          </p>
+        )}
+
+        {/* View Profile Button */}
+        <div className="mt-4 pt-4 border-t border-alice_blue-200">
+          <button className="w-full flex items-center justify-center gap-2 text-sm font-medium text-celestial_blue-500 hover:text-celestial_blue-600 transition-colors duration-300">
+            View Full Profile
+            <svg
+              className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-));
+  );
+});
 
 // Pagination Component
 const Pagination = React.memo(({ currentPage, totalPages, onPageChange }) => {
@@ -507,11 +474,13 @@ export const ProviderList = () => {
   const [error, setError] = useState(null);
   const [filters, setFilters] = useState({
     location: "",
-    specialties: "",       
-    insuranceAccepted: "",   
-    languages: "",      
-    sessionTypes: "",        
-});
+    specialties: "",
+    insuranceAccepted: "",
+    languages: "",
+    sessionTypes: "",
+  });
+  const [inputValue, setInputValue] = useState("");
+
   const [searchTerm, setSearchTerm] = useState("");
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -519,18 +488,38 @@ export const ProviderList = () => {
     totalItems: 0,
     itemsPerPage: 9,
   });
-
   // Memoized filter function
-  const filteredProviders = useMemo(() => providers, [providers]);
+  const filteredProviders = useMemo(() => {
+    return Array.isArray(providers) ? providers : [];
+  }, [providers]);
 
+  // fix keystroke
+  const debouncedSearch = useCallback(
+    debounce((value) => {
+      setPagination((prev) => ({ ...prev, currentPage: 1 }));
+      setFilters((prev) => ({ ...prev, search: value }));
+    }, 300),
+    []
+  );
   // Memoized paginated providers
   const paginatedProviders = useMemo(() => {
+    if (!Array.isArray(filteredProviders)) {
+      return [];
+    }
     const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
     return filteredProviders.slice(
       startIndex,
       startIndex + pagination.itemsPerPage
     );
   }, [filteredProviders, pagination.currentPage, pagination.itemsPerPage]);
+
+  console.log("Current state:", {
+    loading,
+    providers,
+    error,
+    filteredProviders,
+    paginatedProviders,
+  });
 
   // Callback functions
   const handlePageChange = useCallback((newPage) => {
@@ -539,60 +528,74 @@ export const ProviderList = () => {
 
   const handleFilterChange = useCallback((filterType, value) => {
     const filterMapping = {
-        'specialties': 'specialties',
-        'insuranceProviders': 'insuranceAccepted',
-        'languages': 'languages',
-        'sessionTypes': 'sessionTypes',
-        'location': 'location'
+      specialties: "specialties",
+      insuranceProviders: "insurance",
+      languages: "languages",
+      sessionTypes: "sessionType",
+      location: "location",
     };
 
+    console.log("Filter type:", filterType, "Value:", value); // Debug log
     const backendFilterName = filterMapping[filterType];
+    console.log("Mapped to:", backendFilterName); // Debug log
+
     if (backendFilterName) {
-        setFilters(prev => ({ ...prev, [backendFilterName]: value }));
-        setPagination(prev => ({ ...prev, currentPage: 1 }));
+      setFilters((prev) => ({ ...prev, [backendFilterName]: value }));
+      setPagination((prev) => ({ ...prev, currentPage: 1 }));
     }
-}, []);
-
-
-  const handleSearch = useCallback((value) => {
-    setSearchTerm(value);
-    setPagination((prev) => ({ ...prev, currentPage: 1 }));
   }, []);
+
+  const handleSearch = () => {
+    console.log("Handling search with value:", inputValue);
+    setSearchTerm(inputValue);
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
+  };
+  const clearSearch = () => {
+    console.log("Clearing search");
+    setInputValue("");
+    setSearchTerm("");
+    setPagination((prev) => ({ ...prev, currentPage: 1 }));
+  };
 
   // Load providers
   useEffect(() => {
     const loadProviders = async () => {
       try {
-          setLoading(true);
-          const params = {
-              search: searchTerm,
-              specialty: filters.specialties,   
-              insurance: filters.insuranceAccepted, 
-              languages: filters.languages,         
-              sessionType: filters.sessionTypes,    
-              location: filters.location,
-              page: pagination.currentPage,
-              limit: pagination.itemsPerPage
-          };
-          
-          console.log('Sending params to backend:', params); // Debug log
-          const data = await fetchProviders(params);
-          setProviders(data);
-          setPagination(prev => ({
-              ...prev,
-              totalPages: Math.ceil(data.length / prev.itemsPerPage),
-              totalItems: data.length,
-          }));
-      } catch (err) {
-          console.error("Error fetching providers:", err);
-          setError("Failed to load providers");
-      } finally {
-          setLoading(false);
-      }
-  };
+        setLoading(true);
+        const params = {
+          search: searchTerm,
+          specialty: filters.specialties,
+          insurance: filters.insurance,
+          languages: filters.languages,
+          sessionType: filters.sessionTypes,
+          location: filters.location,
+        };
 
-  loadProviders();
-}, [filters, searchTerm, pagination.currentPage]);
+        console.log("Filters:", filters); // Debug log
+        console.log("Params being sent:", params); // Debug log
+
+        // remove empty params
+        Object.keys(params).forEach((key) => {
+          if (!params[key]) delete params[key];
+        });
+
+        const data = await fetchProviders(params);
+        setProviders(data);
+        setPagination((prev) => ({
+          ...prev,
+          totalPages: Math.ceil(data.length / prev.itemsPerPage),
+          totalItems: data.length,
+        }));
+      } catch (err) {
+        console.error("Error fetching providers:", err);
+        setError("Failed to load providers");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadProviders();
+  }, [filters, searchTerm, pagination.currentPage]);
 
   if (loading) {
     return (
@@ -613,20 +616,72 @@ export const ProviderList = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-8 pt-28 pb-16">
       <h1 className={`${theme.text.heading} text-3xl mb-8`}>
         Find Your Provider
       </h1>
 
       {/* Search and Filter Section */}
-      {/* Search and Filter Section */}
-      <div className="bg-white rounded-xl shadow-lg mb-8">
+      <div className="bg-white rounded-xl shadow-lg mb-8 transition-all duration-300 hover:shadow-xl">
         {/* Search Bar */}
         <div className="p-6 border-b border-alice_blue-200">
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+          <div className="relative flex gap-4">
+            <div className="relative flex-1">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <svg
+                  className="h-5 w-5 text-prussian_blue-400"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+              </div>
+              <input
+                type="text"
+                placeholder="Search by name, title, or location..."
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    handleSearch();
+                  }
+                }}
+                className="w-full pl-12 pr-4 py-3 border border-alice_blue-200 rounded-lg focus:ring-2 focus:ring-celestial_blue-500 focus:border-celestial_blue-500 transition-colors duration-200"
+              />
+              {inputValue && (
+                <button
+                  onClick={clearSearch}
+                  className="absolute inset-y-0 right-0 pr-4 flex items-center text-prussian_blue-400 hover:text-celestial_blue-500 transition-colors duration-200"
+                >
+                  <svg
+                    className="h-5 w-5"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
+            <button
+              onClick={handleSearch}
+              className="px-6 py-3 bg-celestial_blue-500 text-white rounded-lg hover:bg-celestial_blue-600 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300 flex items-center gap-2"
+            >
+              Search
               <svg
-                className="h-5 w-5 text-prussian_blue-400"
+                className="w-5 h-5"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -638,29 +693,20 @@ export const ProviderList = () => {
                   d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                 />
               </svg>
-            </div>
-            <input
-              type="text"
-              placeholder="Search by name, title, or location..."
-              value={searchTerm}
-              onChange={(e) => handleSearch(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 border border-alice_blue-200 rounded-lg focus:ring-2 focus:ring-celestial_blue-500 focus:border-celestial_blue-500 transition-colors duration-200"
-            />
+            </button>
           </div>
         </div>
 
         {/* Filters */}
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             {Object.keys(providerSearchFilters.categories).map((filterType) => (
               <div key={filterType} className="relative">
-                <label className="block text-sm font-medium text-prussian_blue-500 mb-2">
+                <label className="block text-sm font-medium text-prussian_blue-500 mb-2 flex items-center gap-2">
+                  {providerSearchFilters.getIcon(filterType)}
                   {providerSearchFilters.getLabel(filterType)}
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-prussian_blue-400">
-                    {providerSearchFilters.getIcon(filterType)}
-                  </div>
                   <select
                     value={
                       filters[
@@ -672,14 +718,14 @@ export const ProviderList = () => {
                     onChange={(e) =>
                       handleFilterChange(
                         filterType === "insuranceProviders"
-                          ? "insurance"
+                          ? "insuranceProviders"
                           : filterType,
                         e.target.value
                       )
                     }
-                    className="block w-full pl-10 pr-10 py-2.5 bg-white border border-alice_blue-200 rounded-lg 
-                       appearance-none focus:ring-2 focus:ring-celestial_blue-500 focus:border-celestial_blue-500 
-                       transition-colors duration-200 text-prussian_blue-500"
+                    className="block w-full pl-4 pr-10 py-2.5 bg-white border border-alice_blue-200 rounded-lg 
+                     appearance-none focus:ring-2 focus:ring-celestial_blue-500 focus:border-celestial_blue-500 
+                     transition-colors duration-200 text-prussian_blue-500 hover:border-celestial_blue-300"
                   >
                     <option value="">
                       All {providerSearchFilters.getLabel(filterType)}
@@ -714,7 +760,7 @@ export const ProviderList = () => {
 
           {/* Active Filters */}
           {Object.entries(filters).some(([_, value]) => value) && (
-            <div className="mt-4 flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2 pb-4">
               <span className="text-sm font-medium text-prussian_blue-400">
                 Active Filters:
               </span>
@@ -723,7 +769,7 @@ export const ProviderList = () => {
                   <span
                     key={key}
                     className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm
-                       bg-celestial_blue-50 text-celestial_blue-500 border border-celestial_blue-200"
+                bg-celestial_blue-50 text-celestial_blue-500 border border-celestial_blue-200"
                   >
                     {value}
                     <button
@@ -753,10 +799,11 @@ export const ProviderList = () => {
                     location: "",
                     specialty: "",
                     insurance: "",
-                    language: "",
-                    gender: "",
+                    languages: "",
                     sessionType: "",
                   });
+                  setInputValue("");
+                  setSearchTerm("");
                 }}
                 className="text-sm text-prussian_blue-400 hover:text-celestial_blue-500 transition-colors duration-200"
               >
@@ -766,10 +813,18 @@ export const ProviderList = () => {
           )}
 
           {/* Results Count */}
-          <div className="mt-4 text-sm text-prussian_blue-400">
-            Found {filteredProviders.length} providers
-            {Object.values(filters).some((value) => value) &&
-              " matching your criteria"}
+          <div className="flex items-center justify-between">
+            <div className="text-sm text-prussian_blue-400">
+              Found {filteredProviders.length} providers
+              {Object.values(filters).some((value) => value) &&
+                " matching your criteria"}
+            </div>
+            {loading && (
+              <div className="flex items-center gap-2 text-sm text-prussian_blue-400">
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-celestial_blue-500"></div>
+                Updating results...
+              </div>
+            )}
           </div>
         </div>
       </div>

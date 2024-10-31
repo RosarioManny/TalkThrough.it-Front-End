@@ -1,18 +1,7 @@
 import axios from 'axios';
+import { getAuthHeaders } from '../utils/auth';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
-
-// Helper function to get headers
-export const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-  console.log('Using token:', token); // Debug log
-  return {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  };
-};
 
 // Client Dashboard services
 export const fetchSavedProviders = async () => {
@@ -89,18 +78,18 @@ export const fetchProviderAppointments = async () => {
 
 export const fetchProviderAvailability = async () => {
     try {
-        console.log('Fetching provider availability...'); // Debug log
+        // Get user ID from token
+        const token = localStorage.getItem('token');
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        const userId = decodedToken._id;
+
         const response = await axios.get(
-            `${BACKEND_URL}/providers/dashboard/availability`,
+            `${BACKEND_URL}/availability/provider/${userId}`,
             getAuthHeaders()
         );
-        console.log('Availability response:', response.data); // Debug log
         return response.data.availability || [];
     } catch (error) {
-        if (error.response?.status === 401) {
-            console.error('Authentication token missing or invalid');
-        }
-        console.error('Error fetching provider availability:', error);
+        console.error("Error fetching provider availability:", error);
         throw error;
     }
 };
