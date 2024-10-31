@@ -6,7 +6,6 @@ import {
   fetchProviderPublicDetails,
   fetchProviderDetails,
   getProviderAvailability,
-  getProviderReviews,
   saveProvider,
   removeSavedProvider
 } from "../../services/providerService";
@@ -23,7 +22,7 @@ export const ProviderDetails = ({
 
   const [provider, setProvider] = useState(modalProvider);
   const [availability, setAvailability] = useState([]);
-  const [reviews, setReviews] = useState([]);
+  // const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(!modalProvider);
   const [error, setError] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -42,20 +41,20 @@ export const ProviderDetails = ({
       try {
         setLoading(true);
 
-        const [providerData, availabilityData, reviewsData] = await Promise.all(
+        const [providerData, availabilityData] = await Promise.all(
           [
             // Use public endpoint when in modal or not logged in
-            isModal || !user
+            isModal && !user
               ? fetchProviderPublicDetails(providerId)
               : fetchProviderDetails(providerId),
-            getProviderAvailability(providerId, selectedDate),
-            getProviderReviews(providerId),
+              // vv TODO: This crashes at view in client/dashboard
+            // getProviderAvailability(providerId, selectedDate),\
           ]
         );
-
-        setProvider(providerData);
+        console.log("provider data :" + providerData.provider)
+        setProvider(providerData.provider);
+        console.log("provider data :" + providerData)
         setAvailability(availabilityData);
-        setReviews(reviewsData);
       } catch (err) {
         console.error("Error loading provider data:", err);
         setError("Failed to load provider information");
@@ -99,17 +98,17 @@ useEffect(() => {
   };
 
 
-  const handleBookAppointment = () => {
-    if (!user) {
-      navigate("/signin", {
-        state: { from: `/book-appointment/${providerId || provider?._id}` },
-      });
-      return;
-    }
-    if (user.type === "provider") {
-      return;
-       }
-  };
+  // const handleBookAppointment = () => {
+  //   if (!user) {
+  //     navigate("/signin", {
+  //       state: { from: `/book-appointment/${providerId || provider?._id}` },
+  //     });
+  //     return;
+  //   }
+  //   if (user.type === "provider") {
+  //     return;
+  //      }
+  // };
     // providers can't book appointments
   const handleRemoveSavedProvider = async () => {
     try {
@@ -213,7 +212,7 @@ useEffect(() => {
                   Book Appointment
                 </button>
 
-                {!isModal && (
+                {/* {!isModal && ( */}
 
                 {savedProviders.some(p=> p._id == provider._id) ? (
                   <button
@@ -344,53 +343,6 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Reviews Section - Only show in full profile view */}
-      {!isModal && reviews && (
-        <div className={`${theme.card.default} p-6`}>
-          <h3 className={`${theme.text.heading} text-xl mb-6`}>Reviews</h3>
-          {reviews.length > 0 ? (
-            <div className="space-y-6">
-              {reviews.map((review) => (
-                <div
-                  key={review._id}
-                  className="border-b border-alice_blue-200 pb-6 last:border-0"
-                >
-                  <div className="flex items-center justify-between mb-3">
-                    <div>
-                      <p className="font-medium text-prussian_blue-500">
-                        {review.clientName}
-                      </p>
-                      <p className="text-sm text-prussian_blue-300">
-                        {new Date(review.createdAt).toLocaleDateString()}
-                      </p>
-                    </div>
-                    <div className="flex text-sunglow-500">
-                      {[...Array(5)].map((_, i) => (
-                        <svg
-                          key={i}
-                          className={`w-5 h-5 ${
-                            i < review.rating
-                              ? "fill-current"
-                              : "text-alice_blue-300"
-                          }`}
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                        </svg>
-                      ))}
-                    </div>
-                  </div>
-                  <p className="text-prussian_blue-400">{review.comment}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-prussian_blue-300 text-center py-8">
-              No reviews yet.
-            </p>
-          )}
-        </div>
-      )}
     </div>
   );
 

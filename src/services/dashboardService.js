@@ -3,18 +3,6 @@ import { getAuthHeaders } from '../utils/auth';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
-// Helper function to get headers
-export const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-//   console.log('Using token:', token); // Debug log
-  return {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  };
-};
-
 // Client Dashboard services
 export const fetchSavedProviders = async () => {
     try { 

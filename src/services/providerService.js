@@ -99,26 +99,13 @@ export const getProviderAvailability = async (providerId, date) => {
     }
 };
 
-// Get provider reviews
-export const getProviderReviews = async (providerId) => {
-    try {
-        const response = await axios.get(
-            `${BACKEND_URL}/providers/${providerId}/reviews`,
-            getAuthHeaders()
-        );
-        return response.data;
-    } catch (error) {
-        console.error("Error fetching provider reviews:", error);
-        throw error;
-    }
-};
 
 // Public endpoint for provider details (no auth required)
 export const fetchProviderPublicDetails = async (providerId) => {
     try {
         console.log("Fetching public provider details for:", providerId);
         const response = await axios.get(
-            `${BACKEND_URL}/providers/public/${providerId}`
+            `${BACKEND_URL}/providers/${providerId}/public`
         );
         return response.data;
     } catch (error) {
