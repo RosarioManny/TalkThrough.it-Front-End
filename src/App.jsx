@@ -14,9 +14,9 @@ import ProviderDetails from './components/ProviderDetails/ProviderDetails';
 import ProviderAppointments from './components/Appointments/ProviderAppointments';
 import ProviderAvailability from './components/Availability/ProviderAvailability';
 import Footer from './components/Partials/Footer/Footer';
+// import Messages from './components/Messages/Messages';
 import ClientEditForm from './components/ClientEditForm/ClientEditForm';
 import ProviderEditForm from './components/ProviderEditForm/ProviderEditForm';
-
 
 
 const App = () => {
@@ -43,7 +43,7 @@ const App = () => {
                 <Route path="/provider/availability" element={<ProviderAvailability />} />
                 <Route path="/provider/profile" element={<ProviderEditForm />} />
                 <Route path="/providerlist" element={<ProviderList />} />
-                <Route path="/providerlist/:providerId" element={<ProviderDetails />} />
+                <Route path="/providerlist/:providerId" element={<ProviderDetails isModal={false}/>} />
             </Routes>
             <Footer />
         </>

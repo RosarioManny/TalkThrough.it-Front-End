@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, redirect } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { theme } from "../../styles/theme";
 import {
@@ -7,7 +7,9 @@ import {
   getProviderAvailability,
   getProviderReviews,
   saveProvider,
+  removeSavedProvider
 } from "../../services/providerService";
+import { fetchSavedProviders } from "../../services/dashboardService";
 
 const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null }) => {
   const { providerId } = useParams();
@@ -20,25 +22,27 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
   const [loading, setLoading] = useState(!modalProvider);
   const [error, setError] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [savedProviders, setSavedProviders] = useState([]);
 
   useEffect(() => {
     if (modalProvider) {
       setProvider(modalProvider);
       return;
     }
-
+    
+  //I commented out reviews and availability methods at this time -Gabe
     const loadProviderData = async () => {
       try {
         setLoading(true);
-        const [providerData, availabilityData, reviewsData] = await Promise.all([
+        const [providerData, availabilityData] = await Promise.all([
           fetchProviderDetails(providerId),
-          getProviderAvailability(providerId, selectedDate),
-          getProviderReviews(providerId),
+          // getProviderAvailability(providerId, selectedDate),
+          // getProviderReviews(providerId),
         ]);
-
-        setProvider(providerData);
-        setAvailability(availabilityData);
-        setReviews(reviewsData);
+        console.log(providerData)
+        setProvider(providerData.provider);
+        // setAvailability(availabilityData);
+        // setReviews(reviewsData);
       } catch (err) {
         console.error("Error loading provider data:", err);
         setError("Failed to load provider information");
@@ -52,10 +56,28 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
     }
   }, [providerId, selectedDate, modalProvider]);
 
+  useEffect(() => {
+    
+   fetchSavedProviders().then(res => {
+    setSavedProviders(res)
+   })
+}, [])
+
   const handleSaveProvider = async () => {
     try {
       await saveProvider(providerId || provider?._id);
-      // Show success message
+      console.log( user)
+      navigate("/client/dashboard")
+    } catch (err) {
+      // Show error message
+    }
+  };
+
+  const handleRemoveSavedProvider = async () => {
+    try {
+      await removeSavedProvider(providerId || provider?._id);
+      console.log( user)
+      navigate("/client/dashboard")
     } catch (err) {
       // Show error message
     }
@@ -66,14 +88,7 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
       onClose();
     }
     navigate(`/book-appointment/${providerId || provider?._id}`);
-  };
-
-  const handleViewFullProfile = () => {
-    if (isModal) {
-      onClose();
-    }
-    navigate(`/providerlist/${providerId || provider?._id}`);
-  };
+  };  
 
   if (loading) {
     return (
@@ -86,13 +101,13 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
     );
   }
 
-  if (error) {
-    return (
-      <div className={`${theme.status.error} p-4 ${isModal ? 'mx-4' : 'max-w-2xl mx-auto'} mt-8 rounded-lg`}>
-        {error}
-      </div>
-    );
-  }
+  // if (error) {
+  //   return (
+  //     <div className={`${theme.status.error} p-4 ${isModal ? 'mx-4' : 'max-w-2xl mx-auto'} mt-8 rounded-lg`}>
+  //       {error + "Banana"}
+  //     </div>
+  //   );
+  // }
 
   const content = (
     <div className={`${isModal ? 'divide-y divide-alice_blue-200' : 'space-y-6'}`}>
@@ -115,7 +130,6 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
               </div>
             )}
           </div>
-          
           <div className="flex-grow space-y-4">
             <div>
               <h1 className={`${theme.text.heading} text-2xl mb-2`}>
@@ -139,21 +153,21 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
                 >
                   Book Appointment
                 </button>
-                {isModal ? (
+                {savedProviders.some(p=> p._id == provider._id) ? (
                   <button
-                    onClick={handleViewFullProfile}
-                    className={`${theme.button.outline} px-6 py-2 rounded-lg`}
-                  >
-                    View Full Profile
+                  onClick={handleRemoveSavedProvider}
+                  className={`${theme.button} bg-amber-600 hover:bg-amber-400`}
+                  > 
+                    Favorited ☆
                   </button>
-                ) : (
+                     )  : (
                   <button
                     onClick={handleSaveProvider}
-                    className={`${theme.button.outline} px-6 py-2 rounded-lg`}
+                    className={`${theme.button.outline} text-white px-6 py-2 rounded-lg`}
                   >
                     Save Provider
                   </button>
-                )}
+                )} 
               </div>
             )}
           </div>
@@ -172,7 +186,7 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
       <div className={`${isModal ? 'py-6' : `${theme.card.default} p-6`}`}>
         <h3 className={`${theme.text.heading} text-xl mb-4`}>Specialties</h3>
         <div className="flex flex-wrap gap-2">
-          {provider?.specialties.map((specialty) => (
+          {provider?.specialties?.map((specialty) => (
             <span
               key={specialty}
               className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm"
@@ -302,7 +316,7 @@ const ProviderDetails = ({ isModal = false, modalProvider = null, onClose = null
     );
   }
 
-  return <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">{content}</div>;
+  return <div className="max-w-7xl my-20 px-4 sm:px-6 lg:px-8">{content}</div>;
 };
 
 export default ProviderDetails;

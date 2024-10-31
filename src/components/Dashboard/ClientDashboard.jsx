@@ -174,7 +174,7 @@ const ClientDashboard = () => {
                           )}
                         </div>
                         <Link
-                          to={`/provider/${provider._id}`}
+                          to={`/providerlist/${provider._id}`}
                           className={`${theme.button.outline} px-3 py-1 text-xs rounded-md`}
                         >
                           View
@@ -201,7 +201,6 @@ const ClientDashboard = () => {
               )}
             </div>
           </div>
-
           {/* Upcoming Appointments Card */}
           <div className={`${theme.card.default}`}>
             <div className="p-6">
