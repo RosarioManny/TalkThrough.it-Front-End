@@ -2,6 +2,7 @@ import axios from "axios";
 import { getAuthHeaders } from '../utils/auth';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 export const getProviderAvailability = async (providerId) => {
   try {

@@ -2,6 +2,7 @@ import axios from "axios";
 import { isTokenExpired } from "../utils/auth";
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+axios.defaults.headers.common['Content-Type'] = 'application/json';
 
 const handleAuthSuccess = (response) => {
     if (response.data.token) {
@@ -58,8 +59,8 @@ export const signupProvider = async (formData) => {
 
 export const signin = async (userData) => {
   try {
+    console.log('Attempting to connect to:', BACKEND_URL); // For debugging
       const res = await axios.post(`${BACKEND_URL}/auth/login`, userData);
-      
       if (res.data.token) {
           localStorage.setItem('token', res.data.token);
           const user = JSON.parse(atob(res.data.token.split('.')[1]));
