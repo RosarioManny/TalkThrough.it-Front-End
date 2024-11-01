@@ -482,7 +482,7 @@ export const AppointmentBookingPage = () => {
 
   return (
     <div className={theme.layout.container}>
-      <div className="max-w-4xl mx-auto py-8">
+      <div className="max-w-4xl mx-auto py-8 pt-28 pb-16">
         {error && (
           <div className={`${theme.status.error} p-4 mb-6 rounded-lg`}>
             {error}
