@@ -23,7 +23,7 @@ export const ProviderAppointments = () => {
   }
 
   return (
-    <div className={`${theme.layout.container} p-6`}>
+    <div className={`${theme.layout.container} p-6 pt-28 pb-16`}>
       <h1 className={`${theme.text.heading} text-2xl mb-6`}>My Appointments</h1>
       <AppointmentList userType="provider" />
     </div>

@@ -65,11 +65,13 @@ useEffect(() => {
   const loadAppointments = async () => {
     try {
       setLoading(true);
+      console.log("Fetching client appointments..."); 
       const data = await fetchClientAppointments();
+      console.log("Received appointments:", data); 
       setAppointments(data || []);
       setError(null);
     } catch (err) {
-      console.error("Error loading appointments:", err);
+      console.error("Load appointments error:", err);
       setError((prev) => ({
         ...prev,
         appointments: "Failed to load appointments",
@@ -78,7 +80,7 @@ useEffect(() => {
       setLoading(false);
     }
   };
-
+  
   const formatDate = (dateString) => {
     try {
       const date = new Date(dateString);
@@ -514,7 +516,7 @@ useEffect(() => {
               Find Providers
             </Link>
           </div>
-          <p className={theme.text.body}>Manage your care journey</p>
+          <p className={theme.text.body}>Your journey of wellness begins here.</p>
         </div>
 
         {/* Error Alert */}

@@ -20,6 +20,19 @@ export const fetchSavedProviders = async () => {
     }
 };
 
+export const fetchProviderDetails = async (providerId) => {
+    try {
+        const response = await axios.get(
+            `${BACKEND_URL}/providers/${providerId}/details`,
+            getAuthHeaders()
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching provider details:', error);
+        throw error;
+    }
+};
+
 export const fetchClientAppointments = async () => {
     try {
         console.log('Fetching client appointments...');

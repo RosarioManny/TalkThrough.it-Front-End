@@ -69,8 +69,14 @@ const App = () => {
   }
 />
         <Route path="/client/profile/" element={<ClientEditForm />} />
-        <Route path="/provider/profile" element={<ProviderEditForm />} />
-        <Route path="/providerlist" element={<ProviderList />} />
+        <Route 
+    path="/provider/profile" 
+    element={
+        <ProtectedRoute allowedUserTypes={["provider"]}>
+            <ProviderEditForm />
+        </ProtectedRoute>
+    } 
+/>        <Route path="/providerlist" element={<ProviderList />} />
         <Route path="/providerlist/:providerId" element={<ProviderDetails isModal={false}/>} />
         <Route
           path="/book-appointment/:providerId"

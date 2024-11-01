@@ -152,7 +152,7 @@ export const ProviderDetails = ({
 
   const content = (
     <div
-      className={`${isModal ? "divide-y divide-alice_blue-200" : "space-y-6"}`}
+      className={`${isModal ? "divide-y divide-alice_blue-200" : "space-y-6 pt-28 pb-16"}`}
     >
       {successMessage && (
         <div
