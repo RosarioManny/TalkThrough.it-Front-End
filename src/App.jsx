@@ -49,44 +49,76 @@ const App = () => {
         pauseOnHover
         theme="light"
       />
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/register/client" element={<ClientSignupForm />} />
-        <Route path="/register/provider" element={<ProviderSignupForm />} />
-        <Route path="/login" element={<SigninForm />} />
-        <Route path="/client/dashboard" element={<ClientDashboard />} />
-        <Route path="/provider/dashboard" element={<ProviderDashboard />} />
-        <Route
-          path="/provider/appointments"
-          element={<ProviderAppointments />}
-        />
-<Route
-  path="/provider/availability"
-  element={
-    <ProtectedRoute allowedUserTypes={["provider"]}>
-      <ProviderAvailability />
-    </ProtectedRoute>
-  }
-/>
-        <Route path="/client/profile/" element={<ClientEditForm />} />
-        <Route 
-    path="/provider/profile" 
-    element={
-        <ProtectedRoute allowedUserTypes={["provider"]}>
-            <ProviderEditForm />
-        </ProtectedRoute>
-    } 
-/>        <Route path="/providerlist" element={<ProviderList />} />
-        <Route path="/providerlist/:providerId" element={<ProviderDetails isModal={false}/>} />
-        <Route
-          path="/book-appointment/:providerId"
-          element={
+
+<Routes>
+    <Route path="/" element={<Landing />} />
+    <Route path="/register/client" element={<ClientSignupForm />} />
+    <Route path="/register/provider" element={<ProviderSignupForm />} />
+    <Route path="/login" element={<SigninForm />} />
+    
+    {/* Protected Client Routes */}
+    <Route
+        path="/client/dashboard"
+        element={
             <ProtectedRoute allowedUserTypes={["client"]}>
-              <AppointmentBookingPage />
+                <ClientDashboard />
             </ProtectedRoute>
-          }
-        />
-      </Routes>
+        }
+    />
+    <Route
+        path="/client/profile"
+        element={
+            <ProtectedRoute allowedUserTypes={["client"]}>
+                <ClientEditForm />
+            </ProtectedRoute>
+        }
+    />
+
+    {/* Protected Provider Routes */}
+    <Route
+        path="/provider/dashboard"
+        element={
+            <ProtectedRoute allowedUserTypes={["provider"]}>
+                <ProviderDashboard />
+            </ProtectedRoute>
+        }
+    />
+    <Route
+        path="/provider/appointments"
+        element={
+            <ProtectedRoute allowedUserTypes={["provider"]}>
+                <ProviderAppointments />
+            </ProtectedRoute>
+        }
+    />
+    <Route
+        path="/provider/availability"
+        element={
+            <ProtectedRoute allowedUserTypes={["provider"]}>
+                <ProviderAvailability />
+            </ProtectedRoute>
+        }
+    />
+    <Route 
+        path="/provider/profile" 
+        element={
+            <ProtectedRoute allowedUserTypes={["provider"]}>
+                <ProviderEditForm />
+            </ProtectedRoute>
+        }
+    />
+    <Route path="/providerlist" element={<ProviderList />} />
+    <Route path="/providerlist/:providerId" element={<ProviderDetails isModal={false}/>} />
+    <Route
+        path="/book-appointment/:providerId"
+        element={
+            <ProtectedRoute allowedUserTypes={["client"]}>
+                <AppointmentBookingPage />
+            </ProtectedRoute>
+        }
+    />
+</Routes>
+
       <Footer />
     </>
   );
