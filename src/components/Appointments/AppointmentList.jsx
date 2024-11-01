@@ -35,7 +35,7 @@ export const AppointmentList = ({ userType = "provider", onUpdate }) => {
     pages: 1,
   });
   const [selectedAppointment, setSelectedAppointment] = useState(null);
-
+  const [selectedProvider, setSelectedProvider] = useState(null);
   const [selectedClient, setSelectedClient] = useState(null);
   const [isClientModalOpen, setIsClientModalOpen] = useState(false);
   const [showCancellationModal, setShowCancellationModal] = useState(false);
@@ -139,15 +139,35 @@ export const AppointmentList = ({ userType = "provider", onUpdate }) => {
     setFilters((prev) => ({ ...prev, [key]: value, page: 1 }));
   };
 
-  const handleClientClick = (client) => {
-    setSelectedClient({
-      ...client,
-      appointments: appointments.filter(
-        (apt) => apt.client?._id === client._id
-      ),
-    });
-    setIsClientModalOpen(true);
-  };
+  const handlePersonClick = async (person) => {
+    try {
+        if (userType === "client") {
+            setSelectedProvider({
+                ...person,
+                appointments: appointments.filter(apt => 
+                    apt.provider._id === person._id &&
+                    new Date(apt.datetime) >= new Date() &&
+                    apt.status !== 'cancelled'
+                )
+            });
+        } else {
+            setSelectedClient({
+                ...person,
+                appointments: appointments.filter(apt => 
+                    apt.client._id === person._id &&
+                    new Date(apt.datetime) >= new Date() &&
+                    apt.status !== 'cancelled'
+                )
+            });
+        }
+        setIsClientModalOpen(true);
+    } catch (error) {
+        console.error('Error processing person details:', error);
+        toast.error('Failed to load details');
+    }
+};
+
+
 
   const handleClearFilters = () => {
     setFilters({
@@ -200,12 +220,12 @@ export const AppointmentList = ({ userType = "provider", onUpdate }) => {
 
   if (loading) {
     return (
-        <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-xl border border-alice_blue-200 p-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-celestial_blue-500" />
-            <p className="mt-4 text-prussian_blue-400">Loading appointments...</p>
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-xl border border-alice_blue-200 p-8">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-celestial_blue-500" />
+        <p className="mt-4 text-prussian_blue-400">Loading appointments...</p>
+      </div>
     );
-}
+  }
 
   return (
     <div className="space-y-6">
@@ -320,27 +340,27 @@ export const AppointmentList = ({ userType = "provider", onUpdate }) => {
       </div>
 
       {error && (
-    <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
-        <div className="flex items-center gap-3">
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+          <div className="flex items-center gap-3">
             <div className="p-2 rounded-lg bg-red-100">
-                <svg 
-                    className="w-5 h-5 text-red-500" 
-                    fill="none" 
-                    viewBox="0 0 24 24" 
-                    stroke="currentColor"
-                >
-                    <path 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round" 
-                        strokeWidth={2} 
-                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
-                    />
-                </svg>
+              <svg
+                className="w-5 h-5 text-red-500"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                />
+              </svg>
             </div>
             <p className="text-red-700">{error}</p>
+          </div>
         </div>
-    </div>
-)}
+      )}
 
       <div className="flex gap-3 mb-6 bg-white p-2 rounded-lg border border-alice_blue-200">
         <button
@@ -399,52 +419,52 @@ export const AppointmentList = ({ userType = "provider", onUpdate }) => {
 
       {/* Appointment Cards */}
       <div className="space-y-4">
-      {filteredAppointments.length === 0 ? (
-    <div className="bg-white rounded-xl border border-alice_blue-200 p-8">
-        <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-alice_blue-50 flex items-center justify-center">
+        {filteredAppointments.length === 0 ? (
+          <div className="bg-white rounded-xl border border-alice_blue-200 p-8">
+            <div className="text-center">
+              <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-alice_blue-50 flex items-center justify-center">
                 <svg
-                    className="w-8 h-8 text-celestial_blue-500"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                  className="w-8 h-8 text-celestial_blue-500"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                    />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                  />
                 </svg>
-            </div>
-            <h3 className="text-lg font-semibold text-prussian_blue-500 mb-2">
+              </div>
+              <h3 className="text-lg font-semibold text-prussian_blue-500 mb-2">
                 No appointments found
-            </h3>
-            <p className="text-sm text-prussian_blue-300">
+              </h3>
+              <p className="text-sm text-prussian_blue-300">
                 Try adjusting your filters or selecting a different view
-            </p>
-            <button
+              </p>
+              <button
                 onClick={handleClearFilters}
                 className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-celestial_blue-50 text-celestial_blue-500 rounded-lg hover:-translate-y-0.5 hover:shadow-md transition-all duration-300"
-            >
+              >
                 <svg
-                    className="w-4 h-4"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-                    />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
                 </svg>
                 Clear Filters
-            </button>
-        </div>
-    </div>
-) : (
+              </button>
+            </div>
+          </div>
+        ) : (
           filteredAppointments.map((appointment) => (
             <div
               key={appointment._id}
@@ -463,8 +483,11 @@ export const AppointmentList = ({ userType = "provider", onUpdate }) => {
                   <div>
                     <p
                       onClick={() =>
-                        appointment.client &&
-                        handleClientClick(appointment.client)
+                        handlePersonClick(
+                          userType === "client"
+                            ? appointment.provider
+                            : appointment.client
+                        )
                       }
                       className="text-lg font-semibold text-prussian_blue-500 hover:text-celestial_blue-500 cursor-pointer transition-colors"
                     >
@@ -601,7 +624,10 @@ export const AppointmentList = ({ userType = "provider", onUpdate }) => {
                           />
                         </svg>
                         <span className="font-medium text-prussian_blue-500">
-                          Meeting Details
+                          Meeting Details{" "}
+                          {userType === "client"
+                            ? "for Your Session"
+                            : "for Client Session"}
                         </span>
                       </div>
 
@@ -775,75 +801,82 @@ export const AppointmentList = ({ userType = "provider", onUpdate }) => {
 
       {/* Pagination */}
       {appointments.length > 0 && (
-    <div className="mt-8">
-        <div className="bg-white rounded-xl border border-alice_blue-200 p-4">
+        <div className="mt-8">
+          <div className="bg-white rounded-xl border border-alice_blue-200 p-4">
             <div className="flex items-center justify-between">
-                <button
-                    onClick={() => handlePageChange(pagination.page - 1)}
-                    disabled={pagination.page === 1}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 
-                        ${pagination.page === 1
+              <button
+                onClick={() => handlePageChange(pagination.page - 1)}
+                disabled={pagination.page === 1}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 
+                        ${
+                          pagination.page === 1
                             ? "bg-alice_blue-50 text-prussian_blue-300 cursor-not-allowed"
                             : "bg-alice_blue-50 text-prussian_blue-500 hover:bg-alice_blue-100 hover:-translate-y-0.5 hover:shadow-sm"
                         }`}
+              >
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                    <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M15 19l-7-7 7-7"
-                        />
-                    </svg>
-                    Previous
-                </button>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 19l-7-7 7-7"
+                  />
+                </svg>
+                Previous
+              </button>
 
-                <div className="flex items-center gap-2">
-                    <span className="text-sm text-prussian_blue-400">
-                        Page {pagination.page} of {pagination.pages}
-                    </span>
-                </div>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-prussian_blue-400">
+                  Page {pagination.page} of {pagination.pages}
+                </span>
+              </div>
 
-                <button
-                    onClick={() => handlePageChange(pagination.page + 1)}
-                    disabled={pagination.page === pagination.pages}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 
-                        ${pagination.page === pagination.pages
+              <button
+                onClick={() => handlePageChange(pagination.page + 1)}
+                disabled={pagination.page === pagination.pages}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-300 
+                        ${
+                          pagination.page === pagination.pages
                             ? "bg-alice_blue-50 text-prussian_blue-300 cursor-not-allowed"
                             : "bg-alice_blue-50 text-prussian_blue-500 hover:bg-alice_blue-100 hover:-translate-y-0.5 hover:shadow-sm"
                         }`}
+              >
+                Next
+                <svg
+                  className="w-4 h-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
                 >
-                    Next
-                    <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                    >
-                        <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M9 5l7 7-7 7"
-                        />
-                    </svg>
-                </button>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
+                </svg>
+              </button>
             </div>
+          </div>
         </div>
-    </div>
-)}
+      )}
 
-      {/* Client Quick View Modal */}
-      {selectedClient && (
+      {/* Client/Provider Quick View Modal */}
+      {(userType === "provider" ? selectedClient : selectedProvider) && (
         <ClientQuickView
-          client={selectedClient}
+          client={userType === "provider" ? selectedClient : null}
+          provider={userType === "client" ? selectedProvider : null}
           isOpen={isClientModalOpen}
-          onClose={() => setIsClientModalOpen(false)}
+          onClose={() => {
+            setIsClientModalOpen(false);
+            setSelectedClient(null);
+            setSelectedProvider(null);
+          }}
         />
       )}
 

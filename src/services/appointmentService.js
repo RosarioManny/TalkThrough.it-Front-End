@@ -50,27 +50,35 @@ export const getAppointments = async (userId, userType, filters = {}) => {
       status: filters.status || "all",
     });
 
-    if (filters.startDate) {
-      params.append("startDate", filters.startDate);
-    }
-    if (filters.endDate) {
-      params.append("endDate", filters.endDate);
-    }
+    // Add this condition to use the correct endpoint
+    const endpoint = userType === 'client' 
+      ? `${BACKEND_URL}/clients/dashboard/appointments`
+      : `${BACKEND_URL}/appointments/provider`;
 
     const response = await axios.get(
-      `${BACKEND_URL}/appointments/provider?${params}`,
+      `${endpoint}?${params}`,
       getAuthHeaders()
     );
 
+    // Handle both response structures
+    const appointments = userType === 'client' 
+      ? response.data.appointments
+      : response.data.appointments;
+
     return {
-      appointments: response.data.appointments,
-      pagination: response.data.pagination,
+      appointments: appointments,
+      pagination: response.data.pagination || {
+        total: appointments.length,
+        page: 1,
+        pages: 1
+      },
     };
   } catch (error) {
     console.error("Get appointments error:", error);
     throw error;
   }
 };
+
 
 export const updateAppointment = async (appointmentId, status) => {
   try {
