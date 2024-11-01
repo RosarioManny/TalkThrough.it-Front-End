@@ -1,18 +1,7 @@
 import axios from 'axios';
+import { getAuthHeaders } from '../utils/auth';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
-
-// Helper function to get headers
-export const getAuthHeaders = () => {
-  const token = localStorage.getItem('token');
-//   console.log('Using token:', token); // Debug log
-  return {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    }
-  };
-};
 
 // Client Dashboard services
 export const fetchSavedProviders = async () => {
@@ -31,22 +20,43 @@ export const fetchSavedProviders = async () => {
     }
 };
 
-export const fetchClientAppointments = async () => {
+export const fetchProviderDetails = async (providerId) => {
     try {
         const response = await axios.get(
-            `${BACKEND_URL}/clients/dashboard/appointments`,
+            `${BACKEND_URL}/providers/${providerId}/details`,
             getAuthHeaders()
         );
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching provider details:', error);
+        throw error;
+    }
+};
+
+export const fetchClientAppointments = async () => {
+    try {
+        console.log('Fetching client appointments...');
+        const response = await axios.get(
+            `${BACKEND_URL}/clients/dashboard/appointments`,
+            {
+                ...getAuthHeaders(),
+                headers: {
+                    ...getAuthHeaders().headers,
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            }
+        );
+        console.log('Appointments response:', response.data);
         return response.data.appointments || [];
     } catch (error) {
-        if (error.response?.status === 401) {
-            // console.error('Authentication token missing or invalid');
-        } else if (error.response?.status === 500) {
-            // console.error('Server error:', error.response.data);
-        }
-        // console.error('Error fetching appointments:', error);
-        // Return empty array instead of throwing
-        return [];
+        console.error('Error fetching client appointments:', {
+            status: error.response?.status,
+            data: error.response?.data,
+            message: error.message
+        });
+        throw error;
     }
 };
 
@@ -89,22 +99,21 @@ export const fetchProviderAppointments = async () => {
 
 export const fetchProviderAvailability = async () => {
     try {
-        console.log('Fetching provider availability...'); // Debug log
+        // Get user ID from token
+        const token = localStorage.getItem('token');
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        const userId = decodedToken._id;
+
         const response = await axios.get(
-            `${BACKEND_URL}/providers/dashboard/availability`,
+            `${BACKEND_URL}/availability/provider/${userId}`,
             getAuthHeaders()
         );
-        console.log('Availability response:', response.data); // Debug log
         return response.data.availability || [];
     } catch (error) {
-        if (error.response?.status === 401) {
-            console.error('Authentication token missing or invalid');
-        }
-        console.error('Error fetching provider availability:', error);
+        console.error("Error fetching provider availability:", error);
         throw error;
     }
 };
-
 
 // Update availability
 export const updateProviderAvailability = async (availabilityData) => {

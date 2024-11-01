@@ -1,56 +1,44 @@
-import axios from 'axios';
+import axios from "axios";
+import { getAuthHeaders } from '../utils/auth';
 
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
 
-const getAuthHeaders = () => {
-    const token = localStorage.getItem('token');
-    return {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-        }
-    };
-};
-
-// Fetch providers with filters and pagination
+// Fetch providers
 export const fetchProviders = async (params = {}) => {
-    try {
-        const {
-            page = 1,
-            limit = 9,
-            search = '',
-            specialty = '',
-            insurance = '',
-            location = '',
-            language = '',
-            sessionType = '',
-            gender = '',
-        } = params;
+  try {
+      const queryParams = new URLSearchParams();
+      
+      Object.entries(params).forEach(([key, value]) => {
+          if (value) {
+              queryParams.append(key, value);
+          }
+      });
 
-        const queryParams = new URLSearchParams({
-            page,
-            limit,
-            ...(search && { search }),
-            ...(specialty && { specialty }),
-            ...(insurance && { insurance }),
-            ...(location && { location }),
-            ...(language && { language }),
-            ...(sessionType && { sessionType }),
-            ...(gender && { gender }),
-        });
+      console.log('Fetching providers with URL:', 
+          `${BACKEND_URL}/providers?${queryParams.toString()}`  // Changed to /providers
+      );
 
-        const response = await axios.get(
-            `${BACKEND_URL}/providers?${queryParams}`,
-            getAuthHeaders()
-        );
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching providers:', error);
-        throw error;
-    }
+      const response = await axios.get(
+          `${BACKEND_URL}/providers?${queryParams.toString()}`  // Changed to match your route
+      );
+
+      console.log('Raw API response:', response.data);
+
+      // Ensure we're always returning an array
+      const providers = Array.isArray(response.data) ? response.data : [];
+
+      console.log('Processed providers:', providers);
+
+      return providers; // Return the array directly
+  } catch (error) {
+      console.error("Error fetching providers:", error);
+      throw error;
+  }
 };
 
-// Fetch single provider details
+
+
+// Protected endpoint for provider's own data
 export const fetchProviderDetails = async (providerId) => {
     try {
         const response = await axios.get(
@@ -59,7 +47,7 @@ export const fetchProviderDetails = async (providerId) => {
         );
         return response.data;
     } catch (error) {
-        console.error('Error fetching provider details:', error);
+        console.error("Error fetching provider details:", error);
         throw error;
     }
 };
@@ -74,7 +62,7 @@ export const saveProvider = async (providerId) => {
         );
         return response.data;
     } catch (error) {
-        console.error('Error saving provider:', error);
+        console.error("Error saving provider:", error);
         throw error;
     }
 };
@@ -97,30 +85,31 @@ export const removeSavedProvider = async (providerId) => {
 // Get provider availability
 export const getProviderAvailability = async (providerId, date) => {
     try {
-        const response = await axios.get(
-            `${BACKEND_URL}/providers/${providerId}/availability`,
-            {
-                params: { date },
-                ...getAuthHeaders()
-            }
-        );
-        return response.data;
-    } catch (error) {
-        console.error('Error fetching provider availability:', error);
-        throw error;
-    }
-};
+        const params = new URLSearchParams();
+        if (date) params.append('date', date);
 
-// Get provider reviews
-export const getProviderReviews = async (providerId) => {
-    try {
         const response = await axios.get(
-            `${BACKEND_URL}/providers/${providerId}/reviews`,
+            `${BACKEND_URL}/providers/${providerId}/availability${params.toString() ? `?${params.toString()}` : ''}`,
             getAuthHeaders()
         );
         return response.data;
     } catch (error) {
-        console.error('Error fetching provider reviews:', error);
+        console.error("Error fetching provider availability:", error);
+        throw error;
+    }
+};
+
+
+// Public endpoint for provider details (no auth required)
+export const fetchProviderPublicDetails = async (providerId) => {
+    try {
+        console.log("Fetching public provider details for:", providerId);
+        const response = await axios.get(
+            `${BACKEND_URL}/providers/${providerId}/public`
+        );
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching provider public details:", error);
         throw error;
     }
 };
