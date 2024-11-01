@@ -729,7 +729,7 @@ export const ProviderDashboard = () => {
               </button>
 
               <button
-                onClick={() => navigate("/profile")}
+                onClick={() => navigate("/provider/profile")}
                 className="w-full bg-white p-6 rounded-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-lg border border-alice_blue-200 text-left"
               >
                 <div className="flex items-center gap-4">

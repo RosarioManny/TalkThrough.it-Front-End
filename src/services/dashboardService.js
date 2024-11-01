@@ -22,20 +22,28 @@ export const fetchSavedProviders = async () => {
 
 export const fetchClientAppointments = async () => {
     try {
+        console.log('Fetching client appointments...');
         const response = await axios.get(
             `${BACKEND_URL}/clients/dashboard/appointments`,
-            getAuthHeaders()
+            {
+                ...getAuthHeaders(),
+                headers: {
+                    ...getAuthHeaders().headers,
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache',
+                    'Expires': '0'
+                }
+            }
         );
+        console.log('Appointments response:', response.data);
         return response.data.appointments || [];
     } catch (error) {
-        if (error.response?.status === 401) {
-            // console.error('Authentication token missing or invalid');
-        } else if (error.response?.status === 500) {
-            // console.error('Server error:', error.response.data);
-        }
-        // console.error('Error fetching appointments:', error);
-        // Return empty array instead of throwing
-        return [];
+        console.error('Error fetching client appointments:', {
+            status: error.response?.status,
+            data: error.response?.data,
+            message: error.message
+        });
+        throw error;
     }
 };
 

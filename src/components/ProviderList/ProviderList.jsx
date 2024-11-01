@@ -377,8 +377,8 @@ const Pagination = React.memo(({ currentPage, totalPages, onPageChange }) => {
             transition-all duration-300 
             ${
               currentPage === 1
-                ? "bg-alice_blue-100 text-prussian_blue-300 cursor-not-allowed"
-                : "bg-white text-prussian_blue-500 border border-alice_blue-200 hover:-translate-y-0.5 hover:shadow-md"
+                ? "bg-alice_blue-100 text-alice_blue-500 cursor-not-allowed"
+                : "bg-white text-alice_blue-100 border border-alice_blue-200 hover:-translate-y-0.5 hover:shadow-md"
             }
           `}
         >
@@ -437,7 +437,7 @@ const Pagination = React.memo(({ currentPage, totalPages, onPageChange }) => {
             transition-all duration-300 
             ${
               currentPage === totalPages
-                ? "bg-alice_blue-100 text-prussian_blue-300 cursor-not-allowed"
+                ? "bg-alice_blue-100 text-alice_blue-500 cursor-not-allowed"
                 : "bg-white text-prussian_blue-500 border border-alice_blue-200 hover:-translate-y-0.5 hover:shadow-md"
             }
           `}

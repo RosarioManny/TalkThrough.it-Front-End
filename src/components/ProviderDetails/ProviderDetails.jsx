@@ -7,7 +7,7 @@ import {
   fetchProviderDetails,
   getProviderAvailability,
   saveProvider,
-  removeSavedProvider
+  removeSavedProvider,
 } from "../../services/providerService";
 import { fetchSavedProviders } from "../../services/dashboardService";
 
@@ -29,31 +29,28 @@ export const ProviderDetails = ({
   const [successMessage, setSuccessMessage] = useState("");
   const [savedProviders, setSavedProviders] = useState([]);
 
-
   useEffect(() => {
     if (modalProvider) {
       setProvider(modalProvider);
       return;
     }
-    
-  //I commented out reviews and availability methods at this time -Gabe
+
+    //I commented out reviews and availability methods at this time -Gabe
     const loadProviderData = async () => {
       try {
         setLoading(true);
 
-        const [providerData, availabilityData] = await Promise.all(
-          [
-            // Use public endpoint when in modal or not logged in
-            isModal && !user
-              ? fetchProviderPublicDetails(providerId)
-              : fetchProviderDetails(providerId),
-              // vv TODO: This crashes at view in client/dashboard
-            // getProviderAvailability(providerId, selectedDate),\
-          ]
-        );
-        console.log("provider data :" + providerData.provider)
+        const [providerData, availabilityData] = await Promise.all([
+          // Use public endpoint when in modal or not logged in
+          isModal && !user
+            ? fetchProviderPublicDetails(providerId)
+            : fetchProviderDetails(providerId),
+          // vv TODO: This crashes at view in client/dashboard
+          // getProviderAvailability(providerId, selectedDate),\
+        ]);
+        console.log("provider data :" + providerData.provider);
         setProvider(providerData.provider);
-        console.log("provider data :" + providerData)
+        console.log("provider data :" + providerData);
         setAvailability(availabilityData);
       } catch (err) {
         console.error("Error loading provider data:", err);
@@ -77,12 +74,11 @@ export const ProviderDetails = ({
     }
   }, [successMessage]);
 
-useEffect(() => {
-    fetchSavedProviders().then(res => {
-    setSavedProviders(res)
-   })
-}, [])
-
+  useEffect(() => {
+    fetchSavedProviders().then((res) => {
+      setSavedProviders(res);
+    });
+  }, []);
 
   const handleSaveProvider = async () => {
     try {
@@ -90,13 +86,11 @@ useEffect(() => {
 
       setSuccessMessage("Provider saved successfully");
 
-      navigate("/client/dashboard")
-
+      navigate("/client/dashboard");
     } catch (err) {
       setError("Failed to save provider");
     }
   };
-
 
   // const handleBookAppointment = () => {
   //   if (!user) {
@@ -109,12 +103,12 @@ useEffect(() => {
   //     return;
   //      }
   // };
-    // providers can't book appointments
+  // providers can't book appointments
   const handleRemoveSavedProvider = async () => {
     try {
       await removeSavedProvider(providerId || provider?._id);
-      console.log( user)
-      navigate("/client/dashboard")
+      console.log(user);
+      navigate("/client/dashboard");
     } catch (err) {
       // Show error message
     }
@@ -125,7 +119,7 @@ useEffect(() => {
       onClose();
     }
     navigate(`/book-appointment/${providerId || provider?._id}`);
-  };  
+  };
 
   if (loading) {
     return (
@@ -155,7 +149,6 @@ useEffect(() => {
       </div>
     );
   }
-
 
   const content = (
     <div
@@ -211,25 +204,35 @@ useEffect(() => {
                 >
                   Book Appointment
                 </button>
-
-                {/* {!isModal && ( */}
-
-                {savedProviders.some(p=> p._id == provider._id) ? (
-                  <button
-                  onClick={handleRemoveSavedProvider}
-                  className={`${theme.button} text-white bg-amber-500 hover:bg-amber-400 hover:-translate-y-0.5 hover:shadow-md rounded-lg p-2 tranisition-all duration-200 `}
-                  > 
-                    Favorited ☆
-                  </button>
-                     )  : (
-                     
-                  <button
-                    onClick={handleSaveProvider}
-                    className={`${theme.button.outline} hover:-translate-y-0.5 hover:shadow-md text-white px-6 py-2 rounded-lg`}
-                  >
-                    Save Provider
-                  </button>
-                )} 
+                {savedProviders.some((p) => p._id == provider._id) ? (
+                  <div className="flex flex-wrap gap-4">
+                    <button
+                      onClick={handleRemoveSavedProvider}
+                      className={`${theme.button} text-white bg-sunglow-400 hover:bg-amber-500 hover:-translate-y-0.5 hover:shadow-md rounded-lg px-6 py-2 duration-200 `}
+                    >
+                      Favorited ☆
+                    </button>
+                    <button
+                      className={`${theme.button} text-white bg-celadon-300 hover:bg-celadon-400 hover:-translate-y-0.5 hover:shadow-md rounded-lg px-6 py-2 duration-200`}
+                    >
+                      Message
+                    </button>
+                  </div>
+                ) : (
+                  <div className="flex flex-wrap gap-4">
+                    <button
+                      onClick={handleSaveProvider}
+                      className={`${theme.button.primary} hover:-translate-y-0.5 bg-sunglow-400 hover:shadow-md hover:bg-sunglow-500 text- px-6 py-2 rounded-lg`}
+                    >
+                      Save Provider
+                    </button>
+                    <button
+                      className={`${theme.button} text-white bg-celadon-300 hover:bg-celadon-400 hover:-translate-y-0.5 hover:shadow-md rounded-lg px-6 py-2 duration-200`}
+                    >
+                      Message
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -278,7 +281,6 @@ useEffect(() => {
       <div className={`${isModal ? "py-6" : `${theme.card.default} p-6`}`}>
         <h3 className={`${theme.text.heading} text-xl mb-4`}>Session Types</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-
           {provider?.sessionTypes.map((type) => (
             <div
               key={type}
@@ -342,7 +344,6 @@ useEffect(() => {
           ))}
         </div>
       </div>
-
     </div>
   );
 
@@ -385,5 +386,4 @@ useEffect(() => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">{content}</div>
   );
-
 };
