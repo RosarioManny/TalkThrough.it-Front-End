@@ -3,20 +3,23 @@ import { getAuthHeaders } from '../utils/auth';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 
-// Client Dashboard services
 export const fetchSavedProviders = async () => {
-    try { 
+    if (!localStorage.getItem('token')) {
+        return { savedProviders: [] };
+    }
+
+    try {
         const response = await axios.get(
             `${BACKEND_URL}/clients/dashboard/saved-providers`,
-            getAuthHeaders() // Use the helper function
+            getAuthHeaders()
         );
-        return response.data.savedProviders;
+        return response.data;
     } catch (error) {
         if (error.response?.status === 401) {
-            // console.error('Authentication token missing or invalid');
+            return { savedProviders: [] };
         }
-        // console.error('Error fetching saved providers:', error);
-        throw error;
+        console.error('Unexpected error fetching saved providers:', error);
+        return { savedProviders: [] };
     }
 };
 

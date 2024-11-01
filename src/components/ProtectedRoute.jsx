@@ -1,19 +1,25 @@
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { isTokenExpired } from '../utils/auth';
 
 export const ProtectedRoute = ({ children, allowedUserTypes }) => {
-    const { user } = useAuth();
-
-    if (!user) {
-        // Redirect to login if not authenticated
-        return <Navigate to="/login" replace state={{ from: window.location.pathname }} />;
+    const { user, handleSignOut } = useAuth();
+    
+    if (user && isTokenExpired()) {
+        console.log("Token expired in ProtectedRoute");
+        handleSignOut();
+        return <Navigate to="/login" replace />;
     }
 
-    if (!allowedUserTypes.includes(user.type)) {
-        // Redirect to dashboard if wrong user type
+    if (!user) {
+        console.log("No user in ProtectedRoute");
+        return <Navigate to="/login" replace />;
+    }
+
+    if (allowedUserTypes && !allowedUserTypes.includes(user.type)) {
+        console.log("Invalid user type in ProtectedRoute", user.type);
         return <Navigate to={`/${user.type}/dashboard`} replace />;
     }
 
     return children;
 };
-
