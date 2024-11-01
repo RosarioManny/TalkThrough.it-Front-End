@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import * as authService from "../../services/authService";
+import { signin } from "../../services/authService"; 
 import { useAuth } from "../../context/AuthContext";
+import { toast } from 'react-toastify'
 
 export const SigninForm = () => {
   const navigate = useNavigate();
@@ -22,34 +23,39 @@ export const SigninForm = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await authService.signin(formData);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+      const response = await signin({
+          email: formData.email,
+          password: formData.password,
+          userType: formData.userType
+      });
 
-      if (response && response.user) {
-        setUser(response.user);
-        if (formData.userType === "provider") {
-          navigate("/provider/dashboard");
-        } else {
-          navigate("/client/dashboard");
-        }
-      } else {
-        throw new Error("Invalid response from server");
+      if (response.error) {
+          toast.error(response.error);
+          setFormData(prev => ({
+              ...prev,
+              password: ''
+          }));
+          return; 
       }
-    } catch (err) {
-      console.error("Signin error:", err);
-      if (err.response?.status === 401) {
-        updateMessage(
-          formData.userType === "provider"
-            ? "Provider not registered"
-            : "Client not registered"
-        );
-      } else {
-        updateMessage("An error occurred during sign in. Please try again.");
+
+      if (response.user) {
+          setUser(response.user);
+          toast.success('Successfully signed in!');
+          navigate(`/${formData.userType}/dashboard`);
       }
-    }
-  };
+  } catch (error) {
+      console.error('Unexpected signin error:', error);
+      toast.error('An unexpected error occurred');
+      setFormData(prev => ({
+          ...prev,
+          password: ''
+      }));
+  }
+};
+
 
   return (
     <main className="min-h-screen bg-alice_blue-500 pt-28 pb-16 px-4">

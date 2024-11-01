@@ -75,11 +75,17 @@ export const ProviderDetails = ({
   }, [successMessage]);
 
   useEffect(() => {
-    fetchSavedProviders().then((res) => {
-      setSavedProviders(res);
-    });
-  }, []);
-
+    if (user?.type === 'client') {
+        fetchSavedProviders().then((res) => {
+            setSavedProviders(res.savedProviders || []);
+        }).catch((error) => {
+            console.log('Error loading saved providers:', error);
+            setSavedProviders([]);
+        });
+    } else {
+        setSavedProviders([]); 
+    }
+}, [user]);
   const handleSaveProvider = async () => {
     try {
       await saveProvider(providerId || provider?._id);
