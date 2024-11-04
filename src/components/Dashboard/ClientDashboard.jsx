@@ -5,6 +5,7 @@ import {
     fetchSavedProviders,
     fetchClientAppointments,
 } from "../../services/dashboardService";
+
 import { theme } from "../../styles/theme";
 import { AppointmentList } from "../Appointments/AppointmentList";
 

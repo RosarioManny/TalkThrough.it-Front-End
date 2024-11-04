@@ -5,30 +5,26 @@ const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 axios.defaults.withCredentials = true;
 
+
 export const fetchSavedProviders = async () => {
     if (!localStorage.getItem('token')) {
         console.log('No token found, returning empty providers list');
-        return [];
+        return { savedProviders: [] };
     }
 
     try {
         console.log('Fetching saved providers...');
-        const response = await axios.get(
-            `${BACKEND_URL}/saved-therapists`,
-            getAuthHeaders()
-        );
-
+        const response = await api.get('/saved-therapists');
         console.log('Raw saved providers response:', response.data);
 
-        // Return the array directly
-        return response.data.savedProviders || [];
+        // Your backend returns { savedProviders: [...] }
+        return response.data;
     } catch (error) {
         console.error('Error fetching saved providers:', {
             message: error.message,
-            response: error.response?.data,
-            status: error.response?.status
+            response: error.response?.data
         });
-        return [];
+        return { savedProviders: [] };
     }
 };
 
