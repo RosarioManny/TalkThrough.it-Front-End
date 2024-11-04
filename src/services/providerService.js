@@ -58,10 +58,14 @@ export const fetchProviderDetails = async (providerId) => {
 export const saveProvider = async (providerId) => {
     try {
         const response = await axios.post(
-            `${BACKEND_URL}/clients/save-provider`,
-            { providerId },
+            `${BACKEND_URL}/saved-therapists`,
+            { 
+                providerId,
+                category: 'Potential Matches' // default category
+            },
             getAuthHeaders()
         );
+        console.log('Save provider response:', response.data);
         return response.data;
     } catch (error) {
         console.error("Error saving provider:", error);
@@ -70,17 +74,31 @@ export const saveProvider = async (providerId) => {
 };
 
 //remove provider from favorites for clients
-export const removeSavedProvider = async (providerId) => {
+export const removeSavedProvider = async (savedId) => {
     try {
-        const response = await axios.put(
-            `${BACKEND_URL}/clients/save-provider`,
-            { providerId },
+        const response = await axios.delete(
+            `${BACKEND_URL}/saved-therapists/${savedId}`,
             getAuthHeaders()
         );
+        console.log('Remove saved provider response:', response.data);
         return response.data;
     } catch (error) {
-        console.error('Error saving provider:', error);
+        console.error('Error removing saved provider:', error);
         throw error;
+    }
+};
+
+export const isProviderSaved = async (providerId) => {
+    try {
+        const response = await axios.get(
+            `${BACKEND_URL}/saved-therapists`,
+            getAuthHeaders()
+        );
+        const savedProviders = response.data.savedProviders || [];
+        return savedProviders.some(sp => sp.provider.id === providerId);
+    } catch (error) {
+        console.error('Error checking if provider is saved:', error);
+        return false;
     }
 };
 
