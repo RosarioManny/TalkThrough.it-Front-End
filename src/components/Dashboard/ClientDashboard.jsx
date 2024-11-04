@@ -5,7 +5,6 @@ import {
     fetchSavedProviders,
     fetchClientAppointments,
 } from "../../services/dashboardService";
-
 import { theme } from "../../styles/theme";
 import { AppointmentList } from "../Appointments/AppointmentList";
 
@@ -31,25 +30,43 @@ export const ClientDashboard = () => {
             setLoading(true);
             setError(null);
     
-            // Fetch appointments first
-            const appointmentsResult = await fetchClientAppointments();
-            console.log('Fetched appointments:', appointmentsResult);
-            setAppointments(appointmentsResult);
+            console.log('Fetching dashboard data...');
     
-            // Fetch saved providers
-            const providersResult = await fetchSavedProviders();
-            console.log('Raw saved providers result:', providersResult);
-            
-            // Handle the data structure
-            const savedProvidersData = Array.isArray(providersResult) 
-                ? providersResult 
-                : providersResult?.savedProviders || [];
+            // Fetch both data sets in parallel
+            const [appointmentsResult, providersResult] = await Promise.all([
+                fetchClientAppointments(),
+                fetchSavedProviders()
+            ]);
+    
+            console.log('Raw appointments result:', appointmentsResult);
+            console.log('Raw providers result:', providersResult);
+    
+            setAppointments(appointmentsResult || []);
+    
+            // Handle saved providers data with detailed logging
+            if (providersResult) {
+                console.log('Processing saved providers:', providersResult);
                 
-            console.log('Processed saved providers:', savedProvidersData);
-            setSavedProviders(savedProvidersData);
+                let providersToSet = [];
+                if (Array.isArray(providersResult)) {
+                    providersToSet = providersResult;
+                } else if (providersResult.savedProviders && Array.isArray(providersResult.savedProviders)) {
+                    providersToSet = providersResult.savedProviders;
+                }
+    
+                console.log('Setting saved providers:', providersToSet);
+                setSavedProviders(providersToSet);
+            } else {
+                console.log('No providers result, setting empty array');
+                setSavedProviders([]);
+            }
     
         } catch (err) {
-            console.error("Dashboard data fetch error:", err);
+            console.error("Dashboard data fetch error:", {
+                message: err.message,
+                response: err.response?.data,
+                stack: err.stack
+            });
             setError({ general: "Failed to load dashboard data" });
         } finally {
             setLoading(false);
@@ -76,20 +93,11 @@ export const ClientDashboard = () => {
     }, [appointments]);
 
     const formatProviderName = (provider) => {
-      if (!provider) return "Provider Name Not Available";
-      
-      // If it's a populated provider document
-      if (provider.firstName && provider.lastName) {
-          return `Dr. ${provider.firstName} ${provider.lastName}`;
-      }
-      
-      // If it's a nested provider object
-      if (provider.providerId?.firstName && provider.providerId?.lastName) {
-          return `Dr. ${provider.providerId.firstName} ${provider.providerId.lastName}`;
-      }
-      
-      return provider.email || "Provider Name Not Available";
-  };
+        if (provider?.name) return provider.name;
+        return provider?.firstName && provider?.lastName
+            ? `Dr. ${provider.firstName} ${provider.lastName}`
+            : provider?.email || "Provider Name Not Available";
+    };
 
     const loadAppointments = async () => {
         try {

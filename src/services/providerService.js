@@ -2,6 +2,8 @@ import axios from "axios";
 import { getAuthHeaders } from '../utils/auth';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+axios.defaults.headers.common['Content-Type'] = 'application/json';
+axios.defaults.withCredentials = true;
 
 // Create axios instance with default config
 export const api = axios.create({
@@ -26,7 +28,7 @@ api.interceptors.request.use(
     }
 );
 
-// Fetch all providers or search
+// Fetch providers
 export const fetchProviders = async (params = {}) => {
     try {
         const queryParams = new URLSearchParams();
@@ -40,14 +42,15 @@ export const fetchProviders = async (params = {}) => {
             `${BACKEND_URL}/providers${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
         );
 
-        const response = await api.get(
-            `/providers${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-        );
-
+        const response = await api.get(`/providers${queryParams.toString() ? `?${queryParams.toString()}` : ''}`);
         console.log('Raw API response:', response.data);
+
         return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
-        console.error("Error fetching providers:", error);
+        console.error("Error fetching providers:", {
+            message: error.message,
+            response: error.response?.data
+        });
         return [];
     }
 };
@@ -55,11 +58,14 @@ export const fetchProviders = async (params = {}) => {
 // Protected endpoint for provider's own data
 export const fetchProviderDetails = async (providerId) => {
     try {
-        console.log('Fetching provider details for:', providerId);
+        console.log('Fetching provider details:', providerId);
         const response = await api.get(`/providers/${providerId}`);
         return response.data;
     } catch (error) {
-        console.error("Error fetching provider details:", error);
+        console.error("Error fetching provider details:", {
+            message: error.message,
+            response: error.response?.data
+        });
         throw error;
     }
 };
@@ -72,7 +78,10 @@ export const saveProvider = async (providerId) => {
         console.log('Save provider response:', response.data);
         return response.data;
     } catch (error) {
-        console.error('Error saving provider:', error);
+        console.error('Error saving provider:', {
+            message: error.message,
+            response: error.response?.data
+        });
         throw error;
     }
 };
@@ -85,7 +94,10 @@ export const removeSavedProvider = async (savedId) => {
         console.log('Remove provider response:', response.data);
         return response.data;
     } catch (error) {
-        console.error('Error removing saved provider:', error);
+        console.error('Error removing saved provider:', {
+            message: error.message,
+            response: error.response?.data
+        });
         throw error;
     }
 };
@@ -100,12 +112,69 @@ export const isProviderSaved = async (providerId) => {
             sp.provider?.id === providerId
         );
     } catch (error) {
-        console.error('Error checking if provider is saved:', error);
+        console.error('Error checking if provider is saved:', {
+            message: error.message,
+            response: error.response?.data
+        });
         return false;
     }
 };
 
-// Update provider profile (protected)
+// Update saved provider
+export const updateSavedProvider = async (savedId, updateData) => {
+    try {
+        console.log('Updating saved provider:', { savedId, updateData });
+        const response = await api.put(`/saved-therapists/${savedId}`, updateData);
+        console.log('Update provider response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating saved provider:', {
+            message: error.message,
+            response: error.response?.data
+        });
+        throw error;
+    }
+};
+
+// Get provider availability
+export const getProviderAvailability = async (providerId, date) => {
+    try {
+        console.log('Fetching availability for provider:', providerId);
+        const params = new URLSearchParams();
+        if (date) params.append('date', date);
+
+        const response = await api.get(
+            `/availability/provider/${providerId}${params.toString() ? `?${params.toString()}` : ''}`
+        );
+        
+        console.log('Availability response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching provider availability:", {
+            message: error.message,
+            response: error.response?.data
+        });
+        // Return empty availability instead of throwing
+        return { availability: [] };
+    }
+};
+
+// Public endpoint for provider details (no auth required)
+export const fetchProviderPublicDetails = async (providerId) => {
+    try {
+        console.log("Fetching public provider details for:", providerId);
+        const response = await api.get(`/providers/${providerId}/public`);
+        return response.data;
+    } catch (error) {
+        console.error("Error fetching provider public details:", {
+            message: error.message,
+            response: error.response?.data
+        });
+        throw error;
+    }
+};
+
+// Update provider profile
 export const updateProvider = async (formData, userid) => {
     try {
         console.log('Updating provider profile:', userid);
@@ -113,42 +182,10 @@ export const updateProvider = async (formData, userid) => {
         console.log('Provider update response:', response.data);
         return response.data;
     } catch (error) {
-        console.error('Provider update error:', error);
+        console.error('Provider update error:', {
+            message: error.message,
+            response: error.response?.data
+        });
         throw error;
     }
 };
-
-// Get provider's appointments (protected)
-export const getProviderAppointments = async () => {
-    try {
-        const response = await api.get('/providers/dashboard/appointments');
-        return response.data.appointments || [];
-    } catch (error) {
-        console.error('Error fetching provider appointments:', error);
-        return [];
-    }
-};
-
-// Get provider's clients (protected)
-export const getProviderClients = async () => {
-    try {
-        const response = await api.get('/providers/dashboard/clients');
-        return response.data.clients || [];
-    } catch (error) {
-        console.error('Error fetching provider clients:', error);
-        return [];
-    }
-};
-
-// Public endpoint for provider details
-export const fetchProviderPublicDetails = async (providerId) => {
-    try {
-        console.log("Fetching public provider details for:", providerId);
-        const response = await api.get(`/providers/${providerId}`);
-        return response.data;
-    } catch (error) {
-        console.error("Error fetching provider public details:", error);
-        throw error;
-    }
-};
-
