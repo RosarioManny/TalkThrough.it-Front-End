@@ -30,6 +30,8 @@ export const ClientDashboard = () => {
             setLoading(true);
             setError(null);
     
+            console.log('Fetching dashboard data...');
+    
             // Fetch both data sets in parallel
             const [appointmentsResult, providersResult] = await Promise.all([
                 fetchClientAppointments(),
@@ -41,20 +43,29 @@ export const ClientDashboard = () => {
     
             setAppointments(appointmentsResult || []);
     
-            // Safely handle the saved providers data
-            if (Array.isArray(providersResult)) {
-                setSavedProviders(providersResult);
-            } else if (providersResult?.savedProviders && Array.isArray(providersResult.savedProviders)) {
-                setSavedProviders(providersResult.savedProviders);
+            // Handle saved providers data with detailed logging
+            if (providersResult) {
+                console.log('Processing saved providers:', providersResult);
+                
+                let providersToSet = [];
+                if (Array.isArray(providersResult)) {
+                    providersToSet = providersResult;
+                } else if (providersResult.savedProviders && Array.isArray(providersResult.savedProviders)) {
+                    providersToSet = providersResult.savedProviders;
+                }
+    
+                console.log('Setting saved providers:', providersToSet);
+                setSavedProviders(providersToSet);
             } else {
-                console.warn('Unexpected saved providers format:', providersResult);
+                console.log('No providers result, setting empty array');
                 setSavedProviders([]);
             }
     
         } catch (err) {
             console.error("Dashboard data fetch error:", {
                 message: err.message,
-                response: err.response?.data
+                response: err.response?.data,
+                stack: err.stack
             });
             setError({ general: "Failed to load dashboard data" });
         } finally {
@@ -239,40 +250,48 @@ export const ClientDashboard = () => {
 ) : savedProviders && savedProviders.length > 0 ? (
     <div className="space-y-4">
         {savedProviders.map((saved) => {
-            // Check if provider exists and has required fields
-            const provider = saved.provider || {};
-            const providerName = provider.name || 'Provider Name Not Available';
-            const initials = providerName.split(' ')
-                .map(n => n[0])
-                .slice(0, 2)
-                .join('');
+            // Debug log to see the structure of each saved provider
+            console.log('Saved provider data:', saved);
 
             return (
                 <div
-                    key={saved.savedId}
+                    key={saved.savedId || saved._id}
                     className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
-                    onClick={() => navigate(`/providerlist/${provider.id}`)}
+                    onClick={() => {
+                        // Safely handle navigation with fallbacks
+                        const providerId = saved.providerId?._id || saved.provider?.id || saved._id;
+                        if (providerId) {
+                            console.log('Navigating to provider:', providerId);
+                            navigate(`/providerlist/${providerId}`);
+                        } else {
+                            console.error('No provider ID found for:', saved);
+                        }
+                    }}
                 >
                     <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
                             <span className="text-celestial_blue-500 font-medium">
-                                {initials}
+                                {(saved.providerId?.firstName?.[0] || '')}
+                                {(saved.providerId?.lastName?.[0] || '')}
                             </span>
                         </div>
                         <div className="flex-1 min-w-0">
                             <p className="font-medium text-prussian_blue-500">
-                                {providerName}
+                                {saved.providerId ? 
+                                    `Dr. ${saved.providerId.firstName} ${saved.providerId.lastName}` :
+                                    'Provider Name Not Available'
+                                }
                             </p>
-                            {provider.specialties && provider.specialties.length > 0 && (
+                            {saved.providerId?.specialties && (
                                 <p className="text-sm text-prussian_blue-300 truncate">
-                                    {provider.specialties.slice(0, 2).join(", ")}
-                                    {provider.specialties.length > 2 && "..."}
+                                    {saved.providerId.specialties.slice(0, 2).join(", ")}
+                                    {saved.providerId.specialties.length > 2 && "..."}
                                 </p>
                             )}
                             <div className="flex items-center gap-2 mt-1">
-                                {provider.credentials && (
+                                {saved.providerId?.credentials && (
                                     <span className="text-sm text-prussian_blue-300">
-                                        {provider.credentials}
+                                        {saved.providerId.credentials}
                                     </span>
                                 )}
                                 <span className="text-sm text-prussian_blue-300">

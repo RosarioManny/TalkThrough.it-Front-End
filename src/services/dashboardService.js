@@ -8,7 +8,7 @@ axios.defaults.withCredentials = true;
 export const fetchSavedProviders = async () => {
     if (!localStorage.getItem('token')) {
         console.log('No token found, returning empty providers list');
-        return { savedProviders: [] };
+        return [];
     }
 
     try {
@@ -18,21 +18,20 @@ export const fetchSavedProviders = async () => {
             getAuthHeaders()
         );
 
-        // Log the raw response to see the structure
         console.log('Raw saved providers response:', response.data);
 
-        // Return the data in the expected format
-        return {
-            savedProviders: response.data?.savedProviders || []
-        };
+        // Return the array directly
+        return response.data.savedProviders || [];
     } catch (error) {
         console.error('Error fetching saved providers:', {
             message: error.message,
-            response: error.response?.data
+            response: error.response?.data,
+            status: error.response?.status
         });
-        return { savedProviders: [] };
+        return [];
     }
 };
+
 
 export const fetchProviderDetails = async (providerId) => {
     try {
