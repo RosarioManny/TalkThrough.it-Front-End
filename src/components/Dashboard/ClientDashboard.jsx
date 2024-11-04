@@ -20,43 +20,51 @@ export const ClientDashboard = () => {
 
     // Initial data fetch
     useEffect(() => {
-        if (!user) {
-            navigate("/login");
-            return;
-        }
-
-        const fetchAllData = async () => {
-            try {
-                setLoading(true);
-                setError(null);
-
-                // Fetch both data sets in parallel
-                const [appointmentsResult, providersResult] = await Promise.all([
-                    fetchClientAppointments(),
-                    fetchSavedProviders()
-                ]);
-
-                console.log('Fetched appointments:', appointmentsResult);
-                console.log('Fetched saved providers:', providersResult);
-
-                setAppointments(appointmentsResult || []);
-                setSavedProviders(providersResult.savedProviders || []);
-
-            } catch (err) {
-                console.error("Dashboard data fetch error:", err);
-                setError({ general: "Failed to load dashboard data" });
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchAllData();
-    }, [user, navigate]);
-
-    // Debug logs
-    useEffect(() => {
-        console.log('Saved Providers updated:', savedProviders);
-    }, [savedProviders]);
+      if (!user) {
+          navigate("/login");
+          return;
+      }
+  
+      const fetchAllData = async () => {
+          try {
+              setLoading(true);
+              setError(null);
+  
+              // Fetch data in parallel
+              const [appointmentsResult, providersResult] = await Promise.all([
+                  fetchClientAppointments(),
+                  fetchSavedProviders()
+              ]);
+  
+              console.log('Fetched appointments:', appointmentsResult);
+              console.log('Fetched saved providers:', providersResult);
+  
+              setAppointments(appointmentsResult || []);
+              setSavedProviders(providersResult.savedProviders || []);
+  
+          } catch (err) {
+              console.error("Dashboard data fetch error:", {
+                  message: err.message,
+                  response: err.response?.data
+              });
+              setError({ general: "Failed to load dashboard data" });
+          } finally {
+              setLoading(false);
+          }
+      };
+  
+      fetchAllData();
+  }, [user, navigate]);
+  
+  // Add a debug useEffect
+  useEffect(() => {
+      console.log('Current saved providers:', {
+          count: savedProviders?.length,
+          providers: savedProviders
+      });
+  }, [savedProviders]);
+  
+  
 
     useEffect(() => {
         console.log('Appointments updated:', appointments);
@@ -155,8 +163,8 @@ export const ClientDashboard = () => {
                                         </span>
                                     </div>
                                     <div className="text-2xl font-bold text-celestial_blue-500">
-                                        {savedProviders?.length || 0}
-                                    </div>
+    {Array.isArray(savedProviders) ? savedProviders.length : 0}
+</div>
                                 </div>
 
                                 <div className="p-4 rounded-xl bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md">
@@ -211,57 +219,69 @@ export const ClientDashboard = () => {
                                     </div>
                                 </div>
 
+
                                 {error?.providers ? (
-                                    <div className="p-4 rounded-lg bg-sunglow-50 border border-sunglow-200">
-                                        <p className="text-sm text-sunglow-700">{error.providers}</p>
-                                    </div>
-                                ) : savedProviders.length > 0 ? (
-                                    <div className="space-y-4">
-                                        {savedProviders.map((saved) => (
-                                            <div
-                                                key={saved.savedId}
-                                                className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
-                                                onClick={() => navigate(`/providerlist/${saved.provider.id}`)}
-                                            >
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
-                                                        <span className="text-celestial_blue-500 font-medium">
-                                                            {saved.provider.name.split(' ')[0][0]}
-                                                            {saved.provider.name.split(' ')[1][0]}
-                                                        </span>
-                                                    </div>
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="font-medium text-prussian_blue-500">
-                                                            {saved.provider.name}
-                                                        </p>
-                                                        {saved.provider.specialties && (
-                                                            <p className="text-sm text-prussian_blue-300 truncate">
-                                                                {saved.provider.specialties.slice(0, 2).join(", ")}
-                                                                {saved.provider.specialties.length > 2 && "..."}
-                                                            </p>
-                                                        )}
-                                                        <p className="text-sm text-prussian_blue-300">
-                                                            Category: {saved.category}
-                                                        </p>
-                                                    </div>
-                                                    <svg
-                                                        className="w-5 h-5 text-celestial_blue-500"
-                                                        fill="none"
-                                                        viewBox="0 0 24 24"
-                                                        stroke="currentColor"
-                                                    >
-                                                        <path
-                                                            strokeLinecap="round"
-                                                            strokeLinejoin="round"
-                                                            strokeWidth={2}
-                                                            d="M9 5l7 7-7 7"
-                                                        />
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                ) : (
+    <div className="p-4 rounded-lg bg-sunglow-50 border border-sunglow-200">
+        <p className="text-sm text-sunglow-700">{error.providers}</p>
+    </div>
+) : savedProviders.length > 0 ? (
+    <div className="space-y-4">
+        {savedProviders.map((saved) => (
+            <div
+                key={saved.savedId}
+                className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+                onClick={() => navigate(`/providerlist/${saved.provider.id}`)}
+            >
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
+                        <span className="text-celestial_blue-500 font-medium">
+                            {saved.provider.name.split(' ')[0][0]}
+                            {saved.provider.name.split(' ')[1][0]}
+                        </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="font-medium text-prussian_blue-500">
+                            {saved.provider.name}
+                        </p>
+                        {saved.provider.specialties && (
+                            <p className="text-sm text-prussian_blue-300 truncate">
+                                {saved.provider.specialties.slice(0, 2).join(", ")}
+                                {saved.provider.specialties.length > 2 && "..."}
+                            </p>
+                        )}
+                        <div className="flex items-center gap-2 mt-1">
+                            <span className="text-sm text-prussian_blue-300">
+                                {saved.provider.credentials}
+                            </span>
+                            <span className="text-sm text-prussian_blue-300">•</span>
+                            <span className="text-sm text-prussian_blue-300">
+                                {saved.category}
+                            </span>
+                        </div>
+                    </div>
+                    <div className="flex flex-col items-end gap-2">
+                        <svg
+                            className="w-5 h-5 text-celestial_blue-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 5l7 7-7 7"
+                            />
+                        </svg>
+                        <span className="text-xs text-prussian_blue-300">
+                            {new Date(saved.savedAt).toLocaleDateString()}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        ))}
+    </div>
+) : (
                                     <div className="text-center py-8">
                                         <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-alice_blue-50 flex items-center justify-center">
                                             <svg
