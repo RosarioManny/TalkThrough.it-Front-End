@@ -30,43 +30,18 @@ export const ClientDashboard = () => {
             setLoading(true);
             setError(null);
     
-            console.log('Fetching dashboard data...');
+            // Fetch appointments first
+            const appointmentsResult = await fetchClientAppointments();
+            console.log('Fetched appointments:', appointmentsResult);
+            setAppointments(appointmentsResult);
     
-            // Fetch both data sets in parallel
-            const [appointmentsResult, providersResult] = await Promise.all([
-                fetchClientAppointments(),
-                fetchSavedProviders()
-            ]);
-    
-            console.log('Raw appointments result:', appointmentsResult);
-            console.log('Raw providers result:', providersResult);
-    
-            setAppointments(appointmentsResult || []);
-    
-            // Handle saved providers data with detailed logging
-            if (providersResult) {
-                console.log('Processing saved providers:', providersResult);
-                
-                let providersToSet = [];
-                if (Array.isArray(providersResult)) {
-                    providersToSet = providersResult;
-                } else if (providersResult.savedProviders && Array.isArray(providersResult.savedProviders)) {
-                    providersToSet = providersResult.savedProviders;
-                }
-    
-                console.log('Setting saved providers:', providersToSet);
-                setSavedProviders(providersToSet);
-            } else {
-                console.log('No providers result, setting empty array');
-                setSavedProviders([]);
-            }
+            // Fetch saved providers
+            const providersResult = await fetchSavedProviders();
+            console.log('Fetched saved providers result:', providersResult);
+            setSavedProviders(providersResult.savedProviders || []);
     
         } catch (err) {
-            console.error("Dashboard data fetch error:", {
-                message: err.message,
-                response: err.response?.data,
-                stack: err.stack
-            });
+            console.error("Dashboard data fetch error:", err);
             setError({ general: "Failed to load dashboard data" });
         } finally {
             setLoading(false);
@@ -246,39 +221,35 @@ export const ClientDashboard = () => {
     <div className="p-4 rounded-lg bg-sunglow-50 border border-sunglow-200">
         <p className="text-sm text-sunglow-700">{error.providers}</p>
     </div>
-) : savedProviders.length > 0 ? (
+) : savedProviders && savedProviders.length > 0 ? (
   <div className="space-y-4">
       {savedProviders.map((saved) => {
-          // Get provider info from the populated providerId field
-          const provider = saved.providerId || {};
-          const firstName = provider.firstName || '';
-          const lastName = provider.lastName || '';
-          const initials = `${firstName[0] || ''}${lastName[0] || ''}`;
-
+          console.log('Rendering saved provider:', saved); // Debug log
           return (
               <div
-                  key={saved._id}
+                  key={saved.savedId}
                   className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
-                  onClick={() => navigate(`/providerlist/${provider._id}`)}
+                  onClick={() => navigate(`/providerlist/${saved.provider.id}`)}
               >
                   <div className="flex items-center gap-3">
                       <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
                           <span className="text-celestial_blue-500 font-medium">
-                              {initials}
+                              {saved.provider.name.split(' ')[0][0]}
+                              {saved.provider.name.split(' ')[1][0]}
                           </span>
                       </div>
                       <div className="flex-1 min-w-0">
                           <p className="font-medium text-prussian_blue-500">
-                              {firstName && lastName ? `Dr. ${firstName} ${lastName}` : 'Provider Name Not Available'}
+                              {saved.provider.name}
                           </p>
-                          {provider.specialties && (
+                          {saved.provider.specialties && (
                               <p className="text-sm text-prussian_blue-300 truncate">
-                                  {provider.specialties.slice(0, 2).join(", ")}
-                                  {provider.specialties.length > 2 && "..."}
+                                  {saved.provider.specialties.slice(0, 2).join(", ")}
+                                  {saved.provider.specialties.length > 2 && "..."}
                               </p>
                           )}
                           <p className="text-sm text-prussian_blue-300">
-                              Category: {saved.category || 'Potential Matches'}
+                              Category: {saved.category}
                           </p>
                       </div>
                       <svg

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { getAuthHeaders } from '../utils/auth';
+import { api } from './providerService';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 axios.defaults.headers.common['Content-Type'] = 'application/json';
@@ -13,20 +14,17 @@ export const fetchSavedProviders = async () => {
 
     try {
         console.log('Fetching saved providers...');
-        const response = await axios.get(
-            `${BACKEND_URL}/saved-therapists`,
-            getAuthHeaders()
-        );
+        const response = await api.get('/saved-therapists');
+        console.log('Raw saved providers response:', response.data);
         
-        console.log('Saved providers response:', response.data);
-        
+        // Return just the array of saved providers
         return response.data.savedProviders || [];
     } catch (error) {
-        console.error('Error fetching saved providers:', error);
-        if (error.response?.status === 401) {
-            return [];
-        }
-        throw error;
+        console.error('Error fetching saved providers:', {
+            message: error.message,
+            response: error.response?.data
+        });
+        return [];
     }
 };
 
