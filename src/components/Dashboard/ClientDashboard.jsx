@@ -36,15 +36,15 @@ export const ClientDashboard = () => {
                 fetchSavedProviders()
             ]);
     
-            console.log('Fetched appointments:', appointmentsResult);
-            console.log('Fetched saved providers:', providersResult);
+            console.log('Raw appointments result:', appointmentsResult);
+            console.log('Raw providers result:', providersResult);
     
             setAppointments(appointmentsResult || []);
-            
-            // Handle saved providers data
-            if (providersResult && Array.isArray(providersResult)) {
+    
+            // Safely handle the saved providers data
+            if (Array.isArray(providersResult)) {
                 setSavedProviders(providersResult);
-            } else if (providersResult && Array.isArray(providersResult.savedProviders)) {
+            } else if (providersResult?.savedProviders && Array.isArray(providersResult.savedProviders)) {
                 setSavedProviders(providersResult.savedProviders);
             } else {
                 console.warn('Unexpected saved providers format:', providersResult);
@@ -52,7 +52,10 @@ export const ClientDashboard = () => {
             }
     
         } catch (err) {
-            console.error("Dashboard data fetch error:", err);
+            console.error("Dashboard data fetch error:", {
+                message: err.message,
+                response: err.response?.data
+            });
             setError({ general: "Failed to load dashboard data" });
         } finally {
             setLoading(false);
@@ -64,11 +67,14 @@ export const ClientDashboard = () => {
   
   // Add a debug useEffect
   useEffect(() => {
-      console.log('Current saved providers:', {
-          count: savedProviders?.length,
-          providers: savedProviders
-      });
-  }, [savedProviders]);
+    if (savedProviders?.length > 0) {
+        console.log('Current saved providers:', {
+            count: savedProviders.length,
+            firstProvider: savedProviders[0],
+            allProviders: savedProviders
+        });
+    }
+}, [savedProviders]);
   
   
 
@@ -231,82 +237,98 @@ export const ClientDashboard = () => {
         <p className="text-sm text-sunglow-700">{error.providers}</p>
     </div>
 ) : savedProviders && savedProviders.length > 0 ? (
-  <div className="space-y-4">
-      {savedProviders.map((saved) => (
-          <div
-              key={saved._id}
-              className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
-              onClick={() => navigate(`/providerlist/${saved.providerId._id}`)}
-          >
-              <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
-                      <span className="text-celestial_blue-500 font-medium">
-                          {saved.providerId?.firstName?.[0]}
-                          {saved.providerId?.lastName?.[0]}
-                      </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                      <p className="font-medium text-prussian_blue-500">
-                          Dr. {saved.providerId?.firstName} {saved.providerId?.lastName}
-                      </p>
-                      {saved.providerId?.specialties && (
-                          <p className="text-sm text-prussian_blue-300 truncate">
-                              {saved.providerId.specialties.slice(0, 2).join(", ")}
-                              {saved.providerId.specialties.length > 2 && "..."}
-                          </p>
-                      )}
-                      <p className="text-sm text-prussian_blue-300">
-                          Category: {saved.category || 'Potential Matches'}
-                      </p>
-                  </div>
-                  <svg
-                      className="w-5 h-5 text-celestial_blue-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                  >
-                      <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
-                      />
-                  </svg>
-              </div>
-          </div>
-      ))}
-  </div>
-) : (
-                                    <div className="text-center py-8">
-                                        <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-alice_blue-50 flex items-center justify-center">
-                                            <svg
-                                                className="w-8 h-8 text-celestial_blue-500"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
-                                                />
-                                            </svg>
-                                        </div>
-                                        <p className="text-prussian_blue-400 mb-2">
-                                            No saved providers yet
-                                        </p>
-                                        <p className="text-sm text-prussian_blue-300 mb-4">
-                                            Browse our provider list to find the right match for you.
-                                        </p>
-                                        <Link
-                                            to="/providerlist"
-                                            className="inline-flex items-center gap-2 px-6 py-2 rounded-lg text-white bg-celestial_blue-500 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300"
-                                        >
-                                            Find Providers
-                                        </Link>
-                                    </div>
+    <div className="space-y-4">
+        {savedProviders.map((saved) => {
+            // Check if provider exists and has required fields
+            const provider = saved.provider || {};
+            const providerName = provider.name || 'Provider Name Not Available';
+            const initials = providerName.split(' ')
+                .map(n => n[0])
+                .slice(0, 2)
+                .join('');
+
+            return (
+                <div
+                    key={saved.savedId}
+                    className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+                    onClick={() => navigate(`/providerlist/${provider.id}`)}
+                >
+                    <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
+                            <span className="text-celestial_blue-500 font-medium">
+                                {initials}
+                            </span>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-medium text-prussian_blue-500">
+                                {providerName}
+                            </p>
+                            {provider.specialties && provider.specialties.length > 0 && (
+                                <p className="text-sm text-prussian_blue-300 truncate">
+                                    {provider.specialties.slice(0, 2).join(", ")}
+                                    {provider.specialties.length > 2 && "..."}
+                                </p>
+                            )}
+                            <div className="flex items-center gap-2 mt-1">
+                                {provider.credentials && (
+                                    <span className="text-sm text-prussian_blue-300">
+                                        {provider.credentials}
+                                    </span>
                                 )}
+                                <span className="text-sm text-prussian_blue-300">
+                                    {saved.category || 'Potential Matches'}
+                                </span>
+                            </div>
+                        </div>
+                        <svg
+                            className="w-5 h-5 text-celestial_blue-500"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 5l7 7-7 7"
+                            />
+                        </svg>
+                    </div>
+                </div>
+            );
+        })}
+    </div>
+) : (
+  <div className="text-center py-8">
+      <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-alice_blue-50 flex items-center justify-center">
+          <svg
+              className="w-8 h-8 text-celestial_blue-500"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+          >
+              <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+              />
+          </svg>
+      </div>
+      <p className="text-prussian_blue-400 mb-2">
+          No saved providers yet
+      </p>
+      <p className="text-sm text-prussian_blue-300 mb-4">
+          Browse our provider list to find the right match for you.
+      </p>
+      <Link
+          to="/providerlist"
+          className="inline-flex items-center gap-2 px-6 py-2 rounded-lg text-white bg-celestial_blue-500 hover:-translate-y-0.5 hover:shadow-md transition-all duration-300"
+      >
+          Find Providers
+      </Link>
+  </div>
+)}
                             </div>
                         </div>
 
