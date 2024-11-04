@@ -7,30 +7,21 @@ axios.defaults.withCredentials = true;
 
 export const fetchSavedProviders = async () => {
     if (!localStorage.getItem('token')) {
-        console.log('No token found, returning empty providers list');
-        return [];
+        return { savedProviders: [] };
     }
 
     try {
-        console.log('Fetching saved providers...');
         const response = await axios.get(
-            `${BACKEND_URL}/saved-therapists`,
+            `${BACKEND_URL}/clients/dashboard/saved-providers`,
             getAuthHeaders()
         );
-        console.log('Saved providers response:', response.data);
-        
-        // Return the savedProviders array from the response
-        return response.data.savedProviders || [];
+        return response.data;
     } catch (error) {
-        console.error('Error fetching saved providers:', {
-            status: error.response?.status,
-            data: error.response?.data,
-            message: error.message
-        });
         if (error.response?.status === 401) {
-            return [];
+            return { savedProviders: [] };
         }
-        throw error;
+        console.error('Unexpected error fetching saved providers:', error);
+        return { savedProviders: [] };
     }
 };
 
@@ -47,19 +38,6 @@ export const fetchProviderDetails = async (providerId) => {
     }
 };
 
-export const updateSavedProvider = async (savedId, updateData) => {
-    try {
-        const response = await axios.put(
-            `${BACKEND_URL}/saved-therapists/${savedId}`,
-            updateData,
-            getAuthHeaders()
-        );
-        return response.data;
-    } catch (error) {
-        console.error('Error updating saved provider:', error);
-        throw error;
-    }
-};
 export const fetchClientAppointments = async () => {
     try {
         console.log('Fetching client appointments...');
@@ -163,33 +141,17 @@ export const updateProviderAvailability = async (availabilityData) => {
 // Add function to save a provider for clients
 export const saveProvider = async (providerId) => {
     try {
-        console.log('Saving provider:', providerId);
         const response = await axios.post(
-            `${BACKEND_URL}/saved-therapists`,
+            `${BACKEND_URL}/clients/save-provider`,
             { providerId },
             getAuthHeaders()
         );
-        console.log('Save provider response:', response.data);
         return response.data;
     } catch (error) {
-        console.error('Error saving provider:', {
-            status: error.response?.status,
-            data: error.response?.data,
-            message: error.message
-        });
-        throw error;
-    }
-};
-
-export const unsaveProvider = async (savedId) => {
-    try {
-        const response = await axios.delete(
-            `${BACKEND_URL}/saved-therapists/${savedId}`,
-            getAuthHeaders()
-        );
-        return response.data;
-    } catch (error) {
-        console.error('Error unsaving provider:', error);
+        if (error.response?.status === 401) {
+            console.error('Authentication token missing or invalid');
+        }
+        console.error('Error saving provider:', error);
         throw error;
     }
 };
