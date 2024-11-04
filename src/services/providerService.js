@@ -57,18 +57,16 @@ export const fetchProviderDetails = async (providerId) => {
 // Save provider (for clients)
 export const saveProvider = async (providerId) => {
     try {
+        console.log('Saving provider:', providerId);
         const response = await axios.post(
             `${BACKEND_URL}/saved-therapists`,
-            { 
-                providerId,
-                category: 'Potential Matches' // default category
-            },
+            { providerId },
             getAuthHeaders()
         );
         console.log('Save provider response:', response.data);
         return response.data;
     } catch (error) {
-        console.error("Error saving provider:", error);
+        console.error('Error saving provider:', error);
         throw error;
     }
 };
@@ -76,11 +74,12 @@ export const saveProvider = async (providerId) => {
 //remove provider from favorites for clients
 export const removeSavedProvider = async (savedId) => {
     try {
+        console.log('Removing saved provider:', savedId);
         const response = await axios.delete(
             `${BACKEND_URL}/saved-therapists/${savedId}`,
             getAuthHeaders()
         );
-        console.log('Remove saved provider response:', response.data);
+        console.log('Remove provider response:', response.data);
         return response.data;
     } catch (error) {
         console.error('Error removing saved provider:', error);
@@ -99,6 +98,22 @@ export const isProviderSaved = async (providerId) => {
     } catch (error) {
         console.error('Error checking if provider is saved:', error);
         return false;
+    }
+};
+
+export const updateSavedProvider = async (savedId, updateData) => {
+    try {
+        console.log('Updating saved provider:', { savedId, updateData });
+        const response = await axios.put(
+            `${BACKEND_URL}/saved-therapists/${savedId}`,
+            updateData,
+            getAuthHeaders()
+        );
+        console.log('Update provider response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating saved provider:', error);
+        throw error;
     }
 };
 
