@@ -30,43 +30,25 @@ export const ClientDashboard = () => {
             setLoading(true);
             setError(null);
     
-            console.log('Fetching dashboard data...');
+            // Fetch appointments first
+            const appointmentsResult = await fetchClientAppointments();
+            console.log('Fetched appointments:', appointmentsResult);
+            setAppointments(appointmentsResult);
     
-            // Fetch both data sets in parallel
-            const [appointmentsResult, providersResult] = await Promise.all([
-                fetchClientAppointments(),
-                fetchSavedProviders()
-            ]);
-    
-            console.log('Raw appointments result:', appointmentsResult);
-            console.log('Raw providers result:', providersResult);
-    
-            setAppointments(appointmentsResult || []);
-    
-            // Handle saved providers data with detailed logging
-            if (providersResult) {
-                console.log('Processing saved providers:', providersResult);
+            // Fetch saved providers
+            const providersResult = await fetchSavedProviders();
+            console.log('Raw saved providers result:', providersResult);
+            
+            // Handle the data structure
+            const savedProvidersData = Array.isArray(providersResult) 
+                ? providersResult 
+                : providersResult?.savedProviders || [];
                 
-                let providersToSet = [];
-                if (Array.isArray(providersResult)) {
-                    providersToSet = providersResult;
-                } else if (providersResult.savedProviders && Array.isArray(providersResult.savedProviders)) {
-                    providersToSet = providersResult.savedProviders;
-                }
-    
-                console.log('Setting saved providers:', providersToSet);
-                setSavedProviders(providersToSet);
-            } else {
-                console.log('No providers result, setting empty array');
-                setSavedProviders([]);
-            }
+            console.log('Processed saved providers:', savedProvidersData);
+            setSavedProviders(savedProvidersData);
     
         } catch (err) {
-            console.error("Dashboard data fetch error:", {
-                message: err.message,
-                response: err.response?.data,
-                stack: err.stack
-            });
+            console.error("Dashboard data fetch error:", err);
             setError({ general: "Failed to load dashboard data" });
         } finally {
             setLoading(false);
@@ -79,8 +61,7 @@ export const ClientDashboard = () => {
   // Add a debug useEffect
   useEffect(() => {
     if (savedProviders?.length > 0) {
-        console.log('Current saved providers:', {
-            count: savedProviders.length,
+        console.log('Saved Providers Data Structure:', {
             firstProvider: savedProviders[0],
             allProviders: savedProviders
         });
@@ -94,11 +75,20 @@ export const ClientDashboard = () => {
     }, [appointments]);
 
     const formatProviderName = (provider) => {
-        if (provider?.name) return provider.name;
-        return provider?.firstName && provider?.lastName
-            ? `Dr. ${provider.firstName} ${provider.lastName}`
-            : provider?.email || "Provider Name Not Available";
-    };
+      if (!provider) return "Provider Name Not Available";
+      
+      // If it's a populated provider document
+      if (provider.firstName && provider.lastName) {
+          return `Dr. ${provider.firstName} ${provider.lastName}`;
+      }
+      
+      // If it's a nested provider object
+      if (provider.providerId?.firstName && provider.providerId?.lastName) {
+          return `Dr. ${provider.providerId.firstName} ${provider.providerId.lastName}`;
+      }
+      
+      return provider.email || "Provider Name Not Available";
+  };
 
     const loadAppointments = async () => {
         try {
@@ -247,76 +237,59 @@ export const ClientDashboard = () => {
     <div className="p-4 rounded-lg bg-sunglow-50 border border-sunglow-200">
         <p className="text-sm text-sunglow-700">{error.providers}</p>
     </div>
-) : savedProviders && savedProviders.length > 0 ? (
-    <div className="space-y-4">
-        {savedProviders.map((saved) => {
-            // Debug log to see the structure of each saved provider
-            console.log('Saved provider data:', saved);
+) : savedProviders.length > 0 ? (
+  <div className="space-y-4">
+      {savedProviders.map((saved) => {
+          // Get provider info from the populated providerId field
+          const provider = saved.providerId || {};
+          const firstName = provider.firstName || '';
+          const lastName = provider.lastName || '';
+          const initials = `${firstName[0] || ''}${lastName[0] || ''}`;
 
-            return (
-                <div
-                    key={saved.savedId || saved._id}
-                    className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
-                    onClick={() => {
-                        // Safely handle navigation with fallbacks
-                        const providerId = saved.providerId?._id || saved.provider?.id || saved._id;
-                        if (providerId) {
-                            console.log('Navigating to provider:', providerId);
-                            navigate(`/providerlist/${providerId}`);
-                        } else {
-                            console.error('No provider ID found for:', saved);
-                        }
-                    }}
-                >
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
-                            <span className="text-celestial_blue-500 font-medium">
-                                {(saved.providerId?.firstName?.[0] || '')}
-                                {(saved.providerId?.lastName?.[0] || '')}
-                            </span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="font-medium text-prussian_blue-500">
-                                {saved.providerId ? 
-                                    `Dr. ${saved.providerId.firstName} ${saved.providerId.lastName}` :
-                                    'Provider Name Not Available'
-                                }
-                            </p>
-                            {saved.providerId?.specialties && (
-                                <p className="text-sm text-prussian_blue-300 truncate">
-                                    {saved.providerId.specialties.slice(0, 2).join(", ")}
-                                    {saved.providerId.specialties.length > 2 && "..."}
-                                </p>
-                            )}
-                            <div className="flex items-center gap-2 mt-1">
-                                {saved.providerId?.credentials && (
-                                    <span className="text-sm text-prussian_blue-300">
-                                        {saved.providerId.credentials}
-                                    </span>
-                                )}
-                                <span className="text-sm text-prussian_blue-300">
-                                    {saved.category || 'Potential Matches'}
-                                </span>
-                            </div>
-                        </div>
-                        <svg
-                            className="w-5 h-5 text-celestial_blue-500"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                        >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 5l7 7-7 7"
-                            />
-                        </svg>
-                    </div>
-                </div>
-            );
-        })}
-    </div>
+          return (
+              <div
+                  key={saved._id}
+                  className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+                  onClick={() => navigate(`/providerlist/${provider._id}`)}
+              >
+                  <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
+                          <span className="text-celestial_blue-500 font-medium">
+                              {initials}
+                          </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                          <p className="font-medium text-prussian_blue-500">
+                              {firstName && lastName ? `Dr. ${firstName} ${lastName}` : 'Provider Name Not Available'}
+                          </p>
+                          {provider.specialties && (
+                              <p className="text-sm text-prussian_blue-300 truncate">
+                                  {provider.specialties.slice(0, 2).join(", ")}
+                                  {provider.specialties.length > 2 && "..."}
+                              </p>
+                          )}
+                          <p className="text-sm text-prussian_blue-300">
+                              Category: {saved.category || 'Potential Matches'}
+                          </p>
+                      </div>
+                      <svg
+                          className="w-5 h-5 text-celestial_blue-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                      >
+                          <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                          />
+                      </svg>
+                  </div>
+              </div>
+          );
+      })}
+  </div>
 ) : (
   <div className="text-center py-8">
       <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-alice_blue-50 flex items-center justify-center">
