@@ -225,49 +225,63 @@ export const ClientDashboard = () => {
     </div>
 ) : savedProviders.length > 0 ? (
   <div className="space-y-4">
-      {savedProviders.map((saved) => (
-          <div
-              key={saved._id}
-              className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
-              onClick={() => navigate(`/providerlist/${saved.providerId._id}`)}
-          >
-              <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
-                      <span className="text-celestial_blue-500 font-medium">
-                          {saved.providerId?.firstName?.[0]}
-                          {saved.providerId?.lastName?.[0]}
-                      </span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                      <p className="font-medium text-prussian_blue-500">
-                          Dr. {saved.providerId?.firstName} {saved.providerId?.lastName}
-                      </p>
-                      {saved.providerId?.specialties && (
-                          <p className="text-sm text-prussian_blue-300 truncate">
-                              {saved.providerId.specialties.slice(0, 2).join(", ")}
-                              {saved.providerId.specialties.length > 2 && "..."}
+      {savedProviders.map((saved) => {
+          // Add debug log
+          console.log('Saved provider data:', saved);
+          
+          return (
+              <div
+                  key={saved._id}
+                  className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+                  onClick={() => {
+                      // Add safe navigation and logging
+                      console.log('Clicking provider:', saved);
+                      const providerId = saved.providerId?._id;
+                      if (providerId) {
+                          navigate(`/providerlist/${providerId}`);
+                      } else {
+                          console.error('No provider ID found:', saved);
+                      }
+                  }}
+              >
+                  <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
+                          <span className="text-celestial_blue-500 font-medium">
+                              {saved.providerId?.firstName?.[0]}
+                              {saved.providerId?.lastName?.[0]}
+                          </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                          <p className="font-medium text-prussian_blue-500">
+                              Dr. {saved.providerId?.firstName} {saved.providerId?.lastName}
                           </p>
-                      )}
-                      <p className="text-sm text-prussian_blue-300">
-                          Category: {saved.category || 'Potential Matches'}
-                      </p>
+                          {saved.providerId?.specialties && (
+                              <p className="text-sm text-prussian_blue-300 truncate">
+                                  {saved.providerId.specialties.slice(0, 2).join(", ")}
+                                  {saved.providerId.specialties.length > 2 && "..."}
+                              </p>
+                          )}
+                          <p className="text-sm text-prussian_blue-300">
+                              Category: {saved.category || 'Potential Matches'}
+                          </p>
+                      </div>
+                      <svg
+                          className="w-5 h-5 text-celestial_blue-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                      >
+                          <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M9 5l7 7-7 7"
+                          />
+                      </svg>
                   </div>
-                  <svg
-                      className="w-5 h-5 text-celestial_blue-500"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                  >
-                      <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M9 5l7 7-7 7"
-                      />
-                  </svg>
               </div>
-          </div>
-      ))}
+          );
+      })}
   </div>
 ) : (
   <div className="text-center py-8">
