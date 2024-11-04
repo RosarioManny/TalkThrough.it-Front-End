@@ -279,9 +279,6 @@ export const ClientDashboard = () => {
                                                   {(saved.providerId?.specialties || saved.provider?.specialties).length > 2 && "..."}
                                               </p>
                                           )}
-                                          <p className="text-sm text-prussian_blue-300">
-                                              Category: {saved.category || 'Potential Matches'}
-                                          </p>
                                       </div>
                                       <svg
                                           className="w-5 h-5 text-celestial_blue-500"
