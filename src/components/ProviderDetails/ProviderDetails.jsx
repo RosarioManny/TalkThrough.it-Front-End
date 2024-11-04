@@ -34,56 +34,61 @@ export const ProviderDetails = ({
 
   useEffect(() => {
     if (modalProvider) {
-      setProvider(modalProvider);
-      return;
+        setProvider(modalProvider);
+        setLoading(false);
+        return;
     }
-
+    if (providerId) {
+      loadProviderData();
+  }
     const loadProviderData = async () => {
       try {
-        setLoading(true);
-        setError(null);
-
-        // Fetch provider details
-        const providerData =
-          isModal || !user
-            ? await fetchProviderPublicDetails(providerId)
-            : await fetchProviderDetails(providerId);
-
-        setProvider(providerData.provider || providerData);
-
-        // Check if provider is saved for clients
-        // In the useEffect where you check if provider is saved
-        if (user?.type === "client") {
-          const saved = await isProviderSaved(providerId);
-          setIsSaved(saved);
-
-          // Get saved providers to find the savedId
-          const savedProvidersData = await fetchSavedProviders();
-          const savedProvider = savedProvidersData.find(
-            (sp) => sp.providerId?._id === providerId
-          );
-          if (savedProvider) {
-            setSavedId(savedProvider._id);
+          setLoading(true);
+          setError(null);
+  
+          if (modalProvider) {
+              setProvider(modalProvider);
+              return;
           }
-        }
-
-        // Fetch availability if needed
-        if (!isModal) {
-          try {
-            const availabilityData = await getProviderAvailability(providerId);
-            setAvailability(formatAvailabilityForDisplay(availabilityData));
-          } catch (err) {
-            console.warn("Error loading availability:", err);
-            setAvailability([]);
+  
+          const providerData = await fetchProviderDetails(providerId);
+          console.log('Fetched provider data:', providerData);
+          
+          // Set the provider data
+          setProvider(providerData.provider || providerData);
+  
+          // Check if provider is saved for clients
+          if (user?.type === "client") {
+              const saved = await isProviderSaved(providerId);
+              setIsSaved(saved);
+  
+              // Get saved providers to find the savedId
+              const savedProvidersData = await fetchSavedProviders();
+              const savedProvider = savedProvidersData.find(
+                  (sp) => sp.providerId?._id === providerId
+              );
+              if (savedProvider) {
+                  setSavedId(savedProvider._id);
+              }
           }
-        }
+  
+          // Fetch availability if needed
+          if (!isModal) {
+              try {
+                  const availabilityData = await getProviderAvailability(providerId);
+                  setAvailability(formatAvailabilityForDisplay(availabilityData));
+              } catch (err) {
+                  console.warn("Error loading availability:", err);
+                  setAvailability([]);
+              }
+          }
       } catch (err) {
-        console.error("Error loading provider data:", err);
-        setError("Failed to load provider information");
+          console.error("Error loading provider data:", err);
+          setError("Failed to load provider information");
       } finally {
-        setLoading(false);
+          setLoading(false);
       }
-    };
+  };
 
     if (providerId) {
       loadProviderData();
