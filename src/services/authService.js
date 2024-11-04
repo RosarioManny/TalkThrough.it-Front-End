@@ -4,6 +4,29 @@ import { isTokenExpired } from "../utils/auth";
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
+// Configure axios defaults
+const axiosInstance = axios.create({
+    baseURL: BACKEND_URL,
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    withCredentials: true  // Important for CORS requests with credentials
+});
+
+// Request interceptor to add authorization header
+axiosInstance.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
+
 const handleAuthSuccess = (response) => {
     if (response.data.token) {
         localStorage.setItem('token', response.data.token);
