@@ -17,13 +17,10 @@ export const fetchSavedProviders = async () => {
         const response = await api.get('/saved-therapists');
         console.log('Raw saved providers response:', response.data);
         
-        // Return just the array of saved providers
+        // Return the raw array of saved providers
         return response.data.savedProviders || [];
     } catch (error) {
-        console.error('Error fetching saved providers:', {
-            message: error.message,
-            response: error.response?.data
-        });
+        console.error('Error fetching saved providers:', error);
         return [];
     }
 };

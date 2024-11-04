@@ -30,15 +30,17 @@ export const ClientDashboard = () => {
             setLoading(true);
             setError(null);
     
-            // Fetch appointments first
-            const appointmentsResult = await fetchClientAppointments();
-            console.log('Fetched appointments:', appointmentsResult);
-            setAppointments(appointmentsResult);
+            // Fetch both data sets
+            const [appointmentsResult, savedProvidersResult] = await Promise.all([
+                fetchClientAppointments(),
+                fetchSavedProviders()
+            ]);
     
-            // Fetch saved providers
-            const providersResult = await fetchSavedProviders();
-            console.log('Fetched saved providers result:', providersResult);
-            setSavedProviders(providersResult.savedProviders || []);
+            console.log('Fetched appointments:', appointmentsResult);
+            console.log('Fetched saved providers:', savedProvidersResult);
+    
+            setAppointments(appointmentsResult || []);
+            setSavedProviders(savedProvidersResult || []);
     
         } catch (err) {
             console.error("Dashboard data fetch error:", err);
@@ -221,54 +223,51 @@ export const ClientDashboard = () => {
     <div className="p-4 rounded-lg bg-sunglow-50 border border-sunglow-200">
         <p className="text-sm text-sunglow-700">{error.providers}</p>
     </div>
-) : savedProviders && savedProviders.length > 0 ? (
+) : savedProviders.length > 0 ? (
   <div className="space-y-4">
-      {savedProviders.map((saved) => {
-          console.log('Rendering saved provider:', saved); // Debug log
-          return (
-              <div
-                  key={saved.savedId}
-                  className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
-                  onClick={() => navigate(`/providerlist/${saved.provider.id}`)}
-              >
-                  <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
-                          <span className="text-celestial_blue-500 font-medium">
-                              {saved.provider.name.split(' ')[0][0]}
-                              {saved.provider.name.split(' ')[1][0]}
-                          </span>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                          <p className="font-medium text-prussian_blue-500">
-                              {saved.provider.name}
-                          </p>
-                          {saved.provider.specialties && (
-                              <p className="text-sm text-prussian_blue-300 truncate">
-                                  {saved.provider.specialties.slice(0, 2).join(", ")}
-                                  {saved.provider.specialties.length > 2 && "..."}
-                              </p>
-                          )}
-                          <p className="text-sm text-prussian_blue-300">
-                              Category: {saved.category}
-                          </p>
-                      </div>
-                      <svg
-                          className="w-5 h-5 text-celestial_blue-500"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          stroke="currentColor"
-                      >
-                          <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 5l7 7-7 7"
-                          />
-                      </svg>
+      {savedProviders.map((saved) => (
+          <div
+              key={saved._id}
+              className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+              onClick={() => navigate(`/providerlist/${saved.providerId._id}`)}
+          >
+              <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
+                      <span className="text-celestial_blue-500 font-medium">
+                          {saved.providerId?.firstName?.[0]}
+                          {saved.providerId?.lastName?.[0]}
+                      </span>
                   </div>
+                  <div className="flex-1 min-w-0">
+                      <p className="font-medium text-prussian_blue-500">
+                          Dr. {saved.providerId?.firstName} {saved.providerId?.lastName}
+                      </p>
+                      {saved.providerId?.specialties && (
+                          <p className="text-sm text-prussian_blue-300 truncate">
+                              {saved.providerId.specialties.slice(0, 2).join(", ")}
+                              {saved.providerId.specialties.length > 2 && "..."}
+                          </p>
+                      )}
+                      <p className="text-sm text-prussian_blue-300">
+                          Category: {saved.category || 'Potential Matches'}
+                      </p>
+                  </div>
+                  <svg
+                      className="w-5 h-5 text-celestial_blue-500"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                  >
+                      <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M9 5l7 7-7 7"
+                      />
+                  </svg>
               </div>
-          );
-      })}
+          </div>
+      ))}
   </div>
 ) : (
   <div className="text-center py-8">
