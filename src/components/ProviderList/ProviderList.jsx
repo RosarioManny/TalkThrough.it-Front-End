@@ -472,6 +472,7 @@ export const ProviderList = () => {
   const [selectedProvider, setSelectedProvider] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [showModal, setShowModal] = useState(false);
   const [filters, setFilters] = useState({
     location: "",
     specialties: "",
@@ -850,12 +851,12 @@ export const ProviderList = () => {
 
       {/* Modal */}
       {selectedProvider && (
-        <ProviderDetails
-          isModal={true}
-          modalProvider={selectedProvider}
-          onClose={() => setSelectedProvider(null)}
-        />
-      )}
+    <ProviderDetails
+        isModal={true}
+        modalProvider={selectedProvider}
+        onClose={() => setSelectedProvider(null)}
+    />
+)}
 
       {filteredProviders.length === 0 && (
         <div className="flex flex-col items-center justify-center py-16 px-4">
