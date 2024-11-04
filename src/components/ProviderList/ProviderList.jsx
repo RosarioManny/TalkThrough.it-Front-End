@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { theme } from "../../styles/theme";
 import { fetchProviders } from "../../services/providerService";
-import { ProviderDetails } from "../ProviderDetails/ProviderDetails";
+import ProviderDetailsWrapper from "../ProviderDetails/ProviderDetails";
 import { debounce } from "lodash";
 
 // Filter Configuration Constants
@@ -851,7 +851,7 @@ export const ProviderList = () => {
 
       {/* Modal */}
       {selectedProvider && (
-    <ProviderDetails
+    <ProviderDetailsWrapper
         isModal={true}
         modalProvider={selectedProvider}
         onClose={() => setSelectedProvider(null)}
