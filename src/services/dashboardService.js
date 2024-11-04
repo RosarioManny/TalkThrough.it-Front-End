@@ -9,7 +9,7 @@ axios.defaults.withCredentials = true;
 export const fetchSavedProviders = async () => {
     if (!localStorage.getItem('token')) {
         console.log('No token found, returning empty providers list');
-        return { savedProviders: [] };
+        return [];
     }
 
     try {
@@ -17,8 +17,15 @@ export const fetchSavedProviders = async () => {
         const response = await api.get('/saved-therapists');
         console.log('Raw saved providers response:', response.data);
 
-        // Return the savedProviders array directly since we're handling the structure in components
-        return response.data.savedProviders || [];
+        if (!response.data || (!response.data.savedProviders && !Array.isArray(response.data))) {
+            console.warn('Unexpected response format:', response.data);
+            return [];
+        }
+
+        const providers = response.data.savedProviders || response.data;
+        console.log('Processed saved providers:', providers);
+        
+        return providers;
     } catch (error) {
         console.error('Error fetching saved providers:', error);
         return [];

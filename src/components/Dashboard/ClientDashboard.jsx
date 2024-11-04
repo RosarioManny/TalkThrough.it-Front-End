@@ -228,36 +228,55 @@ export const ClientDashboard = () => {
                 ) : savedProviders.length > 0 ? (
                   <div className="space-y-4">
                       {savedProviders.map((saved) => {
-                          console.log('Saved provider data:', saved); // Debug log
+                          // Debug log to see the full structure
+                          console.log('Full saved provider data:', saved);
+                          console.log('Provider data:', saved.provider);
+                          // Access providerId directly from the saved object
+                          const providerId = saved.providerId?._id || saved.provider?.id;
+              
                           return (
                               <div
-                                  key={saved.savedId}
+                                  key={saved.savedId || saved._id}
                                   className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
                                   onClick={() => {
-                                      console.log('Clicking provider:', saved);
-                                      const providerId = saved.provider?.id;
                                       if (providerId) {
+                                          console.log('Navigating to provider:', providerId);
                                           navigate(`/providerlist/${providerId}`);
                                       } else {
-                                          console.error('No provider ID found in:', saved);
+                                          console.error('Provider data structure:', saved);
+                                          console.error('ProviderId not found in saved provider data');
                                       }
                                   }}
                               >
                                   <div className="flex items-center gap-3">
                                       <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
                                           <span className="text-celestial_blue-500 font-medium">
-                                              {saved.provider?.name?.split(' ')[0]?.[0]}
-                                              {saved.provider?.name?.split(' ')[1]?.[0]}
+                                              {saved.providerId ? (
+                                                  // If using providerId structure
+                                                  <>
+                                                      {saved.providerId.firstName?.[0]}
+                                                      {saved.providerId.lastName?.[0]}
+                                                  </>
+                                              ) : (
+                                                  // If using provider.name structure
+                                                  saved.provider?.name?.split(' ').map(n => n[0]).join('')
+                                              )}
                                           </span>
                                       </div>
                                       <div className="flex-1 min-w-0">
                                           <p className="font-medium text-prussian_blue-500">
-                                              {saved.provider?.name}
+                                              {saved.providerId ? (
+                                                  `Dr. ${saved.providerId.firstName} ${saved.providerId.lastName}`
+                                              ) : (
+                                                  saved.provider?.name
+                                              )}
                                           </p>
-                                          {saved.provider?.specialties && (
+                                          {(saved.providerId?.specialties || saved.provider?.specialties) && (
                                               <p className="text-sm text-prussian_blue-300 truncate">
-                                                  {saved.provider.specialties.slice(0, 2).join(", ")}
-                                                  {saved.provider.specialties.length > 2 && "..."}
+                                                  {(saved.providerId?.specialties || saved.provider?.specialties)
+                                                      .slice(0, 2)
+                                                      .join(", ")}
+                                                  {(saved.providerId?.specialties || saved.provider?.specialties).length > 2 && "..."}
                                               </p>
                                           )}
                                           <p className="text-sm text-prussian_blue-300">
