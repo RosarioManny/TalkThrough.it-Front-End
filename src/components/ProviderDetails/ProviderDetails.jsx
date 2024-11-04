@@ -52,6 +52,7 @@ export const ProviderDetails = ({
         setProvider(providerData.provider || providerData);
 
         // Check if provider is saved for clients
+        // In the useEffect where you check if provider is saved
         if (user?.type === "client") {
           const saved = await isProviderSaved(providerId);
           setIsSaved(saved);
@@ -59,12 +60,10 @@ export const ProviderDetails = ({
           // Get saved providers to find the savedId
           const savedProvidersData = await fetchSavedProviders();
           const savedProvider = savedProvidersData.find(
-            (sp) =>
-              sp.providerId?._id === providerId ||
-              sp.provider?.id === providerId
+            (sp) => sp.providerId?._id === providerId
           );
           if (savedProvider) {
-            setSavedId(savedProvider._id || savedProvider.savedId);
+            setSavedId(savedProvider._id);
           }
         }
 
