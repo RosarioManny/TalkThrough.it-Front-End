@@ -101,31 +101,41 @@ export const signin = async (userData) => {
   }
 };
 
-
 export const getUser = () => {
-    if (isTokenExpired()) {
-        signOut();
-        return null;
-    }
-
     try {
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            return JSON.parse(storedUser);
-        }
-
         const token = localStorage.getItem('token');
         if (!token) return null;
         
-        const user = JSON.parse(atob(token.split('.')[1]));
-        localStorage.setItem('user', JSON.stringify(user));
-        return user;
+        const decodedToken = JSON.parse(atob(token.split('.')[1]));
+        const expirationTime = decodedToken.exp * 1000;
+
+        // Log token information for debugging
+        console.log('Token decode result:', {
+            ...decodedToken,
+            exp: new Date(expirationTime).toLocaleString()
+        });
+
+        if (Date.now() >= expirationTime) {
+            console.log('Token expired, signing out');
+            signOut();
+            return null;
+        }
+
+        // Return full user object with all needed fields
+        return {
+            _id: decodedToken._id,
+            type: decodedToken.type,
+            firstName: decodedToken.firstName,
+            lastName: decodedToken.lastName,
+            email: decodedToken.email
+        };
     } catch (error) {
-        console.error('Error getting user data:', error);
+        console.error('Error decoding token:', error);
         signOut();
         return null;
     }
 };
+
 
 export const signOut = () => {
     localStorage.removeItem('token');
