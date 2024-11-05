@@ -222,16 +222,21 @@ export const ProviderDetails = ({
         setSavedProviders(updatedProviders);
         
         setSuccessMessage("Provider removed from favorites");
-        
-        // Only navigate if in modal mode
+
+        // Close modal if in modal mode
         if (isModal && onClose) {
             onClose();
         }
+
+        // Refresh the current page
+        window.location.reload();
+        
     } catch (err) {
         console.error('Error removing saved provider:', err);
         setError("Failed to remove provider from favorites");
     }
 };
+
 
 
   const handleBookAppointment = () => {
