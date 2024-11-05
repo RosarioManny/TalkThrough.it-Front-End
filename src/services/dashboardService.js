@@ -14,32 +14,29 @@ export const fetchSavedProviders = async () => {
     try {
         console.log('Fetching saved providers...');
         const response = await axios.get(
-            `${BACKEND_URL}/saved-therapists`,
+            `${BACKEND_URL}/saved-therapists/details`, // Update your backend endpoint to return populated provider data
             getAuthHeaders()
         );
         console.log('Raw saved providers response:', response.data);
 
-        if (!response.data) {
-            console.warn('No data received from saved providers endpoint');
-            return [];
-        }
-
-        // Extract providers from response
         const providers = response.data.savedProviders || response.data;
+        console.log('Processed saved providers:', providers);
         
-        // Ensure we're returning an array
-        const formattedProviders = Array.isArray(providers) ? providers : [];
-        
-        console.log('Processed saved providers:', formattedProviders);
+        // Map the data to include full provider details
+        const formattedProviders = Array.isArray(providers) 
+            ? providers.map(saved => ({
+                ...saved,
+                provider: saved.providerId // Assuming providerId contains the populated provider data
+            }))
+            : [];
+
         return formattedProviders;
     } catch (error) {
-        console.error('Error fetching saved providers:', {
-            message: error.message,
-            response: error.response?.data
-        });
+        console.error('Error fetching saved providers:', error);
         return [];
     }
 };
+
 
 export const fetchProviderDetails = async (providerId) => {
     try {

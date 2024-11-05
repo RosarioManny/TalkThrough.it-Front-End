@@ -30,40 +30,51 @@ export const ProviderDetails = ({
   const [savedProviders, setSavedProviders] = useState([]);
 
   const formatDateForApi = (date) => {
-    return date.toISOString().split('T')[0]; 
-};
+    return date.toISOString().split("T")[0];
+  };
 
   useEffect(() => {
     if (modalProvider) {
+      console.log("Setting modal provider:", modalProvider);
       setProvider(modalProvider);
       return;
     }
 
     const loadProviderData = async () => {
       try {
-          setLoading(true);
-  
-          const [providerData, availabilityData] = await Promise.all([
-              isModal && !user
-                  ? fetchProviderPublicDetails(providerId)
-                  : fetchProviderDetails(providerId),
-              getProviderAvailability(providerId, formatDateForApi(selectedDate)),
-          ]);
-          console.log("Provider data:", providerData.provider);
-          setProvider(providerData.provider);
-          setAvailability(availabilityData);
+        setLoading(true);
+        setError(null);
+
+        const [providerData, availabilityData] = await Promise.all([
+          isModal && !user
+            ? fetchProviderPublicDetails(providerId)
+            : fetchProviderDetails(providerId),
+          getProviderAvailability(providerId, formatDateForApi(selectedDate)),
+        ]);
+
+        console.log("Loaded provider data:", providerData);
+
+        // Handle different response structures
+        const providerInfo = providerData.provider || providerData;
+
+        if (!providerInfo) {
+          throw new Error("Provider data not found");
+        }
+
+        setProvider(providerInfo);
+        setAvailability(availabilityData);
       } catch (err) {
-          console.error("Error loading provider data:", err);
-          setError("Failed to load provider information");
+        console.error("Error loading provider data:", err);
+        setError("Failed to load provider information");
       } finally {
-          setLoading(false);
+        setLoading(false);
       }
-  };
+    };
 
     if (providerId) {
       loadProviderData();
     }
-  }, [providerId, selectedDate, modalProvider]);
+  }, [providerId, selectedDate, modalProvider, user, isModal]);
 
   useEffect(() => {
     if (successMessage) {
@@ -75,17 +86,19 @@ export const ProviderDetails = ({
   }, [successMessage]);
 
   useEffect(() => {
-    if (user?.type === 'client') {
-        fetchSavedProviders().then((res) => {
-            setSavedProviders(res.savedProviders || []);
-        }).catch((error) => {
-            console.log('Error loading saved providers:', error);
-            setSavedProviders([]);
+    if (user?.type === "client") {
+      fetchSavedProviders()
+        .then((res) => {
+          setSavedProviders(res.savedProviders || []);
+        })
+        .catch((error) => {
+          console.log("Error loading saved providers:", error);
+          setSavedProviders([]);
         });
     } else {
-        setSavedProviders([]); 
+      setSavedProviders([]);
     }
-}, [user]);
+  }, [user]);
   const handleSaveProvider = async () => {
     try {
       await saveProvider(providerId || provider?._id);
@@ -158,7 +171,9 @@ export const ProviderDetails = ({
 
   const content = (
     <div
-      className={`${isModal ? "divide-y divide-alice_blue-200" : "space-y-6 pt-28 pb-16"}`}
+      className={`${
+        isModal ? "divide-y divide-alice_blue-200" : "space-y-6 pt-28 pb-16"
+      }`}
     >
       {successMessage && (
         <div

@@ -242,62 +242,40 @@ export const ClientDashboard = () => {
                 ) : savedProviders.length > 0 ? (
                   <div className="space-y-4">
                     {savedProviders.map((saved) => {
-                      // Check if saved exists and has an id/providerId
-                      const providerId = saved?.providerId || saved?._id;
-                      if (!providerId) return null;
-
+                      const provider = saved.providerId; // The populated provider data
                       return (
                         <div
-                          key={saved.id || saved._id}
+                          key={saved.id}
                           className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
                           onClick={() => {
                             console.log(
-                              "Clicking provider with ID:",
-                              providerId
+                              "Opening provider details for:",
+                              provider
                             );
-                            setSelectedProvider(providerId);
+                            setSelectedProvider(provider); // Pass the full provider object
                           }}
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
                               <span className="text-celestial_blue-500 font-medium">
-                                {/* Default to a generic icon if no initials */}
-                                <svg
-                                  className="w-5 h-5"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                                  />
-                                </svg>
+                                {provider?.firstName?.[0]}
+                                {provider?.lastName?.[0]}
                               </span>
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-prussian_blue-500">
-                                Saved Provider
+                                Dr. {provider?.firstName} {provider?.lastName}
                               </p>
+                              {provider?.specialties && (
+                                <p className="text-sm text-prussian_blue-300 truncate">
+                                  {provider.specialties.slice(0, 2).join(", ")}
+                                  {provider.specialties.length > 2 && "..."}
+                                </p>
+                              )}
                               <p className="text-sm text-prussian_blue-300">
-                                Click to view details
+                                {provider?.location || "Location not available"}
                               </p>
                             </div>
-                            <svg
-                              className="w-5 h-5 text-celestial_blue-500"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M9 5l7 7-7 7"
-                              />
-                            </svg>
                           </div>
                         </div>
                       );
@@ -633,8 +611,8 @@ export const ClientDashboard = () => {
               </div>
               <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
                 <ProviderDetails
-                  providerId={selectedProvider}
                   isModal={true}
+                  modalProvider={selectedProvider}
                   onClose={() => setSelectedProvider(null)}
                 />
               </div>
