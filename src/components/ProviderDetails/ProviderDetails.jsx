@@ -97,6 +97,19 @@ export const ProviderDetails = ({
   }, [successMessage]);
 
   useEffect(() => {
+    console.log("Checking saved status:", {
+        savedProviders,
+        currentProvider: provider,
+        matches: savedProviders.map(p => ({
+            savedId: p._id,
+            savedProviderId: p.providerId?._id,
+            currentProviderId: provider?._id,
+            isMatch: p.providerId?._id === provider?._id
+        }))
+    });
+}, [savedProviders, provider]);
+
+  useEffect(() => {
     if (user?.type === "client") {
       fetchSavedProviders()
         .then((res) => {
@@ -112,63 +125,61 @@ export const ProviderDetails = ({
   }, [user]);
   const handleSaveProvider = async () => {
     try {
-        // First check if user is logged in and is a client
-        if (!user) {
-            console.log('No user logged in, redirecting to login');
-            navigate('/login', { 
-                state: { from: location.pathname }  // Save current location to redirect back after login
-            });
-            return;
-        }
-
-        if (user.type !== 'client') {
-            console.log('User is not a client');
-            setError("Only clients can save providers");
-            return;
-        }
-
-        // Determine which ID to use
-        const idToSave = isModal ? provider?._id : providerId;
-        
-        console.log('Save provider attempt:', {
-            userType: user.type,
-            isModal,
-            providerId,
-            providerId_fromState: provider?._id,
-            idToSave,
+      // First check if user is logged in and is a client
+      if (!user) {
+        console.log("No user logged in, redirecting to login");
+        navigate("/login", {
+          state: { from: location.pathname }, // Save current location to redirect back after login
         });
+        return;
+      }
 
-        if (!idToSave) {
-            console.error('No provider ID available for saving');
-            setError("Unable to save provider: No ID available");
-            return;
-        }
+      if (user.type !== "client") {
+        console.log("User is not a client");
+        setError("Only clients can save providers");
+        return;
+      }
 
-        const result = await saveProvider(idToSave);
-        console.log('Save provider result:', result);
+      // Determine which ID to use
+      const idToSave = isModal ? provider?._id : providerId;
 
-        setSuccessMessage("Provider saved successfully");
+      console.log("Save provider attempt:", {
+        userType: user.type,
+        isModal,
+        providerId,
+        providerId_fromState: provider?._id,
+        idToSave,
+      });
 
-        // If we're in a modal, close it before navigating
-        if (isModal && onClose) {
-            onClose();
-        }
+      if (!idToSave) {
+        console.error("No provider ID available for saving");
+        setError("Unable to save provider: No ID available");
+        return;
+      }
 
-        navigate("/client/dashboard");
+      const result = await saveProvider(idToSave);
+      console.log("Save provider result:", result);
+
+      setSuccessMessage("Provider saved successfully");
+
+      // If we're in a modal, close it before navigating
+      if (isModal && onClose) {
+        onClose();
+      }
+
+      navigate("/client/dashboard");
     } catch (err) {
-        console.error("Save provider error:", err);
-        // If error is due to authentication, redirect to login
-        if (err.response?.status === 401) {
-            navigate('/login', { 
-                state: { from: location.pathname }
-            });
-            return;
-        }
-        setError(err.response?.data?.message || "Failed to save provider");
+      console.error("Save provider error:", err);
+      // If error is due to authentication, redirect to login
+      if (err.response?.status === 401) {
+        navigate("/login", {
+          state: { from: location.pathname },
+        });
+        return;
+      }
+      setError(err.response?.data?.message || "Failed to save provider");
     }
-};
-
-
+  };
 
   // const handleBookAppointment = () => {
   //   if (!user) {
@@ -284,7 +295,13 @@ export const ProviderDetails = ({
                 >
                   Book Appointment
                 </button>
-                {savedProviders.some((p) => p._id == provider._id) ? (
+                {savedProviders.some(
+                  (p) =>
+                    // Check multiple possible ID locations
+                    p._id === provider._id ||
+                    p.providerId?._id === provider._id ||
+                    p.providerId === provider._id
+                ) ? (
                   <div className="flex flex-wrap gap-4">
                     <button
                       onClick={handleRemoveSavedProvider}
