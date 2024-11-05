@@ -24,7 +24,7 @@ export const fetchSavedProviders = async () => {
 
         const providers = response.data.savedProviders || response.data;
         console.log('Processed saved providers:', providers);
-        
+        xq
         return providers;
     } catch (error) {
         console.error('Error fetching saved providers:', error);
