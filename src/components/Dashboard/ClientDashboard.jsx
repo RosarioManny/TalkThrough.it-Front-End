@@ -27,43 +27,41 @@ export const ClientDashboard = () => {
     }
 
     const fetchAllData = async () => {
-        try {
-            setLoading(true);
-            setError(null);
-    
-            const [appointmentsResult, providersResult] = await Promise.all([
-                fetchClientAppointments(),
-                fetchSavedProviders()
-            ]);
-    
-            console.log('Fetched appointments:', appointmentsResult);
-            console.log('Fetched saved providers:', providersResult);
-    
-            const formattedAppointments = Array.isArray(appointmentsResult) 
-                ? appointmentsResult.map(apt => ({
-                    ...apt,
-                    provider: apt.provider || {}
-                }))
-                : [];
-    
-            const formattedProviders = Array.isArray(providersResult)
-                ? providersResult.map(provider => ({
-                    ...provider,
-                    providerId: provider.providerId || {}
-                }))
-                : [];
-    
-            setAppointments(formattedAppointments);
-            setSavedProviders(formattedProviders);
-    
-        } catch (err) {
-            console.error("Dashboard data fetch error:", err);
-            setError({ general: "Failed to load dashboard data" });
-        } finally {
-            setLoading(false);
-        }
+      try {
+        setLoading(true);
+        setError(null);
+
+        const [appointmentsResult, providersResult] = await Promise.all([
+          fetchClientAppointments(),
+          fetchSavedProviders(),
+        ]);
+
+        console.log("Fetched appointments:", appointmentsResult);
+        console.log("Fetched saved providers:", providersResult);
+
+        const formattedAppointments = Array.isArray(appointmentsResult)
+          ? appointmentsResult.map((apt) => ({
+              ...apt,
+              provider: apt.provider || {},
+            }))
+          : [];
+
+        const formattedProviders = Array.isArray(providersResult)
+          ? providersResult.map((provider) => ({
+              ...provider,
+              providerId: provider.providerId || {},
+            }))
+          : [];
+
+        setAppointments(formattedAppointments);
+        setSavedProviders(formattedProviders);
+      } catch (err) {
+        console.error("Dashboard data fetch error:", err);
+        setError({ general: "Failed to load dashboard data" });
+      } finally {
+        setLoading(false);
+      }
     };
-    
 
     fetchAllData();
   }, [user, navigate]);
@@ -78,17 +76,17 @@ export const ClientDashboard = () => {
 
   const formatProviderName = (provider) => {
     if (!provider) return "Provider Name Not Available";
-    
+
     if (provider.firstName && provider.lastName) {
-        return `Dr. ${provider.firstName} ${provider.lastName}`;
+      return `Dr. ${provider.firstName} ${provider.lastName}`;
     }
-    
+
     if (provider.email) {
-        return provider.email;
+      return provider.email;
     }
-    
+
     return "Provider Name Not Available";
-};
+  };
 
   const loadAppointments = async () => {
     try {
@@ -243,58 +241,67 @@ export const ClientDashboard = () => {
                   </div>
                 ) : savedProviders.length > 0 ? (
                   <div className="space-y-4">
-                    {savedProviders.map((saved) => (
-                      <div
-                        key={saved.id || saved._id}
-                        className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
-                        onClick={() => {
-                          console.log("Selected provider:", saved.providerId);
-                          setSelectedProvider(saved.providerId);
-                        }}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
-                            <span className="text-celestial_blue-500 font-medium">
-                              {/* Add null checks here */}
-                              {saved.providerId?.firstName?.[0] || ""}
-                              {saved.providerId?.lastName?.[0] || ""}
-                            </span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-prussian_blue-500">
-                              {saved.providerId
-                                ? formatProviderName(saved.providerId)
-                                : "Provider Name Not Available"}
-                            </p>
-                            {saved.providerId?.specialties && (
-                              <p className="text-sm text-prussian_blue-300 truncate">
-                                {saved.providerId.specialties
-                                  .slice(0, 2)
-                                  .join(", ")}
-                                {saved.providerId.specialties.length > 2 &&
-                                  "..."}
+                    {savedProviders.map((saved) => {
+                      // Check if saved exists and has an id/providerId
+                      const providerId = saved?.providerId || saved?._id;
+                      if (!providerId) return null;
+
+                      return (
+                        <div
+                          key={saved.id || saved._id}
+                          className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+                          onClick={() => {
+                            console.log(
+                              "Clicking provider with ID:",
+                              providerId
+                            );
+                            setSelectedProvider(providerId);
+                          }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
+                              <span className="text-celestial_blue-500 font-medium">
+                                {/* Default to a generic icon if no initials */}
+                                <svg
+                                  className="w-5 h-5"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={2}
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                  />
+                                </svg>
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-prussian_blue-500">
+                                Saved Provider
                               </p>
-                            )}
-                            <p className="text-sm text-prussian_blue-300">
-                              Category: {saved.category || "Potential Matches"}
-                            </p>
+                              <p className="text-sm text-prussian_blue-300">
+                                Click to view details
+                              </p>
+                            </div>
+                            <svg
+                              className="w-5 h-5 text-celestial_blue-500"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 5l7 7-7 7"
+                              />
+                            </svg>
                           </div>
-                          <svg
-                            className="w-5 h-5 text-celestial_blue-500"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 5l7 7-7 7"
-                            />
-                          </svg>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-8">
@@ -616,11 +623,23 @@ export const ClientDashboard = () => {
 
         {/* Provider Details Modal */}
         {selectedProvider && (
-          <ProviderDetails
-            isModal={true}
-            modalProvider={selectedProvider}
-            onClose={() => setSelectedProvider(null)}
-          />
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+              <div
+                className="fixed inset-0 transition-opacity"
+                aria-hidden="true"
+              >
+                <div className="absolute inset-0 bg-prussian_blue-500 opacity-75"></div>
+              </div>
+              <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                <ProviderDetails
+                  providerId={selectedProvider}
+                  isModal={true}
+                  onClose={() => setSelectedProvider(null)}
+                />
+              </div>
+            </div>
+          </div>
         )}
       </div>
     </div>
