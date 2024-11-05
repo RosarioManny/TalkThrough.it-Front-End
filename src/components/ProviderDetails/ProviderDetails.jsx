@@ -204,40 +204,32 @@ export const ProviderDetails = ({
   // providers can't book appointments
   const handleRemoveSavedProvider = async () => {
     try {
-        // Find the saved relationship ID for this provider
-        const savedRelationship = savedProviders.find(
-            saved => saved.providerId?._id === provider?._id
-        );
+      const savedRelationship = savedProviders.find(
+        (saved) => saved.providerId?._id === provider?._id
+      );
 
-        if (!savedRelationship) {
-            console.error('Could not find saved relationship');
-            return;
-        }
+      if (!savedRelationship) {
+        console.error("Could not find saved relationship");
+        return;
+      }
 
-        console.log('Removing saved relationship:', savedRelationship._id);
-        await removeSavedProvider(savedRelationship._id);
-        
-        // Refresh the saved providers list
-        const updatedProviders = await fetchSavedProviders();
-        setSavedProviders(updatedProviders);
-        
-        setSuccessMessage("Provider removed from favorites");
+      await removeSavedProvider(savedRelationship._id);
 
-        // Close modal if in modal mode
-        if (isModal && onClose) {
-            onClose();
-        }
+      // Immediately update local state
+      setSavedProviders((prev) =>
+        prev.filter((saved) => saved._id !== savedRelationship._id)
+      );
 
-        // Refresh the current page
-        window.location.reload();
-        
+      setSuccessMessage("Provider removed from favorites");
+
+      if (isModal && onClose) {
+        onClose();
+      }
     } catch (err) {
-        console.error('Error removing saved provider:', err);
-        setError("Failed to remove provider from favorites");
+      console.error("Error removing saved provider:", err);
+      setError("Failed to remove provider from favorites");
     }
-};
-
-
+  };
 
   const handleBookAppointment = () => {
     if (isModal) {
