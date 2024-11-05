@@ -247,10 +247,13 @@ export const ClientDashboard = () => {
                       console.log("Provider ID object:", provider);
                       return (
                         <div
-                          key={saved._id}
-                          className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
-                          onClick={() => setSelectedProvider(provider)}
-                        >
+                        key={saved._id}
+                        className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+                        onClick={() => {
+                            console.log("Clicked provider:", provider);
+                            setSelectedProvider(provider);
+                        }}
+                    >
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
                               <span className="text-celestial_blue-500 font-medium">
