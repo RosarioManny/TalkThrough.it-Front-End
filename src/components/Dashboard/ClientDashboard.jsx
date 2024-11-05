@@ -245,15 +245,12 @@ export const ClientDashboard = () => {
                       const provider = saved.providerId; // The populated provider data
                       return (
                         <div
-                          key={saved._id || saved.id}
-                          className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
-                          onClick={() => {
-                            console.log(
-                              "Opening provider details for:",
-                              provider
-                            );
-                            setSelectedProvider(provider._id); // Pass just the provider ID
-                          }}
+                        key={saved._id}
+                        className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+                        onClick={() => {
+                            console.log('Opening provider details for:', provider._id);
+                            setSelectedProvider(provider._id);
+                        }}
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">

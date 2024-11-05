@@ -14,17 +14,16 @@ import { fetchSavedProviders } from "../../services/dashboardService";
 export const ProviderDetails = ({
   isModal = false,
   providerId = null,
-  modalProvider = null,
   onClose = null,
 }) => {
   const params = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [provider, setProvider] = useState(modalProvider);
+  const [provider, setProvider] = useState(null);
   const [availability, setAvailability] = useState([]);
   // const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(!modalProvider);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [successMessage, setSuccessMessage] = useState("");
@@ -35,46 +34,53 @@ export const ProviderDetails = ({
   };
 
   useEffect(() => {
-    if (modalProvider) {
-        console.log("Setting modal provider:", modalProvider);
-        setProvider(modalProvider);
-        return;
-    }
-
     const loadProviderData = async () => {
-        try {
-            setLoading(true);
-            setError(null);
+      try {
+        setLoading(true);
+        setError(null);
 
-            const [providerData, availabilityData] = await Promise.all([
-                isModal && !user
-                    ? fetchProviderPublicDetails(providerId || params.providerId)
-                    : fetchProviderDetails(providerId || params.providerId),
-                getProviderAvailability(providerId || params.providerId, formatDateForApi(selectedDate)),
-            ]);
+        console.log(
+          "Loading provider data for ID:",
+          providerId || params.providerId
+        );
 
-            console.log("Loaded provider data:", providerData);
-            const providerInfo = providerData.provider || providerData;
+        const [providerData, availabilityData] = await Promise.all([
+          fetchProviderDetails(providerId || params.providerId),
+          getProviderAvailability(
+            providerId || params.providerId,
+            formatDateForApi(selectedDate)
+          ),
+        ]);
 
-            if (!providerInfo) {
-                throw new Error("Provider data not found");
-            }
+        console.log("Loaded provider data:", providerData);
 
-            setProvider(providerInfo);
-            setAvailability(availabilityData);
-        } catch (err) {
-            console.error("Error loading provider data:", err);
-            setError("Failed to load provider information");
-        } finally {
-            setLoading(false);
+        if (
+          !providerData ||
+          (!providerData.provider && !providerData.firstName)
+        ) {
+          throw new Error("Provider data not found");
         }
+
+        // Handle both possible response structures
+        const providerInfo = providerData.provider || providerData;
+        setProvider(providerInfo);
+        setAvailability(availabilityData);
+      } catch (err) {
+        console.error("Error loading provider data:", err);
+        setError("Failed to load provider information");
+      } finally {
+        setLoading(false);
+      }
     };
 
     if (providerId || params.providerId) {
-        loadProviderData();
+      loadProviderData();
     }
-}, [providerId, params.providerId, selectedDate, modalProvider, user, isModal]);
+  }, [providerId, params.providerId, selectedDate]);
 
+  useEffect(() => {
+    console.log("Current provider state:", provider);
+  }, [provider]);
 
   useEffect(() => {
     if (successMessage) {

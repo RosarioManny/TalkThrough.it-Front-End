@@ -58,14 +58,17 @@ export const fetchProviders = async (params = {}) => {
 // Protected endpoint for provider's own data
 export const fetchProviderDetails = async (providerId) => {
     try {
-        console.log('Fetching provider details:', providerId);
-        const response = await api.get(`/providers/${providerId}`);
-        return response.data;
+        console.log('Fetching provider details for:', providerId);
+        const response = await axios.get(
+            `${BACKEND_URL}/providers/${providerId}`,
+            getAuthHeaders()
+        );
+        console.log('Provider details response:', response.data);
+        
+        // Make sure we're returning the provider data in a consistent format
+        return response.data.provider || response.data;
     } catch (error) {
-        console.error("Error fetching provider details:", {
-            message: error.message,
-            response: error.response?.data
-        });
+        console.error('Error fetching provider details:', error);
         throw error;
     }
 };
