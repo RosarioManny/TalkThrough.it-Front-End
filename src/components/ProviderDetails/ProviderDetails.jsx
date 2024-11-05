@@ -98,16 +98,16 @@ export const ProviderDetails = ({
 
   useEffect(() => {
     console.log("Checking saved status:", {
-        savedProviders,
-        currentProvider: provider,
-        matches: savedProviders.map(p => ({
-            savedId: p._id,
-            savedProviderId: p.providerId?._id,
-            currentProviderId: provider?._id,
-            isMatch: p.providerId?._id === provider?._id
-        }))
+      savedProviders,
+      currentProvider: provider,
+      matches: savedProviders.map((p) => ({
+        savedId: p._id,
+        savedProviderId: p.providerId?._id,
+        currentProviderId: provider?._id,
+        isMatch: p.providerId?._id === provider?._id,
+      })),
     });
-}, [savedProviders, provider]);
+  }, [savedProviders, provider]);
 
   useEffect(() => {
     if (user?.type === "client") {
@@ -295,13 +295,15 @@ export const ProviderDetails = ({
                 >
                   Book Appointment
                 </button>
-                {savedProviders.some(
-                  (p) =>
-                    // Check multiple possible ID locations
-                    p._id === provider._id ||
-                    p.providerId?._id === provider._id ||
-                    p.providerId === provider._id
-                ) ? (
+                {savedProviders.some((p) => {
+                  console.log("Comparing:", {
+                    savedProvider: p,
+                    currentProvider: provider,
+                  });
+                  return (
+                    p._id === provider._id || p.providerId?._id === provider._id
+                  );
+                }) ? (
                   <div className="flex flex-wrap gap-4">
                     <button
                       onClick={handleRemoveSavedProvider}
