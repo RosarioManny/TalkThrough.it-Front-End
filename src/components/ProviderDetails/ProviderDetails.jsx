@@ -16,15 +16,18 @@ export const ProviderDetails = ({
   modalProvider = null,
   onClose = null,
 }) => {
-  console.log("ProviderDetails received:", { isModal, modalProvider });
+  console.log('ProviderDetails received props:', {
+    isModal,
+    modalProvider,
+    hasOnClose: !!onClose
+});
   const { providerId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-
-  const [provider, setProvider] = useState(null);
+  const [provider, setProvider] = useState(modalProvider);
+  const [loading, setLoading] = useState(!modalProvider);
   const [availability, setAvailability] = useState([]);
   // const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(!modalProvider);
   const [error, setError] = useState(null);
   const [selectedDate] = useState(new Date());
   const [successMessage, setSuccessMessage] = useState("");
@@ -33,6 +36,14 @@ export const ProviderDetails = ({
   const formatDateForApi = (date) => {
     return date.toISOString().split("T")[0];
   };
+
+  useEffect(() => {
+    if (modalProvider) {
+        console.log('Setting provider from modalProvider:', modalProvider);
+        setProvider(modalProvider);
+        setLoading(false);
+    }
+}, [modalProvider]);
 
   useEffect(() => {
     const loadProviderData = async () => {
