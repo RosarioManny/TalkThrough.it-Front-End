@@ -249,45 +249,7 @@ export const ClientDashboard = () => {
                         <div
                           key={saved._id}
                           className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
-                          onClick={() => {
-                            console.log("Raw provider data:", provider);
-                            console.log(
-                              "Provider properties:",
-                              Object.keys(provider)
-                            );
-                            console.log(
-                              "Provider insuranceAccepted:",
-                              provider.insuranceAccepted
-                            );
-                            console.log(
-                              "Provider specialties:",
-                              provider.specialties
-                            );
-                            console.log(
-                              "Provider languages:",
-                              provider.languages
-                            );
-                            console.log(
-                              "Provider sessionTypes:",
-                              provider.sessionTypes
-                            );
-                            const formattedProvider = {
-                                _id: provider._id,
-                                firstName: provider.firstName,
-                                lastName: provider.lastName,
-                                credentials: provider.credentials,
-                                bio: provider.bio,
-                                location: provider.location,
-                                insuranceAccepted: Array.isArray(provider.insuranceAccepted) ? provider.insuranceAccepted : [],
-                                specialties: Array.isArray(provider.specialties) ? provider.specialties : [],
-                                languages: Array.isArray(provider.languages) ? provider.languages : [],
-                                sessionTypes: Array.isArray(provider.sessionTypes) ? provider.sessionTypes : [],
-                                acceptingClients: provider.acceptingClients
-                            };
-                            
-                            console.log("Formatted provider for modal:", formattedProvider);
-                            setSelectedProvider(formattedProvider);
-                        }}
+                          onClick={() => setSelectedProvider(provider)}
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
@@ -649,35 +611,18 @@ export const ClientDashboard = () => {
         {/* Provider Details Modal */}
         {selectedProvider && (
           <div className="fixed inset-0 z-50 overflow-y-auto">
-            {console.log(
-              "Rendering modal with selectedProvider:",
-              selectedProvider
-            )}
             <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
               <div
                 className="fixed inset-0 bg-prussian_blue-500 bg-opacity-75 transition-opacity"
                 aria-hidden="true"
-                onClick={() => {
-                  console.log("Closing modal via backdrop click");
-                  setSelectedProvider(null);
-                }}
+                onClick={() => setSelectedProvider(null)}
               ></div>
 
               <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-                {console.log("About to render ProviderDetails with props:", {
-                  isModal: true,
-                  modalProvider: selectedProvider,
-                })}
                 <ProviderDetails
                   isModal={true}
                   modalProvider={selectedProvider}
-                  onClose={() => {
-                    console.log(
-                      "Modal closing via onClose prop, provider was:",
-                      selectedProvider
-                    );
-                    setSelectedProvider(null);
-                  }}
+                  onClose={() => setSelectedProvider(null)}
                 />
               </div>
             </div>
