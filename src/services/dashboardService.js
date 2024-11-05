@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { getAuthHeaders } from '../utils/auth';
-import { api } from './providerService';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
 axios.defaults.headers.common['Content-Type'] = 'application/json';
@@ -14,20 +13,30 @@ export const fetchSavedProviders = async () => {
 
     try {
         console.log('Fetching saved providers...');
-        const response = await api.get('/saved-therapists');
+        const response = await axios.get(
+            `${BACKEND_URL}/saved-therapists`,
+            getAuthHeaders()
+        );
         console.log('Raw saved providers response:', response.data);
 
-        if (!response.data || (!response.data.savedProviders && !Array.isArray(response.data))) {
-            console.warn('Unexpected response format:', response.data);
+        if (!response.data) {
+            console.warn('No data received from saved providers endpoint');
             return [];
         }
 
+        // Extract providers from response
         const providers = response.data.savedProviders || response.data;
-        console.log('Processed saved providers:', providers);
-        xq
-        return providers;
+        
+        // Ensure we're returning an array
+        const formattedProviders = Array.isArray(providers) ? providers : [];
+        
+        console.log('Processed saved providers:', formattedProviders);
+        return formattedProviders;
     } catch (error) {
-        console.error('Error fetching saved providers:', error);
+        console.error('Error fetching saved providers:', {
+            message: error.message,
+            response: error.response?.data
+        });
         return [];
     }
 };
