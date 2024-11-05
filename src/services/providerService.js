@@ -136,29 +136,6 @@ export const updateSavedProvider = async (savedId, updateData) => {
     }
 };
 
-// Get provider availability
-export const getProviderAvailability = async (providerId, date) => {
-    try {
-        console.log('Fetching availability for provider:', providerId);
-        const params = new URLSearchParams();
-        if (date) params.append('date', date);
-
-        const response = await api.get(
-            `/availability/provider/${providerId}${params.toString() ? `?${params.toString()}` : ''}`
-        );
-        
-        console.log('Availability response:', response.data);
-        return response.data;
-    } catch (error) {
-        console.error("Error fetching provider availability:", {
-            message: error.message,
-            response: error.response?.data
-        });
-        // Return empty availability instead of throwing
-        return { availability: [] };
-    }
-};
-
 // Public endpoint for provider details (no auth required)
 export const fetchProviderPublicDetails = async (providerId) => {
     try {

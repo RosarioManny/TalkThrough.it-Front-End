@@ -44,18 +44,14 @@ export const getProviderAvailability = async (providerId) => {
     }
 };
 
-// Update provider's availability (protected route)
-export const updateProviderAvailability = async (availabilityData) => {
+export const updateProviderAvailability = async (data) => {
     try {
-        console.log('Updating availability:', availabilityData);
-        const response = await api.put(
-            '/availability/update',
-            availabilityData
-        );
+        console.log('Sending availability update:', data);
+        const response = await api.put('/availability/update', data);
         console.log('Update response:', response.data);
-        return response.data.availability;
+        return response.data;
     } catch (error) {
-        console.error("updateProviderAvailability - Error:", {
+        console.error('updateProviderAvailability - Error:', {
             message: error.message,
             response: error.response?.data
         });

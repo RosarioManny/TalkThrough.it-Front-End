@@ -5,10 +5,10 @@ import { theme } from "../../styles/theme";
 import {
   fetchProviderPublicDetails,
   fetchProviderDetails,
-  getProviderAvailability,
   saveProvider,
   removeSavedProvider,
 } from "../../services/providerService";
+import { getProviderAvailability } from "../../services/availabilityService";
 import { fetchSavedProviders } from "../../services/dashboardService";
 
 export const ProviderDetails = ({
@@ -29,36 +29,36 @@ export const ProviderDetails = ({
   const [successMessage, setSuccessMessage] = useState("");
   const [savedProviders, setSavedProviders] = useState([]);
 
+  const formatDateForApi = (date) => {
+    return date.toISOString().split('T')[0]; 
+};
+
   useEffect(() => {
     if (modalProvider) {
       setProvider(modalProvider);
       return;
     }
 
-    //I commented out reviews and availability methods at this time -Gabe
     const loadProviderData = async () => {
       try {
-        setLoading(true);
-
-        const [providerData, availabilityData] = await Promise.all([
-          // Use public endpoint when in modal or not logged in
-          isModal && !user
-            ? fetchProviderPublicDetails(providerId)
-            : fetchProviderDetails(providerId),
-          // vv TODO: This crashes at view in client/dashboard
-          // getProviderAvailability(providerId, selectedDate),\
-        ]);
-        console.log("provider data :" + providerData.provider);
-        setProvider(providerData.provider);
-        console.log("provider data :" + providerData);
-        setAvailability(availabilityData);
+          setLoading(true);
+  
+          const [providerData, availabilityData] = await Promise.all([
+              isModal && !user
+                  ? fetchProviderPublicDetails(providerId)
+                  : fetchProviderDetails(providerId),
+              getProviderAvailability(providerId, formatDateForApi(selectedDate)),
+          ]);
+          console.log("Provider data:", providerData.provider);
+          setProvider(providerData.provider);
+          setAvailability(availabilityData);
       } catch (err) {
-        console.error("Error loading provider data:", err);
-        setError("Failed to load provider information");
+          console.error("Error loading provider data:", err);
+          setError("Failed to load provider information");
       } finally {
-        setLoading(false);
+          setLoading(false);
       }
-    };
+  };
 
     if (providerId) {
       loadProviderData();

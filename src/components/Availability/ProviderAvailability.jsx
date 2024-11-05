@@ -335,43 +335,41 @@ export const ProviderAvailability = () => {
 
     return slot && slot.availableMeetingTypes.includes(meetingType);
   };
-  const handleSave = async () => {
-    try {
+
+const handleSave = async () => {
+  try {
       console.log("Current user ID:", user._id);
       setLoading(true);
       setError(null);
-      console.log("TEST - Current availability state:", availability);
       validateAvailability(availability);
+      const availabilityData = Object.values(availability)
+          .filter(day => day.isAvailable)
+          .map(day => ({
+              dayOfWeek: day.dayOfWeek,
+              isAvailable: true,
+              timeSlots: day.timeSlots.map(slot => ({
+                  startTime: slot.startTime,
+                  endTime: slot.endTime,
+                  isBooked: slot.isBooked || false,
+                  availableMeetingTypes: slot.availableMeetingTypes
+              }))
+          }));
 
-      const availabilityData = Object.entries(availability)
-        .filter(([_, data]) => data.isAvailable)
-        .map(([day, data]) => ({
-          dayOfWeek: day,
-          timeSlots: data.timeSlots.map((slot) => ({
-            startTime: slot.startTime,
-            endTime: slot.endTime,
-            isBooked: slot.isBooked || false,
-            availableMeetingTypes: slot.availableMeetingTypes,
-          })),
-          isAvailable: true,
-        }));
-
-      console.log("TEST - Formatted data to save:", availabilityData);
-      await updateProviderAvailability(user._id, availabilityData);
+      console.log("Sending availability data:", availabilityData);
+      
+      await updateProviderAvailability({ availabilityData });
       toast.success("Availability updated successfully");
-
-      // Reload to verify the saved data
-      console.log("TEST - Reloading availability");
-      await loadAvailability(user._id);
-    } catch (err) {
-      console.error("TEST - Save Error:", err);
+      await loadAvailability();
+  } catch (err) {
+      console.error("Save Error:", err);
       const errorMessage = err.message || "Failed to update availability";
       setError(errorMessage);
       toast.error(errorMessage);
-    } finally {
+  } finally {
       setLoading(false);
-    }
-  };
+  }
+};
+
 
   if (loading) {
     return (
