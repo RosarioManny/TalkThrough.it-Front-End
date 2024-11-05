@@ -13,17 +13,15 @@ export const fetchSavedProviders = async () => {
 
     try {
         console.log('Fetching saved providers...');
-        // Change this line to match your backend route
         const response = await axios.get(
-            `${BACKEND_URL}/saved-therapists`, // Remove /details
+            `${BACKEND_URL}/saved-therapists`,
             getAuthHeaders()
         );
-        console.log('Raw saved providers response:', response.data);
-
-        const providers = response.data || [];
-        console.log('Processed saved providers:', providers);
         
-        return Array.isArray(providers) ? providers : [];
+        console.log('Raw saved providers response:', response.data);
+        console.log('First saved provider structure:', response.data[0]);
+
+        return response.data;
     } catch (error) {
         console.error('Error fetching saved providers:', error);
         return [];

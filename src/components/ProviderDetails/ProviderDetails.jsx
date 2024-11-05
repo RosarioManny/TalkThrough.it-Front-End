@@ -295,43 +295,55 @@ export const ProviderDetails = ({
                 >
                   Book Appointment
                 </button>
-                {savedProviders.some((p) => {
-                  console.log("Comparing:", {
-                    savedProvider: p,
+                {(() => {
+                  // Log the current data
+                  console.log("Checking saved state:", {
+                    savedProviders: savedProviders,
                     currentProvider: provider,
                   });
-                  return (
-                    p._id === provider._id || p.providerId?._id === provider._id
+
+                  const isProviderSaved = savedProviders.some((saved) => {
+                    // Log each comparison
+                    console.log("Comparing IDs:", {
+                      savedProviderId: saved.providerId?._id,
+                      currentProviderId: provider?._id,
+                      isMatch: saved.providerId?._id === provider?._id,
+                    });
+                    return saved.providerId?._id === provider?._id;
+                  });
+
+                  console.log("Is provider saved:", isProviderSaved);
+
+                  return isProviderSaved ? (
+                    <div className="flex flex-wrap gap-4">
+                      <button
+                        onClick={handleRemoveSavedProvider}
+                        className={`${theme.button} text-white bg-sunglow-400 hover:bg-amber-500 hover:-translate-y-0.5 hover:shadow-md rounded-lg px-6 py-2 duration-200 `}
+                      >
+                        Favorited ☆
+                      </button>
+                      <button
+                        className={`${theme.button} text-white bg-celadon-300 hover:bg-celadon-400 hover:-translate-y-0.5 hover:shadow-md rounded-lg px-6 py-2 duration-200`}
+                      >
+                        Message
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-4">
+                      <button
+                        onClick={handleSaveProvider}
+                        className={`${theme.button.primary} hover:-translate-y-0.5 bg-sunglow-400 hover:shadow-md hover:bg-sunglow-500 text- px-6 py-2 rounded-lg`}
+                      >
+                        Save Provider
+                      </button>
+                      <button
+                        className={`${theme.button} text-white bg-celadon-300 hover:bg-celadon-400 hover:-translate-y-0.5 hover:shadow-md rounded-lg px-6 py-2 duration-200`}
+                      >
+                        Message
+                      </button>
+                    </div>
                   );
-                }) ? (
-                  <div className="flex flex-wrap gap-4">
-                    <button
-                      onClick={handleRemoveSavedProvider}
-                      className={`${theme.button} text-white bg-sunglow-400 hover:bg-amber-500 hover:-translate-y-0.5 hover:shadow-md rounded-lg px-6 py-2 duration-200 `}
-                    >
-                      Favorited ☆
-                    </button>
-                    <button
-                      className={`${theme.button} text-white bg-celadon-300 hover:bg-celadon-400 hover:-translate-y-0.5 hover:shadow-md rounded-lg px-6 py-2 duration-200`}
-                    >
-                      Message
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-wrap gap-4">
-                    <button
-                      onClick={handleSaveProvider}
-                      className={`${theme.button.primary} hover:-translate-y-0.5 bg-sunglow-400 hover:shadow-md hover:bg-sunglow-500 text- px-6 py-2 rounded-lg`}
-                    >
-                      Save Provider
-                    </button>
-                    <button
-                      className={`${theme.button} text-white bg-celadon-300 hover:bg-celadon-400 hover:-translate-y-0.5 hover:shadow-md rounded-lg px-6 py-2 duration-200`}
-                    >
-                      Message
-                    </button>
-                  </div>
-                )}
+                })()}
               </div>
             )}
           </div>
