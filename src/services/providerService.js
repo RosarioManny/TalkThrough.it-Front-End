@@ -61,12 +61,17 @@ export const fetchProviderDetails = async (providerId) => {
         console.log('Fetching provider details for:', providerId);
         const response = await axios.get(
             `${BACKEND_URL}/providers/${providerId}`,
-            getAuthHeaders()
+            {
+                ...getAuthHeaders(),
+                headers: {
+                    ...getAuthHeaders().headers,
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+            }
         );
         console.log('Provider details response:', response.data);
-        
-        // Make sure we're returning the provider data in a consistent format
-        return response.data.provider || response.data;
+        return response.data;
     } catch (error) {
         console.error('Error fetching provider details:', error);
         throw error;

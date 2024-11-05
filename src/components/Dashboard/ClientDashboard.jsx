@@ -248,8 +248,8 @@ export const ClientDashboard = () => {
                         key={saved._id}
                         className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
                         onClick={() => {
-                            console.log('Opening provider details for:', provider._id);
-                            setSelectedProvider(provider._id);
+                            console.log('Opening provider details for:', provider);
+                            setSelectedProvider(provider);
                         }}
                         >
                           <div className="flex items-center gap-3">
@@ -622,7 +622,7 @@ export const ClientDashboard = () => {
               <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
                 <ProviderDetails
                   isModal={true}
-                  providerId={selectedProvider}
+                  modalProvider={selectedProvider}
                   onClose={() => setSelectedProvider(null)}
                 />
               </div>

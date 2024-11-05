@@ -13,19 +13,19 @@ import { fetchSavedProviders } from "../../services/dashboardService";
 
 export const ProviderDetails = ({
   isModal = false,
-  providerId = null,
+  modalProvider = null,
   onClose = null,
 }) => {
-  const params = useParams();
+  const { providerId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [provider, setProvider] = useState(null);
   const [availability, setAvailability] = useState([]);
   // const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!modalProvider);
   const [error, setError] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate] = useState(new Date());
   const [successMessage, setSuccessMessage] = useState("");
   const [savedProviders, setSavedProviders] = useState([]);
 
@@ -35,48 +35,40 @@ export const ProviderDetails = ({
 
   useEffect(() => {
     const loadProviderData = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        console.log(
-          "Loading provider data for ID:",
-          providerId || params.providerId
-        );
-
-        const [providerData, availabilityData] = await Promise.all([
-          fetchProviderDetails(providerId || params.providerId),
-          getProviderAvailability(
-            providerId || params.providerId,
-            formatDateForApi(selectedDate)
-          ),
-        ]);
-
-        console.log("Loaded provider data:", providerData);
-
-        if (
-          !providerData ||
-          (!providerData.provider && !providerData.firstName)
-        ) {
-          throw new Error("Provider data not found");
-        }
-
-        // Handle both possible response structures
-        const providerInfo = providerData.provider || providerData;
-        setProvider(providerInfo);
-        setAvailability(availabilityData);
-      } catch (err) {
-        console.error("Error loading provider data:", err);
-        setError("Failed to load provider information");
-      } finally {
+      if (modalProvider) {
+        console.log('Setting modal provider:', modalProvider);
+        setProvider(modalProvider);
         setLoading(false);
-      }
-    };
-
-    if (providerId || params.providerId) {
-      loadProviderData();
+        return;
     }
-  }, [providerId, params.providerId, selectedDate]);
+      try {
+          setLoading(true);
+          setError(null);
+
+          const activeProviderId = providerId;
+          console.log('Loading provider data for ID:', activeProviderId);
+
+          const [providerData, availabilityData] = await Promise.all([
+              fetchProviderDetails(activeProviderId),
+              getProviderAvailability(activeProviderId, formatDateForApi(selectedDate))
+          ]);
+
+          console.log('Loaded provider data:', providerData);
+          setProvider(providerData.provider || providerData);
+          setAvailability(availabilityData);
+
+      } catch (err) {
+          console.error("Error loading provider data:", err);
+          setError("Failed to load provider information");
+      } finally {
+          setLoading(false);
+      }
+  };
+
+  if (providerId) {
+      loadProviderData();
+  }
+}, [providerId, modalProvider, selectedDate]);
 
   useEffect(() => {
     console.log("Current provider state:", provider);
