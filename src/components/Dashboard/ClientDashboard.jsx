@@ -243,6 +243,8 @@ export const ClientDashboard = () => {
                   <div className="space-y-4">
                     {savedProviders.map((saved) => {
                       const provider = saved.providerId; // The populated provider data
+                      console.log("Full saved provider object:", saved);
+                      console.log("Provider ID object:", provider);
                       return (
                         <div
                           key={saved._id}
@@ -269,22 +271,23 @@ export const ClientDashboard = () => {
                               "Provider sessionTypes:",
                               provider.sessionTypes
                             );
-
                             const formattedProvider = {
-                              ...provider,
-                              insuranceAccepted:
-                                provider.insuranceAccepted || [],
-                              specialties: provider.specialties || [],
-                              languages: provider.languages || [],
-                              sessionTypes: provider.sessionTypes || [],
+                                _id: provider._id,
+                                firstName: provider.firstName,
+                                lastName: provider.lastName,
+                                credentials: provider.credentials,
+                                bio: provider.bio,
+                                location: provider.location,
+                                insuranceAccepted: Array.isArray(provider.insuranceAccepted) ? provider.insuranceAccepted : [],
+                                specialties: Array.isArray(provider.specialties) ? provider.specialties : [],
+                                languages: Array.isArray(provider.languages) ? provider.languages : [],
+                                sessionTypes: Array.isArray(provider.sessionTypes) ? provider.sessionTypes : [],
+                                acceptingClients: provider.acceptingClients
                             };
-
-                            console.log(
-                              "Formatted provider being set:",
-                              formattedProvider
-                            );
+                            
+                            console.log("Formatted provider for modal:", formattedProvider);
                             setSelectedProvider(formattedProvider);
-                          }}
+                        }}
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">

@@ -16,12 +16,19 @@ export const ProviderDetails = ({
   modalProvider = null,
   onClose = null,
 }) => {
-  console.log('ProviderDetails render:', {
-    isModal,
-    modalProvider,
-    modalProviderType: typeof modalProvider,
-    modalProviderKeys: modalProvider ? Object.keys(modalProvider) : null
-});
+  console.log("ProviderDetails received modalProvider:", {
+    isNull: modalProvider === null,
+    type: typeof modalProvider,
+    keys: modalProvider ? Object.keys(modalProvider) : [],
+    arrays: modalProvider
+      ? {
+          insuranceAccepted: Array.isArray(modalProvider.insuranceAccepted),
+          specialties: Array.isArray(modalProvider.specialties),
+          languages: Array.isArray(modalProvider.languages),
+          sessionTypes: Array.isArray(modalProvider.sessionTypes),
+        }
+      : null,
+  });
   const { providerId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -40,11 +47,23 @@ export const ProviderDetails = ({
 
   useEffect(() => {
     if (modalProvider) {
-        console.log('Setting provider from modalProvider:', modalProvider);
-        setProvider(modalProvider);
-        setLoading(false);
+      console.log("Modal provider data validation:", {
+        hasName: Boolean(modalProvider.firstName && modalProvider.lastName),
+        hasArrays: {
+          insuranceAccepted: Array.isArray(modalProvider.insuranceAccepted),
+          specialties: Array.isArray(modalProvider.specialties),
+          languages: Array.isArray(modalProvider.languages),
+          sessionTypes: Array.isArray(modalProvider.sessionTypes),
+        },
+        arrays: {
+          insuranceAccepted: modalProvider.insuranceAccepted,
+          specialties: modalProvider.specialties,
+          languages: modalProvider.languages,
+          sessionTypes: modalProvider.sessionTypes,
+        },
+      });
     }
-}, [modalProvider]);
+  }, [modalProvider]);
 
   useEffect(() => {
     const loadProviderData = async () => {
