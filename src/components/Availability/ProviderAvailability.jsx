@@ -336,39 +336,45 @@ export const ProviderAvailability = () => {
     return slot && slot.availableMeetingTypes.includes(meetingType);
   };
 
-const handleSave = async () => {
-  try {
-      console.log("Current user ID:", user._id);
-      setLoading(true);
-      setError(null);
-      validateAvailability(availability);
-      const availabilityData = Object.values(availability)
-          .filter(day => day.isAvailable)
-          .map(day => ({
-              dayOfWeek: day.dayOfWeek,
-              isAvailable: true,
-              timeSlots: day.timeSlots.map(slot => ({
-                  startTime: slot.startTime,
-                  endTime: slot.endTime,
-                  isBooked: slot.isBooked || false,
-                  availableMeetingTypes: slot.availableMeetingTypes
-              }))
-          }));
+  const handleSave = async () => {
+    try {
+        setLoading(true);
+        setError(null);
 
-      console.log("Sending availability data:", availabilityData);
-      
-      await updateProviderAvailability({ availabilityData });
-      toast.success("Availability updated successfully");
-      await loadAvailability();
-  } catch (err) {
-      console.error("Save Error:", err);
-      const errorMessage = err.message || "Failed to update availability";
-      setError(errorMessage);
-      toast.error(errorMessage);
-  } finally {
-      setLoading(false);
-  }
+        // Format the data
+        const availabilityData = Object.values(availability)
+            .filter(day => day.isAvailable)
+            .map(day => ({
+                dayOfWeek: day.dayOfWeek,
+                isAvailable: true,
+                timeSlots: day.timeSlots.map(slot => ({
+                    startTime: slot.startTime,
+                    endTime: slot.endTime,
+                    isBooked: Boolean(slot.isBooked),
+                    availableMeetingTypes: Array.isArray(slot.availableMeetingTypes) 
+                        ? slot.availableMeetingTypes 
+                        : []
+                }))
+            }));
+
+        console.log('Formatted availability data:', availabilityData);
+
+        // Send the update
+        await updateProviderAvailability(availabilityData);
+        toast.success('Availability updated successfully');
+
+        // Reload the data
+        await loadAvailability();
+    } catch (err) {
+        console.error('Save Error:', err);
+        const errorMessage = err.response?.data?.message || err.message || 'Failed to update availability';
+        setError(errorMessage);
+        toast.error(errorMessage);
+    } finally {
+        setLoading(false);
+    }
 };
+
 
 
   if (loading) {

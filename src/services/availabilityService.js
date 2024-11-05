@@ -44,10 +44,16 @@ export const getProviderAvailability = async (providerId) => {
     }
 };
 
-export const updateProviderAvailability = async (data) => {
+export const updateProviderAvailability = async (availabilityData) => {
     try {
-        console.log('Sending availability update:', data);
-        const response = await api.put('/availability/update', data);
+        console.log('Sending availability update:', { availabilityData });
+        
+        const response = await api.put('/availability/update', { availabilityData }, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
         console.log('Update response:', response.data);
         return response.data;
     } catch (error) {
