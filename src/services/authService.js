@@ -102,26 +102,24 @@ export const signin = async (userData) => {
 };
 
 export const getUser = () => {
+    if (isTokenExpired()) {
+        signOut();
+        return null;
+    }
+
     try {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            return JSON.parse(storedUser);
+        }
+
         const token = localStorage.getItem('token');
         if (!token) return null;
         
         const decodedToken = JSON.parse(atob(token.split('.')[1]));
-        const expirationTime = decodedToken.exp * 1000;
+        console.log('Decoded token data:', decodedToken); // Debug log
 
-        // Log token information for debugging
-        console.log('Token decode result:', {
-            ...decodedToken,
-            exp: new Date(expirationTime).toLocaleString()
-        });
-
-        if (Date.now() >= expirationTime) {
-            console.log('Token expired, signing out');
-            signOut();
-            return null;
-        }
-
-        // Return full user object with all needed fields
+        // Return full user object with all fields
         return {
             _id: decodedToken._id,
             type: decodedToken.type,
@@ -130,7 +128,7 @@ export const getUser = () => {
             email: decodedToken.email
         };
     } catch (error) {
-        console.error('Error decoding token:', error);
+        console.error('Error getting user data:', error);
         signOut();
         return null;
     }
