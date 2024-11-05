@@ -81,18 +81,44 @@ export const fetchProviderDetails = async (providerId) => {
 // Save provider (for clients)
 export const saveProvider = async (providerId) => {
     try {
-        console.log('Saving provider:', providerId);
-        const response = await api.post('/saved-therapists', { providerId });
+        if (!providerId) {
+            throw new Error('Provider ID is required');
+        }
+
+        // Check for auth token
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('Authentication required');
+        }
+
+        console.log('Attempting to save provider:', providerId);
+        
+        const response = await api.post('/saved-therapists', 
+            { providerId },
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
+        );
+
         console.log('Save provider response:', response.data);
         return response.data;
     } catch (error) {
+        // If error is authentication related, enhance the error
+        if (error.response?.status === 401) {
+            throw new Error('Please log in to save providers');
+        }
         console.error('Error saving provider:', {
             message: error.message,
-            response: error.response?.data
+            response: error.response?.data,
+            providerId
         });
         throw error;
     }
 };
+
 
 // Remove saved provider
 export const removeSavedProvider = async (savedId) => {

@@ -16,11 +16,6 @@ export const ProviderDetails = ({
   modalProvider = null,
   onClose = null,
 }) => {
-  console.log("ProviderDetails rendering with:", {
-    isModal,
-    hasModalProvider: !!modalProvider,
-    providerData: modalProvider
-});
   const { providerId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -37,27 +32,32 @@ export const ProviderDetails = ({
     return date.toISOString().split("T")[0];
   };
 
+  // For modal usage
   useEffect(() => {
-    if (!modalProvider) {
-      console.log("No provider data received");
-      return null;
-  }
-  }, [modalProvider]);
-
-  useEffect(() => {
-    const loadProviderData = async () => {
+    if (isModal) {
       if (modalProvider) {
-        console.log("Setting modal provider:", modalProvider);
+        console.log("Modal: Setting provided data");
         setProvider(modalProvider);
         setLoading(false);
-        return;
+      } else {
+        console.log("Modal: No provider data");
+        setLoading(true);
       }
+    }
+  }, [modalProvider, isModal]);
+
+  // For standalone page usage
+  useEffect(() => {
+    const loadProviderData = async () => {
+      // Only load if not in modal mode
+      if (isModal) return;
+
       try {
         setLoading(true);
         setError(null);
 
         const activeProviderId = providerId;
-        console.log("Loading provider data for ID:", activeProviderId);
+        console.log("Page: Loading provider data for ID:", activeProviderId);
 
         const [providerData, availabilityData] = await Promise.all([
           fetchProviderDetails(activeProviderId),
@@ -67,7 +67,7 @@ export const ProviderDetails = ({
           ),
         ]);
 
-        console.log("Loaded provider data:", providerData);
+        console.log("Page: Loaded provider data:", providerData);
         setProvider(providerData.provider || providerData);
         setAvailability(availabilityData);
       } catch (err) {
@@ -78,10 +78,10 @@ export const ProviderDetails = ({
       }
     };
 
-    if (providerId) {
+    if (providerId && !isModal) {
       loadProviderData();
     }
-  }, [providerId, modalProvider, selectedDate]);
+  }, [providerId, isModal, selectedDate]);
 
   useEffect(() => {
     console.log("Current provider state:", provider);
@@ -112,15 +112,63 @@ export const ProviderDetails = ({
   }, [user]);
   const handleSaveProvider = async () => {
     try {
-      await saveProvider(providerId || provider?._id);
+        // First check if user is logged in and is a client
+        if (!user) {
+            console.log('No user logged in, redirecting to login');
+            navigate('/login', { 
+                state: { from: location.pathname }  // Save current location to redirect back after login
+            });
+            return;
+        }
 
-      setSuccessMessage("Provider saved successfully");
+        if (user.type !== 'client') {
+            console.log('User is not a client');
+            setError("Only clients can save providers");
+            return;
+        }
 
-      navigate("/client/dashboard");
+        // Determine which ID to use
+        const idToSave = isModal ? provider?._id : providerId;
+        
+        console.log('Save provider attempt:', {
+            userType: user.type,
+            isModal,
+            providerId,
+            providerId_fromState: provider?._id,
+            idToSave,
+        });
+
+        if (!idToSave) {
+            console.error('No provider ID available for saving');
+            setError("Unable to save provider: No ID available");
+            return;
+        }
+
+        const result = await saveProvider(idToSave);
+        console.log('Save provider result:', result);
+
+        setSuccessMessage("Provider saved successfully");
+
+        // If we're in a modal, close it before navigating
+        if (isModal && onClose) {
+            onClose();
+        }
+
+        navigate("/client/dashboard");
     } catch (err) {
-      setError("Failed to save provider");
+        console.error("Save provider error:", err);
+        // If error is due to authentication, redirect to login
+        if (err.response?.status === 401) {
+            navigate('/login', { 
+                state: { from: location.pathname }
+            });
+            return;
+        }
+        setError(err.response?.data?.message || "Failed to save provider");
     }
-  };
+};
+
+
 
   // const handleBookAppointment = () => {
   //   if (!user) {

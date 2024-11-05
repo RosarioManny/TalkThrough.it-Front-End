@@ -250,25 +250,23 @@ export const ClientDashboard = () => {
                           key={saved._id}
                           className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
                           onClick={() => {
-                            // Add this console.log to verify the data
-                            console.log("Setting selected provider:", provider);
-
-                            // Set the selected provider directly
+                            console.log("Click detected");
+                            console.log("Setting provider:", provider);
                             setSelectedProvider({
-                              _id: provider._id,
-                              firstName: provider.firstName,
-                              lastName: provider.lastName,
-                              credentials: provider.credentials,
-                              bio: provider.bio,
-                              location: provider.location,
-                              insuranceAccepted:
-                                provider.insuranceAccepted || [],
-                              specialties: provider.specialties || [],
-                              languages: provider.languages || [],
-                              sessionTypes: provider.sessionTypes || [],
-                              acceptingClients: provider.acceptingClients,
+                                _id: provider._id,
+                                firstName: provider.firstName,
+                                lastName: provider.lastName,
+                                credentials: provider.credentials,
+                                bio: provider.bio,
+                                location: provider.location,
+                                insuranceAccepted: provider.insuranceAccepted || [],
+                                specialties: provider.specialties || [],
+                                languages: provider.languages || [],
+                                sessionTypes: provider.sessionTypes || [],
+                                acceptingClients: provider.acceptingClients
                             });
-                          }}
+                            console.log("Selected provider set");
+                        }}
                         >
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
