@@ -110,26 +110,31 @@ export const ProviderDetails = ({
   }, [savedProviders, provider]);
 
   useEffect(() => {
-    if (user?.type === "client") {
-      fetchSavedProviders()
-        .then((res) => {
-          setSavedProviders(res.savedProviders || []);
-        })
-        .catch((error) => {
+    const loadSavedProviders = async () => {
+      if (user?.type === "client") {
+        try {
+          const res = await fetchSavedProviders();
+          console.log("Fetched saved providers:", res);
+          setSavedProviders(res);
+        } catch (error) {
           console.log("Error loading saved providers:", error);
           setSavedProviders([]);
-        });
-    } else {
-      setSavedProviders([]);
-    }
-  }, [user]);
+        }
+      } else {
+        setSavedProviders([]);
+      }
+    };
+
+    loadSavedProviders();
+  }, [user, provider, successMessage]);
+
   const handleSaveProvider = async () => {
     try {
       // First check if user is logged in and is a client
       if (!user) {
         console.log("No user logged in, redirecting to login");
         navigate("/login", {
-          state: { from: location.pathname }, // Save current location to redirect back after login
+          state: { from: location.pathname },
         });
         return;
       }
@@ -162,15 +167,19 @@ export const ProviderDetails = ({
 
       setSuccessMessage("Provider saved successfully");
 
-      // If we're in a modal, close it before navigating
+      // Refresh saved providers list
+      const updatedProviders = await fetchSavedProviders();
+      setSavedProviders(updatedProviders);
+
+      // Only navigate if in modal mode
       if (isModal && onClose) {
         onClose();
       }
 
-      navigate("/client/dashboard");
+      // Don't navigate to dashboard, let user stay on current page
+      // navigate("/client/dashboard");
     } catch (err) {
       console.error("Save provider error:", err);
-      // If error is due to authentication, redirect to login
       if (err.response?.status === 401) {
         navigate("/login", {
           state: { from: location.pathname },
