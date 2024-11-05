@@ -204,13 +204,35 @@ export const ProviderDetails = ({
   // providers can't book appointments
   const handleRemoveSavedProvider = async () => {
     try {
-      await removeSavedProvider(providerId || provider?._id);
-      console.log(user);
-      navigate("/client/dashboard");
+        // Find the saved relationship ID for this provider
+        const savedRelationship = savedProviders.find(
+            saved => saved.providerId?._id === provider?._id
+        );
+
+        if (!savedRelationship) {
+            console.error('Could not find saved relationship');
+            return;
+        }
+
+        console.log('Removing saved relationship:', savedRelationship._id);
+        await removeSavedProvider(savedRelationship._id);
+        
+        // Refresh the saved providers list
+        const updatedProviders = await fetchSavedProviders();
+        setSavedProviders(updatedProviders);
+        
+        setSuccessMessage("Provider removed from favorites");
+        
+        // Only navigate if in modal mode
+        if (isModal && onClose) {
+            onClose();
+        }
     } catch (err) {
-      // Show error message
+        console.error('Error removing saved provider:', err);
+        setError("Failed to remove provider from favorites");
     }
-  };
+};
+
 
   const handleBookAppointment = () => {
     if (isModal) {
