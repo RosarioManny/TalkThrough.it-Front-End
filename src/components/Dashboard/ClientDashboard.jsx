@@ -629,25 +629,26 @@ export const ClientDashboard = () => {
 
         {/* Provider Details Modal */}
         {selectedProvider && (
-          <div className="fixed inset-0 z-50 overflow-y-auto">
-            {console.log("Rendering modal with provider:", selectedProvider)}
-            <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-              <div
-                className="fixed inset-0 bg-prussian_blue-500 bg-opacity-75 transition-opacity"
-                aria-hidden="true"
-                onClick={() => setSelectedProvider(null)}
-              ></div>
-
-              <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
+        {console.log("Modal overlay rendering")}
+        <div className="flex items-center justify-center min-h-screen p-4">
+            <div 
+                className="relative bg-white rounded-lg w-full max-w-4xl"
+                onClick={e => e.stopPropagation()}
+            >
+                {console.log("Modal content rendering")}
                 <ProviderDetails
-                  isModal={true}
-                  modalProvider={selectedProvider}
-                  onClose={() => setSelectedProvider(null)}
+                    isModal={true}
+                    modalProvider={selectedProvider}
+                    onClose={() => {
+                        console.log("Modal closing");
+                        setSelectedProvider(null);
+                    }}
                 />
-              </div>
             </div>
-          </div>
-        )}
+        </div>
+    </div>
+)}
       </div>
     </div>
   );
