@@ -16,10 +16,11 @@ export const ProviderDetails = ({
   modalProvider = null,
   onClose = null,
 }) => {
-  console.log('ProviderDetails received props:', {
+  console.log('ProviderDetails render:', {
     isModal,
     modalProvider,
-    hasOnClose: !!onClose
+    modalProviderType: typeof modalProvider,
+    modalProviderKeys: modalProvider ? Object.keys(modalProvider) : null
 });
   const { providerId } = useParams();
   const navigate = useNavigate();

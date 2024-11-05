@@ -248,19 +248,42 @@ export const ClientDashboard = () => {
                           key={saved._id}
                           className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
                           onClick={() => {
+                            console.log("Raw provider data:", provider);
                             console.log(
-                              "Opening provider details for:",
-                              provider
+                              "Provider properties:",
+                              Object.keys(provider)
                             );
-                            // Pass the full provider object
-                            setSelectedProvider({
+                            console.log(
+                              "Provider insuranceAccepted:",
+                              provider.insuranceAccepted
+                            );
+                            console.log(
+                              "Provider specialties:",
+                              provider.specialties
+                            );
+                            console.log(
+                              "Provider languages:",
+                              provider.languages
+                            );
+                            console.log(
+                              "Provider sessionTypes:",
+                              provider.sessionTypes
+                            );
+
+                            const formattedProvider = {
                               ...provider,
                               insuranceAccepted:
                                 provider.insuranceAccepted || [],
                               specialties: provider.specialties || [],
                               languages: provider.languages || [],
                               sessionTypes: provider.sessionTypes || [],
-                            });
+                            };
+
+                            console.log(
+                              "Formatted provider being set:",
+                              formattedProvider
+                            );
+                            setSelectedProvider(formattedProvider);
                           }}
                         >
                           <div className="flex items-center gap-3">
@@ -623,23 +646,31 @@ export const ClientDashboard = () => {
         {/* Provider Details Modal */}
         {selectedProvider && (
           <div className="fixed inset-0 z-50 overflow-y-auto">
+            {console.log(
+              "Rendering modal with selectedProvider:",
+              selectedProvider
+            )}
             <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
               <div
                 className="fixed inset-0 bg-prussian_blue-500 bg-opacity-75 transition-opacity"
                 aria-hidden="true"
                 onClick={() => {
-                  console.log("Closing modal");
+                  console.log("Closing modal via backdrop click");
                   setSelectedProvider(null);
                 }}
               ></div>
 
               <div className="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
+                {console.log("About to render ProviderDetails with props:", {
+                  isModal: true,
+                  modalProvider: selectedProvider,
+                })}
                 <ProviderDetails
                   isModal={true}
-                  modalProvider={selectedProvider} // Pass the full provider object
+                  modalProvider={selectedProvider}
                   onClose={() => {
                     console.log(
-                      "Modal closing, provider was:",
+                      "Modal closing via onClose prop, provider was:",
                       selectedProvider
                     );
                     setSelectedProvider(null);
