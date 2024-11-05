@@ -247,13 +247,29 @@ export const ClientDashboard = () => {
                       console.log("Provider ID object:", provider);
                       return (
                         <div
-                        key={saved._id}
-                        className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
-                        onClick={() => {
-                            console.log("Clicked provider:", provider);
-                            setSelectedProvider(provider);
-                        }}
-                    >
+                          key={saved._id}
+                          className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+                          onClick={() => {
+                            // Add this console.log to verify the data
+                            console.log("Setting selected provider:", provider);
+
+                            // Set the selected provider directly
+                            setSelectedProvider({
+                              _id: provider._id,
+                              firstName: provider.firstName,
+                              lastName: provider.lastName,
+                              credentials: provider.credentials,
+                              bio: provider.bio,
+                              location: provider.location,
+                              insuranceAccepted:
+                                provider.insuranceAccepted || [],
+                              specialties: provider.specialties || [],
+                              languages: provider.languages || [],
+                              sessionTypes: provider.sessionTypes || [],
+                              acceptingClients: provider.acceptingClients,
+                            });
+                          }}
+                        >
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
                               <span className="text-celestial_blue-500 font-medium">
@@ -614,6 +630,7 @@ export const ClientDashboard = () => {
         {/* Provider Details Modal */}
         {selectedProvider && (
           <div className="fixed inset-0 z-50 overflow-y-auto">
+            {console.log("Rendering modal with provider:", selectedProvider)}
             <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
               <div
                 className="fixed inset-0 bg-prussian_blue-500 bg-opacity-75 transition-opacity"
