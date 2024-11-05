@@ -46,9 +46,10 @@ export const getProviderAvailability = async (providerId) => {
 
 export const updateProviderAvailability = async (availabilityData) => {
     try {
-        console.log('Sending availability update:', { availabilityData });
+        const payload = { availabilityData };
+        console.log('Availability update payload:', JSON.stringify(payload, null, 2));
         
-        const response = await api.put('/availability/update', { availabilityData }, {
+        const response = await api.put('/availability/update', payload, {
             headers: {
                 'Content-Type': 'application/json'
             }
@@ -59,7 +60,9 @@ export const updateProviderAvailability = async (availabilityData) => {
     } catch (error) {
         console.error('updateProviderAvailability - Error:', {
             message: error.message,
-            response: error.response?.data
+            response: error.response?.data,
+            status: error.response?.status,
+            data: error.response?.data
         });
         throw error;
     }

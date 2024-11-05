@@ -341,7 +341,6 @@ export const ProviderAvailability = () => {
         setLoading(true);
         setError(null);
 
-        // Format the data
         const availabilityData = Object.values(availability)
             .filter(day => day.isAvailable)
             .map(day => ({
@@ -357,16 +356,28 @@ export const ProviderAvailability = () => {
                 }))
             }));
 
-        console.log('Formatted availability data:', availabilityData);
+        console.log('Sending availability data:', JSON.stringify(availabilityData, null, 2));
+        
+        // Validate data before sending
+        if (!Array.isArray(availabilityData)) {
+            throw new Error('Availability data must be an array');
+        }
 
-        // Send the update
+        availabilityData.forEach(day => {
+            if (!day.dayOfWeek || !Array.isArray(day.timeSlots)) {
+                throw new Error(`Invalid data format for day: ${day.dayOfWeek}`);
+            }
+        });
+
         await updateProviderAvailability(availabilityData);
         toast.success('Availability updated successfully');
-
-        // Reload the data
         await loadAvailability();
     } catch (err) {
-        console.error('Save Error:', err);
+        console.error('Save Error:', {
+            message: err.message,
+            response: err.response?.data,
+            data: err.response?.data
+        });
         const errorMessage = err.response?.data?.message || err.message || 'Failed to update availability';
         setError(errorMessage);
         toast.error(errorMessage);
@@ -374,6 +385,7 @@ export const ProviderAvailability = () => {
         setLoading(false);
     }
 };
+
 
 
 
