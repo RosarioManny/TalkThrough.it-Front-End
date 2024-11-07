@@ -5,10 +5,10 @@ import { theme } from "../../styles/theme";
 import {
   fetchProviderPublicDetails,
   fetchProviderDetails,
-  getProviderAvailability,
   saveProvider,
   removeSavedProvider,
 } from "../../services/providerService";
+import { getProviderAvailability } from "../../services/availabilityService";
 import { fetchSavedProviders } from "../../services/dashboardService";
 
 export const ProviderDetails = ({
@@ -19,38 +19,56 @@ export const ProviderDetails = ({
   const { providerId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-
   const [provider, setProvider] = useState(modalProvider);
+  const [loading, setLoading] = useState(!modalProvider);
   const [availability, setAvailability] = useState([]);
   // const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(!modalProvider);
   const [error, setError] = useState(null);
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate] = useState(new Date());
   const [successMessage, setSuccessMessage] = useState("");
   const [savedProviders, setSavedProviders] = useState([]);
 
-  useEffect(() => {
-    if (modalProvider) {
-      setProvider(modalProvider);
-      return;
-    }
+  const formatDateForApi = (date) => {
+    return date.toISOString().split("T")[0];
+  };
 
-    //I commented out reviews and availability methods at this time -Gabe
+  // For modal usage
+  useEffect(() => {
+    if (isModal) {
+      if (modalProvider) {
+        console.log("Modal: Setting provided data");
+        setProvider(modalProvider);
+        setLoading(false);
+      } else {
+        console.log("Modal: No provider data");
+        setLoading(true);
+      }
+    }
+  }, [modalProvider, isModal]);
+
+  // For standalone page usage
+  useEffect(() => {
     const loadProviderData = async () => {
+      // Only load if not in modal mode
+      if (isModal) return;
+
       try {
         setLoading(true);
+        setError(null);
+
+        const activeProviderId = providerId;
+        console.log("Page: Loading provider data for ID:", activeProviderId);
 
         const [providerData, availabilityData] = await Promise.all([
-          // Use public endpoint when in modal or not logged in
-          isModal && !user
-            ? fetchProviderPublicDetails(providerId)
-            : fetchProviderDetails(providerId),
-          // vv TODO: This crashes at view in client/dashboard
-          // getProviderAvailability(providerId, selectedDate),\
+          fetchProviderDetails(activeProviderId),
+          getProviderAvailability(
+            activeProviderId,
+            formatDateForApi(selectedDate)
+          ),
         ]);
-        console.log("provider data :" + providerData.provider);
-        setProvider(providerData.provider);
-        console.log("provider data :" + providerData);
+
+        console.log("Page: Loaded provider data:", providerData);
+        setProvider(providerData.provider || providerData);
         setAvailability(availabilityData);
       } catch (err) {
         console.error("Error loading provider data:", err);
@@ -60,10 +78,14 @@ export const ProviderDetails = ({
       }
     };
 
-    if (providerId) {
+    if (providerId && !isModal) {
       loadProviderData();
     }
-  }, [providerId, selectedDate, modalProvider]);
+  }, [providerId, isModal, selectedDate]);
+
+  useEffect(() => {
+    console.log("Current provider state:", provider);
+  }, [provider]);
 
   useEffect(() => {
     if (successMessage) {
@@ -75,26 +97,96 @@ export const ProviderDetails = ({
   }, [successMessage]);
 
   useEffect(() => {
-    if (user?.type === 'client') {
-        fetchSavedProviders().then((res) => {
-            setSavedProviders(res.savedProviders || []);
-        }).catch((error) => {
-            console.log('Error loading saved providers:', error);
-            setSavedProviders([]);
-        });
-    } else {
-        setSavedProviders([]); 
-    }
-}, [user]);
+    console.log("Checking saved status:", {
+      savedProviders,
+      currentProvider: provider,
+      matches: savedProviders.map((p) => ({
+        savedId: p._id,
+        savedProviderId: p.providerId?._id,
+        currentProviderId: provider?._id,
+        isMatch: p.providerId?._id === provider?._id,
+      })),
+    });
+  }, [savedProviders, provider]);
+
+  useEffect(() => {
+    const loadSavedProviders = async () => {
+      if (user?.type === "client") {
+        try {
+          const res = await fetchSavedProviders();
+          console.log("Fetched saved providers:", res);
+          setSavedProviders(res);
+        } catch (error) {
+          console.log("Error loading saved providers:", error);
+          setSavedProviders([]);
+        }
+      } else {
+        setSavedProviders([]);
+      }
+    };
+
+    loadSavedProviders();
+  }, [user, provider, successMessage]);
+
   const handleSaveProvider = async () => {
     try {
-      await saveProvider(providerId || provider?._id);
+      // First check if user is logged in and is a client
+      if (!user) {
+        console.log("No user logged in, redirecting to login");
+        navigate("/login", {
+          state: { from: location.pathname },
+        });
+        return;
+      }
+
+      if (user.type !== "client") {
+        console.log("User is not a client");
+        setError("Only clients can save providers");
+        return;
+      }
+
+      // Determine which ID to use
+      const idToSave = isModal ? provider?._id : providerId;
+
+      console.log("Save provider attempt:", {
+        userType: user.type,
+        isModal,
+        providerId,
+        providerId_fromState: provider?._id,
+        idToSave,
+      });
+
+      if (!idToSave) {
+        console.error("No provider ID available for saving");
+        setError("Unable to save provider: No ID available");
+        return;
+      }
+
+      const result = await saveProvider(idToSave);
+      console.log("Save provider result:", result);
 
       setSuccessMessage("Provider saved successfully");
 
-      navigate("/client/dashboard");
+      // Refresh saved providers list
+      const updatedProviders = await fetchSavedProviders();
+      setSavedProviders(updatedProviders);
+
+      // Only navigate if in modal mode
+      if (isModal && onClose) {
+        onClose();
+      }
+
+      // Don't navigate to dashboard, let user stay on current page
+      // navigate("/client/dashboard");
     } catch (err) {
-      setError("Failed to save provider");
+      console.error("Save provider error:", err);
+      if (err.response?.status === 401) {
+        navigate("/login", {
+          state: { from: location.pathname },
+        });
+        return;
+      }
+      setError(err.response?.data?.message || "Failed to save provider");
     }
   };
 
@@ -112,11 +204,30 @@ export const ProviderDetails = ({
   // providers can't book appointments
   const handleRemoveSavedProvider = async () => {
     try {
-      await removeSavedProvider(providerId || provider?._id);
-      console.log(user);
-      navigate("/client/dashboard");
+      const savedRelationship = savedProviders.find(
+        (saved) => saved.providerId?._id === provider?._id
+      );
+
+      if (!savedRelationship) {
+        console.error("Could not find saved relationship");
+        return;
+      }
+
+      await removeSavedProvider(savedRelationship._id);
+
+      // Immediately update local state
+      setSavedProviders((prev) =>
+        prev.filter((saved) => saved._id !== savedRelationship._id)
+      );
+
+      setSuccessMessage("Provider removed from favorites");
+
+      if (isModal && onClose) {
+        onClose();
+      }
     } catch (err) {
-      // Show error message
+      console.error("Error removing saved provider:", err);
+      setError("Failed to remove provider from favorites");
     }
   };
 
@@ -158,7 +269,9 @@ export const ProviderDetails = ({
 
   const content = (
     <div
-      className={`${isModal ? "divide-y divide-alice_blue-200" : "space-y-6 pt-28 pb-16"}`}
+      className={`${
+        isModal ? "divide-y divide-alice_blue-200" : "space-y-6 pt-28 pb-16"
+      }`}
     >
       {successMessage && (
         <div
@@ -210,35 +323,55 @@ export const ProviderDetails = ({
                 >
                   Book Appointment
                 </button>
-                {savedProviders.some((p) => p._id == provider._id) ? (
-                  <div className="flex flex-wrap gap-4">
-                    <button
-                      onClick={handleRemoveSavedProvider}
-                      className={`${theme.button} text-white bg-sunglow-400 hover:bg-amber-500 hover:-translate-y-0.5 hover:shadow-md rounded-lg px-6 py-2 duration-200 `}
-                    >
-                      Favorited ☆
-                    </button>
-                    <button
-                      className={`${theme.button} text-white bg-celadon-300 hover:bg-celadon-400 hover:-translate-y-0.5 hover:shadow-md rounded-lg px-6 py-2 duration-200`}
-                    >
-                      Message
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-wrap gap-4">
-                    <button
-                      onClick={handleSaveProvider}
-                      className={`${theme.button.primary} hover:-translate-y-0.5 bg-sunglow-400 hover:shadow-md hover:bg-sunglow-500 text- px-6 py-2 rounded-lg`}
-                    >
-                      Save Provider
-                    </button>
-                    <button
-                      className={`${theme.button} text-white bg-celadon-300 hover:bg-celadon-400 hover:-translate-y-0.5 hover:shadow-md rounded-lg px-6 py-2 duration-200`}
-                    >
-                      Message
-                    </button>
-                  </div>
-                )}
+                {(() => {
+                  // Log the current data
+                  console.log("Checking saved state:", {
+                    savedProviders: savedProviders,
+                    currentProvider: provider,
+                  });
+
+                  const isProviderSaved = savedProviders.some((saved) => {
+                    // Log each comparison
+                    console.log("Comparing IDs:", {
+                      savedProviderId: saved.providerId?._id,
+                      currentProviderId: provider?._id,
+                      isMatch: saved.providerId?._id === provider?._id,
+                    });
+                    return saved.providerId?._id === provider?._id;
+                  });
+
+                  console.log("Is provider saved:", isProviderSaved);
+
+                  return isProviderSaved ? (
+                    <div className="flex flex-wrap gap-4">
+                      <button
+                        onClick={handleRemoveSavedProvider}
+                        className={`${theme.button} text-white bg-sunglow-400 hover:bg-amber-500 hover:-translate-y-0.5 hover:shadow-md rounded-lg px-6 py-2 duration-200 `}
+                      >
+                        Favorited ☆
+                      </button>
+                      <button
+                        className={`${theme.button} text-white bg-celadon-300 hover:bg-celadon-400 hover:-translate-y-0.5 hover:shadow-md rounded-lg px-6 py-2 duration-200`}
+                      >
+                        Message
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-4">
+                      <button
+                        onClick={handleSaveProvider}
+                        className={`${theme.button.primary} hover:-translate-y-0.5 bg-sunglow-400 hover:shadow-md hover:bg-sunglow-500 text- px-6 py-2 rounded-lg`}
+                      >
+                        Save Provider
+                      </button>
+                      <button
+                        className={`${theme.button} text-white bg-celadon-300 hover:bg-celadon-400 hover:-translate-y-0.5 hover:shadow-md rounded-lg px-6 py-2 duration-200`}
+                      >
+                        Message
+                      </button>
+                    </div>
+                  );
+                })()}
               </div>
             )}
           </div>

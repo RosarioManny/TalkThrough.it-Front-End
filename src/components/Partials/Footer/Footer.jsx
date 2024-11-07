@@ -60,7 +60,7 @@ export const Footer = () => {
               <div className="flex gap-4 mt-6">
                 {[
                   {
-                    to: "https://github.com/RosarioManny/TalkThrough.it-Front-End/tree/er-Navbar",
+                    to: "https://github.com/RosarioManny/TalkThrough.it-Front-End/",
                     label: "Frontend"
                   },
                   {

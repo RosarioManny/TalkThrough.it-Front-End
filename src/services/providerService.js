@@ -2,52 +2,78 @@ import axios from "axios";
 import { getAuthHeaders } from '../utils/auth';
 
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+axios.defaults.headers.common['Content-Type'] = 'application/json';
+axios.defaults.withCredentials = true;
+
+// Create axios instance with default config
+export const api = axios.create({
+    baseURL: BACKEND_URL,
+    withCredentials: true,
+    headers: {
+        'Content-Type': 'application/json'
+    }
+});
+
+// Add auth token to requests
+api.interceptors.request.use(
+    (config) => {
+        const token = localStorage.getItem('token');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => {
+        return Promise.reject(error);
+    }
+);
 
 // Fetch providers
 export const fetchProviders = async (params = {}) => {
-  try {
-      const queryParams = new URLSearchParams();
-      
-      Object.entries(params).forEach(([key, value]) => {
-          if (value) {
-              queryParams.append(key, value);
-          }
-      });
+    try {
+        const queryParams = new URLSearchParams();
+        Object.entries(params).forEach(([key, value]) => {
+            if (value) {
+                queryParams.append(key, value);
+            }
+        });
 
-      console.log('Fetching providers with URL:', 
-          `${BACKEND_URL}/providers?${queryParams.toString()}`  // Changed to /providers
-      );
+        console.log('Fetching providers with URL:', 
+            `${BACKEND_URL}/providers${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
+        );
 
-      const response = await axios.get(
-          `${BACKEND_URL}/providers?${queryParams.toString()}`  // Changed to match your route
-      );
+        const response = await api.get(`/providers${queryParams.toString() ? `?${queryParams.toString()}` : ''}`);
+        console.log('Raw API response:', response.data);
 
-      console.log('Raw API response:', response.data);
-
-      // Ensure we're always returning an array
-      const providers = Array.isArray(response.data) ? response.data : [];
-
-      console.log('Processed providers:', providers);
-
-      return providers; // Return the array directly
-  } catch (error) {
-      console.error("Error fetching providers:", error);
-      throw error;
-  }
+        return Array.isArray(response.data) ? response.data : [];
+    } catch (error) {
+        console.error("Error fetching providers:", {
+            message: error.message,
+            response: error.response?.data
+        });
+        return [];
+    }
 };
-
-
 
 // Protected endpoint for provider's own data
 export const fetchProviderDetails = async (providerId) => {
     try {
+        console.log('Fetching provider details for:', providerId);
         const response = await axios.get(
             `${BACKEND_URL}/providers/${providerId}`,
-            getAuthHeaders() 
+            {
+                ...getAuthHeaders(),
+                headers: {
+                    ...getAuthHeaders().headers,
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache'
+                }
+            }
         );
+        console.log('Provider details response:', response.data);
         return response.data;
     } catch (error) {
-        console.error("Error fetching provider details:", error);
+        console.error('Error fetching provider details:', error);
         throw error;
     }
 };
@@ -55,73 +81,122 @@ export const fetchProviderDetails = async (providerId) => {
 // Save provider (for clients)
 export const saveProvider = async (providerId) => {
     try {
-        const response = await axios.post(
-            `${BACKEND_URL}/clients/save-provider`,
+        if (!providerId) {
+            throw new Error('Provider ID is required');
+        }
+
+        // Check for auth token
+        const token = localStorage.getItem('token');
+        if (!token) {
+            throw new Error('Authentication required');
+        }
+
+        console.log('Attempting to save provider:', providerId);
+        
+        const response = await api.post('/saved-therapists', 
             { providerId },
-            getAuthHeaders()
+            {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            }
         );
+
+        console.log('Save provider response:', response.data);
         return response.data;
     } catch (error) {
-        console.error("Error saving provider:", error);
+        // If error is authentication related, enhance the error
+        if (error.response?.status === 401) {
+            throw new Error('Please log in to save providers');
+        }
+        console.error('Error saving provider:', {
+            message: error.message,
+            response: error.response?.data,
+            providerId
+        });
         throw error;
     }
 };
 
-//remove provider from favorites for clients
-export const removeSavedProvider = async (providerId) => {
+
+// Remove saved provider
+export const removeSavedProvider = async (savedId) => {
     try {
-        const response = await axios.put(
-            `${BACKEND_URL}/clients/save-provider`,
-            { providerId },
-            getAuthHeaders()
-        );
+        console.log('Removing saved provider:', savedId);
+        const response = await api.delete(`/saved-therapists/${savedId}`);
+        console.log('Remove provider response:', response.data);
         return response.data;
     } catch (error) {
-        console.error('Error saving provider:', error);
+        console.error('Error removing saved provider:', {
+            message: error.message,
+            response: error.response?.data
+        });
         throw error;
     }
 };
 
-// Get provider availability
-export const getProviderAvailability = async (providerId, date) => {
+// Check if provider is saved
+export const isProviderSaved = async (providerId) => {
     try {
-        const params = new URLSearchParams();
-        if (date) params.append('date', date);
-
-        const response = await axios.get(
-            `${BACKEND_URL}/providers/${providerId}/availability${params.toString() ? `?${params.toString()}` : ''}`,
-            getAuthHeaders()
+        const response = await api.get('/saved-therapists');
+        const savedProviders = response.data.savedProviders || [];
+        return savedProviders.some(sp => 
+            sp.providerId?._id === providerId || 
+            sp.provider?.id === providerId
         );
-        return response.data;
     } catch (error) {
-        console.error("Error fetching provider availability:", error);
-        throw error;
+        console.error('Error checking if provider is saved:', {
+            message: error.message,
+            response: error.response?.data
+        });
+        return false;
     }
 };
 
+// Update saved provider
+export const updateSavedProvider = async (savedId, updateData) => {
+    try {
+        console.log('Updating saved provider:', { savedId, updateData });
+        const response = await api.put(`/saved-therapists/${savedId}`, updateData);
+        console.log('Update provider response:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error updating saved provider:', {
+            message: error.message,
+            response: error.response?.data
+        });
+        throw error;
+    }
+};
 
 // Public endpoint for provider details (no auth required)
 export const fetchProviderPublicDetails = async (providerId) => {
     try {
         console.log("Fetching public provider details for:", providerId);
-        const response = await axios.get(
-            `${BACKEND_URL}/providers/${providerId}/public`
-        );
+        const response = await api.get(`/providers/${providerId}/public`);
         return response.data;
     } catch (error) {
-        console.error("Error fetching provider public details:", error);
+        console.error("Error fetching provider public details:", {
+            message: error.message,
+            response: error.response?.data
+        });
         throw error;
     }
 };
 
-//update provider profile
-export const updateProvider = async(formData,userid) => {
+// Update provider profile
+export const updateProvider = async (formData, userid) => {
     try {
-      const res = await axios.put(`${BACKEND_URL}/providers/${userid}`, formData, getAuthHeaders())
-      console.log('Provider registration response:', res.data);
-      return res.data
+        console.log('Updating provider profile:', userid);
+        const response = await api.put(`/providers/${userid}`, formData);
+        console.log('Provider update response:', response.data);
+        return response.data;
     } catch (error) {
-      console.error('Provider Signup error:', error);
-      throw error;
+        console.error('Provider update error:', {
+            message: error.message,
+            response: error.response?.data
+        });
+        throw error;
     }
-  }
+};

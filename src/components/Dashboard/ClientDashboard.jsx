@@ -7,7 +7,7 @@ import {
 } from "../../services/dashboardService";
 import { theme } from "../../styles/theme";
 import { AppointmentList } from "../Appointments/AppointmentList";
-import axios from "axios";
+import { ProviderDetails } from "../ProviderDetails/ProviderDetails";
 
 export const ClientDashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -15,59 +15,85 @@ export const ClientDashboard = () => {
   const { user } = useAuth();
   const [savedProviders, setSavedProviders] = useState([]);
   const [appointments, setAppointments] = useState([]);
-  const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState("");
-
+  const [selectedProvider, setSelectedProvider] = useState(null);
 
   useEffect(() => {
     if (!user) {
-        navigate("/login");
-        return;
+      navigate("/login");
+      return;
     }
 
     const fetchAllData = async () => {
-        try {
-            setLoading(true);
-            setError(null);
+      try {
+        setLoading(true);
+        setError(null);
 
-            // Fetch appointments first
-            const appointmentsResult = await fetchClientAppointments();
-            console.log('Fetched appointments:', appointmentsResult);
-            setAppointments(appointmentsResult);
+        const [appointmentsResult, providersResult] = await Promise.all([
+          fetchClientAppointments(),
+          fetchSavedProviders(),
+        ]);
 
-            // Fetch saved providers
-            const providersResult = await fetchSavedProviders();
-            setSavedProviders(providersResult || []);
+        console.log("Fetched appointments:", appointmentsResult);
+        console.log("Fetched saved providers:", providersResult);
 
-        } catch (err) {
-            console.error("Dashboard data fetch error:", err);
-            setError({ general: "Failed to load dashboard data" });
-        } finally {
-            setLoading(false);
-        }
+        const formattedAppointments = Array.isArray(appointmentsResult)
+          ? appointmentsResult.map((apt) => ({
+              ...apt,
+              provider: apt.provider || {},
+            }))
+          : [];
+
+        const formattedProviders = Array.isArray(providersResult)
+          ? providersResult.map((provider) => ({
+              ...provider,
+              providerId: provider.providerId || {},
+            }))
+          : [];
+
+        setAppointments(formattedAppointments);
+        setSavedProviders(formattedProviders);
+      } catch (err) {
+        console.error("Dashboard data fetch error:", err);
+        setError({ general: "Failed to load dashboard data" });
+      } finally {
+        setLoading(false);
+      }
     };
 
     fetchAllData();
-}, [user, navigate]);
-  
-useEffect(() => {
-  console.log('Appointments state updated:', appointments);
-}, [appointments]);
+  }, [user, navigate]);
+
+  useEffect(() => {
+    console.log("Appointments state updated:", appointments);
+  }, [appointments]);
+
+  useEffect(() => {
+    console.log("Current saved providers:", savedProviders);
+  }, [savedProviders]);
 
   const formatProviderName = (provider) => {
-    return provider.firstName && provider.lastName
-      ? `Dr. ${provider.firstName} ${provider.lastName}`
-      : provider.email || "Provider Name Not Available";
+    if (!provider) return "Provider Name Not Available";
+
+    if (provider.firstName && provider.lastName) {
+      return `Dr. ${provider.firstName} ${provider.lastName}`;
+    }
+
+    if (provider.email) {
+      return provider.email;
+    }
+
+    return "Provider Name Not Available";
   };
 
   const loadAppointments = async () => {
     try {
       setLoading(true);
-      console.log("Fetching client appointments..."); 
+      console.log("Fetching client appointments...");
       const data = await fetchClientAppointments();
-      console.log("Received appointments:", data); 
+      console.log("Received appointments:", data);
       setAppointments(data || []);
       setError(null);
     } catch (err) {
@@ -80,7 +106,7 @@ useEffect(() => {
       setLoading(false);
     }
   };
-  
+
   const formatDate = (dateString) => {
     try {
       const date = new Date(dateString);
@@ -96,7 +122,6 @@ useEffect(() => {
       return "Date not available";
     }
   };
-
   const renderContent = () => {
     switch (activeTab) {
       case "overview":
@@ -210,50 +235,77 @@ useEffect(() => {
 
                 {error?.providers ? (
                   <div className="p-4 rounded-lg bg-sunglow-50 border border-sunglow-200">
-                    <p className="text-sm text-sunglow-700">{error.providers}</p>
+                    <p className="text-sm text-sunglow-700">
+                      {error.providers}
+                    </p>
                   </div>
                 ) : savedProviders.length > 0 ? (
                   <div className="space-y-4">
-                    {savedProviders.map((provider) => (
-                      <div
-                        key={provider._id}
-                        className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
-                        onClick={() => navigate(`/providerlist/${provider._id}`)}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
-                            <span className="text-celestial_blue-500 font-medium">
-                              {provider.firstName?.[0]}
-                              {provider.lastName?.[0]}
-                            </span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-prussian_blue-500">
-                              {formatProviderName(provider)}
-                            </p>
-                            {provider.specialties && (
-                              <p className="text-sm text-prussian_blue-300 truncate">
-                                {provider.specialties.slice(0, 2).join(", ")}
-                                {provider.specialties.length > 2 && "..."}
+                    {savedProviders.map((saved) => {
+                      const provider = saved.providerId; // The populated provider data
+                      console.log("Full saved provider object:", saved);
+                      console.log("Provider ID object:", provider);
+                      return (
+                        <div
+                          key={saved._id}
+                          className="p-4 rounded-lg bg-alice_blue-50 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md cursor-pointer"
+                          onClick={() => {
+                            console.log("Click detected");
+                            console.log("Setting provider:", provider);
+                            setSelectedProvider({
+                                _id: provider._id,
+                                firstName: provider.firstName,
+                                lastName: provider.lastName,
+                                credentials: provider.credentials,
+                                bio: provider.bio,
+                                location: provider.location,
+                                insuranceAccepted: provider.insuranceAccepted || [],
+                                specialties: provider.specialties || [],
+                                languages: provider.languages || [],
+                                sessionTypes: provider.sessionTypes || [],
+                                acceptingClients: provider.acceptingClients
+                            });
+                            console.log("Selected provider set");
+                        }}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-celestial_blue-100 flex items-center justify-center">
+                              <span className="text-celestial_blue-500 font-medium">
+                                {provider?.firstName?.[0]}
+                                {provider?.lastName?.[0]}
+                              </span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-prussian_blue-500">
+                                Dr. {provider?.firstName} {provider?.lastName}
                               </p>
-                            )}
+                              {provider?.specialties && (
+                                <p className="text-sm text-prussian_blue-300 truncate">
+                                  {provider.specialties.slice(0, 2).join(", ")}
+                                  {provider.specialties.length > 2 && "..."}
+                                </p>
+                              )}
+                              <p className="text-sm text-prussian_blue-300">
+                                {provider?.location || "Location not available"}
+                              </p>
+                            </div>
+                            <svg
+                              className="w-5 h-5 text-celestial_blue-500"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M9 5l7 7-7 7"
+                              />
+                            </svg>
                           </div>
-                          <svg
-                            className="w-5 h-5 text-celestial_blue-500"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            stroke="currentColor"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M9 5l7 7-7 7"
-                            />
-                          </svg>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="text-center py-8">
@@ -288,7 +340,6 @@ useEffect(() => {
                 )}
               </div>
             </div>
-
             {/* Upcoming Appointments Card */}
             <div className="bg-white rounded-xl border border-alice_blue-200 overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
               <div className="p-6">
@@ -358,13 +409,15 @@ useEffect(() => {
                           </div>
                           <span
                             className={`px-3 py-1 rounded-full text-sm font-medium
-                              ${
-                                appointment.status === "confirmed"
-                                  ? "bg-celadon-100 text-celadon-700"
-                                  : appointment.status === "pending"
-                                  ? "bg-sunglow-100 text-sunglow-700"
-                                  : "bg-celestial_blue-100 text-celestial_blue-700"
-                              }`}
+                                                            ${
+                                                              appointment.status ===
+                                                              "confirmed"
+                                                                ? "bg-celadon-100 text-celadon-700"
+                                                                : appointment.status ===
+                                                                  "pending"
+                                                                ? "bg-sunglow-100 text-sunglow-700"
+                                                                : "bg-celestial_blue-100 text-celestial_blue-700"
+                                                            }`}
                           >
                             {appointment.status.charAt(0).toUpperCase() +
                               appointment.status.slice(1)}
@@ -408,8 +461,8 @@ useEffect(() => {
             </div>
           </div>
         );
+
       case "appointments":
-        console.log('Rendering appointments tab with data:', appointments); // Add this
         return (
           <div className="bg-white rounded-xl border border-alice_blue-200 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg">
             <div className="flex items-center justify-between mb-6">
@@ -417,7 +470,6 @@ useEffect(() => {
                 <h2 className="text-xl font-semibold text-prussian_blue-500">
                   My Appointments
                 </h2>
-                
                 <div className="p-2 rounded-lg bg-alice_blue-50">
                   <svg
                     className="w-5 h-5 text-celestial_blue-500"
@@ -471,6 +523,7 @@ useEffect(() => {
             )}
           </div>
         );
+
       default:
         return null;
     }
@@ -481,7 +534,9 @@ useEffect(() => {
       <div className="flex justify-center items-center min-h-screen bg-alice_blue-500">
         <div className="flex flex-col items-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-celestial_blue-500"></div>
-          <p className="mt-4 text-prussian_blue-400">Loading your dashboard...</p>
+          <p className="mt-4 text-prussian_blue-400">
+            Loading your dashboard...
+          </p>
         </div>
       </div>
     );
@@ -516,7 +571,9 @@ useEffect(() => {
               Find Providers
             </Link>
           </div>
-          <p className={theme.text.body}>Your journey of wellness begins here.</p>
+          <p className={theme.text.body}>
+            Your journey of wellness begins here.
+          </p>
         </div>
 
         {/* Error Alert */}
@@ -524,7 +581,11 @@ useEffect(() => {
           <div
             className={`mb-6 p-4 ${theme.status.error} rounded-lg flex items-center`}
           >
-            <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+            <svg
+              className="w-5 h-5 mr-2"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+            >
               <path
                 fillRule="evenodd"
                 d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
@@ -540,22 +601,22 @@ useEffect(() => {
           <button
             onClick={() => setActiveTab("overview")}
             className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:-translate-y-0.5
-              ${
-                activeTab === "overview"
-                  ? "bg-celestial_blue-500 text-white shadow-lg shadow-celestial_blue-500/30"
-                  : "bg-alice_blue-100 text-alice_blue-500 hover:bg-celestial_blue-100 hover:text-white hover:shadow-md"
-              }`}
+                            ${
+                              activeTab === "overview"
+                                ? "bg-celestial_blue-500 text-white shadow-lg shadow-celestial_blue-500/30"
+                                : "bg-alice_blue-100 text-alice_blue-500 hover:bg-celestial_blue-100 hover:text-white hover:shadow-md"
+                            }`}
           >
             Overview
           </button>
           <button
             onClick={() => setActiveTab("appointments")}
             className={`px-6 py-3 rounded-lg font-medium transition-all duration-300 transform hover:-translate-y-0.5
-              ${
-                activeTab === "appointments"
-                  ? "bg-celestial_blue-500 text-white shadow-lg shadow-celestial_blue-500/30"
-                  : "bg-alice_blue-100 text-alice_blue-500 hover:bg-celestial_blue-100 hover:text-white hover:shadow-md"
-              }`}
+                            ${
+                              activeTab === "appointments"
+                                ? "bg-celestial_blue-500 text-white shadow-lg shadow-celestial_blue-500/30"
+                                : "bg-alice_blue-100 text-alice_blue-500 hover:bg-celestial_blue-100 hover:text-white hover:shadow-md"
+                            }`}
           >
             Appointments
           </button>
@@ -563,6 +624,29 @@ useEffect(() => {
 
         {/* Content */}
         {renderContent()}
+
+        {/* Provider Details Modal */}
+        {selectedProvider && (
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-black bg-opacity-50">
+        {console.log("Modal overlay rendering")}
+        <div className="flex items-center justify-center min-h-screen p-4">
+            <div 
+                className="relative bg-white rounded-lg w-full max-w-4xl"
+                onClick={e => e.stopPropagation()}
+            >
+                {console.log("Modal content rendering")}
+                <ProviderDetails
+                    isModal={true}
+                    modalProvider={selectedProvider}
+                    onClose={() => {
+                        console.log("Modal closing");
+                        setSelectedProvider(null);
+                    }}
+                />
+            </div>
+        </div>
+    </div>
+)}
       </div>
     </div>
   );
