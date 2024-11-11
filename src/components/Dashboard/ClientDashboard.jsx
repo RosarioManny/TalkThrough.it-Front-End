@@ -78,7 +78,7 @@ export const ClientDashboard = () => {
     if (!provider) return "Provider Name Not Available";
 
     if (provider.firstName && provider.lastName) {
-      return `Dr. ${provider.firstName} ${provider.lastName}`;
+      return `${provider.firstName} ${provider.lastName}`;
     }
 
     if (provider.email) {
@@ -277,7 +277,7 @@ export const ClientDashboard = () => {
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-medium text-prussian_blue-500">
-                                Dr. {provider?.firstName} {provider?.lastName}
+                                {provider?.firstName} {provider?.lastName}
                               </p>
                               {provider?.specialties && (
                                 <p className="text-sm text-prussian_blue-300 truncate">

@@ -493,7 +493,7 @@ export const AppointmentList = ({ userType = "provider", onUpdate }) => {
                     >
                       {userType === "client"
                         ? appointment.provider
-                          ? `Dr. ${appointment.provider.firstName} ${appointment.provider.lastName}`
+                          ? `${appointment.provider.firstName} ${appointment.provider.lastName}`
                           : "Provider Not Found"
                         : appointment.client
                         ? `${appointment.client.firstName} ${appointment.client.lastName}`
