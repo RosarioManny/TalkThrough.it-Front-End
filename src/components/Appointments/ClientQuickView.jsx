@@ -84,7 +84,7 @@ export const ClientQuickView = ({ client, provider, onClose, isOpen }) => {
                       </label>
                       <p className={`${theme.text.heading}`}>
                         {isClientView
-                          ? `Dr. ${personData?.firstName} ${personData?.lastName}`
+                          ? `${personData?.firstName} ${personData?.lastName}`
                           : `${personData?.firstName} ${personData?.lastName}`}
                       </p>
                     </div>

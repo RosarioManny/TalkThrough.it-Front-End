@@ -845,7 +845,7 @@ export const ProviderDashboard = () => {
           {/* Dashboard Header */}
           <div className="mb-8">
             <h1 className={`${theme.text.heading} text-3xl mb-2`}>
-              Welcome, Dr. {user.lastName}
+              Welcome, {user.lastName}
             </h1>
             <p className={theme.text.body}>
               Manage your practice and appointments

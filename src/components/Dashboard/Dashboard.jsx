@@ -6,7 +6,6 @@ import { useEffect } from 'react';
 
 const Dashboard = () => {
   const { user } = useAuth(); // Get user from context
-  console.log("shiiiiiiiiit")
   
   const [conversations, setConversations] = useState({})
 
